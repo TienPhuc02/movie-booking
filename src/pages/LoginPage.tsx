@@ -18,7 +18,7 @@ const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
 
 const LoginPage: React.FC = () => {
   return (
-    <div className="login-container pt-[100px]">
+    <div className="login-container pt-[100px] border-2 w-2/5 mx-auto mt-10">
       <div className="header-form max-w-[1000px] mx-auto">
         <div className="logo"></div>
         <div className="title-form  text-[50px] font-light text-center">
@@ -29,7 +29,7 @@ const LoginPage: React.FC = () => {
           in.
         </div>
       </div>
-      <div className="form-content">
+      <div className="form-content ">
         <Form
           name="basic"
           labelCol={{ span: 24 }}
