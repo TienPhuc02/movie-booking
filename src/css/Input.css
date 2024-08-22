@@ -1,0 +1,11 @@
+:where(.css-dev-only-do-not-override-1gwfwyx).ant-input-outlined:hover {
+  border-color: unset;
+  background-color: #ffffff;
+}
+:where(.css-dev-only-do-not-override-1gwfwyx).ant-input-outlined:focus,
+:where(.css-dev-only-do-not-override-1gwfwyx).ant-input-outlined:focus-within {
+  border-color: unset;
+  box-shadow: unset;
+  outline: 0;
+  background-color: #ffffff;
+}
