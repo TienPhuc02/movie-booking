@@ -82,7 +82,7 @@ const LoginPage = ({
               <Button
                 type="primary"
                 htmlType="submit"
-                className="w-[450px] bg-[#DA2778] hover:bg-[#DA2778]"
+                className="w-[450px] bg-[#DA2778] hover:bg-[#DA2778] cursor-pointer"
               >
                 Đăng Nhập
               </Button>
@@ -90,7 +90,10 @@ const LoginPage = ({
           </Form>
           <div>
             Bạn chưa có tài khoản?{" "}
-            <span className="font-bold" onClick={showModalRegister}>
+            <span
+              className="font-bold cursor-pointer"
+              onClick={showModalRegister}
+            >
               Đăng ký.
             </span>
           </div>

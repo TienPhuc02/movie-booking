@@ -207,7 +207,10 @@ const RegisterPage = ({
             </Form>
             <div>
               Bạn có tài khoản?{" "}
-              <span className="font-bold" onClick={showModalLogin}>
+              <span
+                className="font-bold cursor-pointer"
+                onClick={showModalLogin}
+              >
                 Đăng Nhập.
               </span>
             </div>
