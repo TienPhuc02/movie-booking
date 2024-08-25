@@ -49,13 +49,13 @@ const HeaderApp = () => {
             <div className="item-header">Review Phim</div>
             <div className="item-header">Tin Tức</div>
             <div
-              className="item-header cursor-pointer border rounded-2xl p-3 hover:shadow-xl"
+              className="item-header cursor-pointer border rounded-2xl p-3 "
               onClick={showModalRegister}
             >
               Đăng ký
             </div>
             <div
-              className="item-header cursor-pointer border rounded-2xl p-3 bg-red-500 text-white hover:shadow-xl"
+              className="item-header cursor-pointer border rounded-2xl p-3 bg-red-500 text-white"
               onClick={showModalLogin}
             >
               Đăng Nhập

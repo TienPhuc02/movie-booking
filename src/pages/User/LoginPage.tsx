@@ -1,15 +1,12 @@
-import React from "react";
-import axios from "axios"; // Import Axios
 import type { FormProps } from "antd";
 import { Button, Form, Input, message, Modal } from "antd";
 import "../../css/Button.css";
 import "../../css/Input.css";
+import { APILogin } from "../../services/service.api";
 
 type FieldType = {
-  email?: string;
-  password?: string;
-  code:  number;
-  message: string;
+  email: string;
+  password: string;
 };
 
 type PropLoginPage = {
@@ -18,41 +15,39 @@ type PropLoginPage = {
   isModalLoginOpen: boolean;
 };
 
-const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-  try {
-    const response = await axios.post('https://localhost:7196/api/v1/Auth/login', {
-      email: values.email,
-      password: values.password,
-    });
-
-    const data= response.data;
-    if(response.status === 200) {
-      if(data.error.code === 0) {
-        alert(data.error.message);
-      }else{
-        alert(data.error.message);
-      }
-        // Xử lý khi đăng nhập thành công
-    }else{
-      console.error("Unexpected status code:", response.status);
-      alert("Something went wrong. Please try again.");
-    }
-    // Xử lý khi đăng nhập thành công, ví dụ: lưu token, chuyển hướng
-  } catch (error) {
-    console.error("Failed:", error);
-    // Xử lý khi đăng nhập thất bại, ví dụ: hiển thị thông báo lỗi
-  }
-};
-
-const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
-  console.log("Failed:", errorInfo);
-};
-
 const LoginPage = ({
   showModalRegister,
   handleModalLoginCancel,
   isModalLoginOpen,
 }: PropLoginPage) => {
+  const [form] = Form.useForm();
+  const onFinish = async (values: FieldType) => {
+    console.log(values);
+    try {
+      const res = await APILogin(values);
+      console.log(" check res>>", res);
+      console.log(res.data.error.code); //26
+      if (res && res.data.error.code === 0) {
+        message.success("Đăng Nhập Thành Công!!");
+        handleModalLoginCancel();
+        form.resetFields();
+      } else {
+        console.log("error login"); ///  không chạy vào đây mặc dù log ra đúng error.code=26 rồi
+        message.error("Đăng Nhập Thất Bại. Vui lòng kiểm tra lại thông tin!!");
+        handleModalLoginCancel();
+        form.resetFields();
+      }
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+    errorInfo
+  ) => {
+    console.log("Failed:", errorInfo);
+  };
+
   return (
     <Modal
       open={isModalLoginOpen}
@@ -72,6 +67,7 @@ const LoginPage = ({
         </div>
         <div className="form-content ">
           <Form
+            form={form}
             name="basic"
             labelCol={{ span: 24 }}
             wrapperCol={{ span: 24 }}

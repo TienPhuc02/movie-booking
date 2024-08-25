@@ -1,7 +1,8 @@
-import { Col, DatePicker, Modal, Radio, Row } from "antd";
+import { Col, DatePicker, message, Modal, Radio, Row } from "antd";
 import type { FormProps, RadioChangeEvent } from "antd";
 import { Button, Form, Input } from "antd";
 import { useState } from "react";
+import { APIRegister } from "../../services/service.api";
 type PropRegisterPage = {
   isModalRegisterOpen: boolean;
   handleModalRegisterCancel: () => void;
@@ -9,7 +10,7 @@ type PropRegisterPage = {
 };
 type FieldType = {
   email: string;
-  fullName: string;
+  fullname: string;
   gender: number;
   birthday: string;
   phoneNumber: string;
@@ -22,12 +23,12 @@ const RegisterPage = ({
   showModalLogin,
 }: PropRegisterPage) => {
   const [value, setValue] = useState(1);
-
+  const [form] = Form.useForm();
   const onChange = (e: RadioChangeEvent) => {
     console.log("radio checked", e.target.value);
     setValue(e.target.value);
   };
-  const onFinish = (values: FieldType) => {
+  const onFinish = async (values: FieldType) => {
     const { birthday, ...restValues } = values;
 
     const birthdayObj = new Date(birthday);
@@ -44,8 +45,22 @@ const RegisterPage = ({
       birthday: birthdayFormat,
     };
     console.log("dataRegister", dataRegister);
+    // console.log(111);
+    const res = await APIRegister(dataRegister);
+    console.log(res);
+    if (res && res.status === 200 && res.data.error.code === 0) {
+      message.success("Đăng Ký thành công !!!");
+      handleModalRegisterCancel();
+      form.resetFields();
+    } else if (res && res.status === 400) {
+      console.log(111);
+      // Xử lý lỗi ở đây
+      // const errorMessage = res.data?.message || "Đăng Ký thất bại !!!";
+      // message.error(errorMessage);
+    } else if (res === null) {
+      message.error("Không thể kết nối với server!!!");
+    }
   };
-
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
     errorInfo
   ) => {
@@ -71,6 +86,7 @@ const RegisterPage = ({
           </div>
           <div className="form-content ">
             <Form
+              form={form}
               name="basic"
               labelCol={{ span: 24 }}
               wrapperCol={{ span: 24 }}
@@ -98,7 +114,7 @@ const RegisterPage = ({
                 <Col span={12}>
                   <Form.Item<FieldType>
                     label={<div className="font-semibold">Full Name</div>}
-                    name="fullName"
+                    name="fullname"
                     rules={[
                       { required: true, message: "Please input your Email!" },
                       {
