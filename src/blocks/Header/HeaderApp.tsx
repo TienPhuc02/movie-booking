@@ -32,7 +32,6 @@ const HeaderApp = () => {
   const showModalRegister = () => {
     setIsModalRegisterOpen(true);
   };
-  console.log(isModalLoginOpen);
   return (
     <>
       <div className="header-wrapper max-h-[6.4rem] shadow ">
@@ -50,13 +49,13 @@ const HeaderApp = () => {
             <div className="item-header">Review Phim</div>
             <div className="item-header">Tin Tức</div>
             <div
-              className="item-header cursor-pointer"
+              className="item-header cursor-pointer border rounded-2xl p-3 hover:shadow-xl"
               onClick={showModalRegister}
             >
               Đăng ký
             </div>
             <div
-              className="item-header cursor-pointer"
+              className="item-header cursor-pointer border rounded-2xl p-3 bg-red-500 text-white hover:shadow-xl"
               onClick={showModalLogin}
             >
               Đăng Nhập

@@ -1,19 +1,47 @@
 import React from "react";
+import axios from "axios"; // Import Axios
 import type { FormProps } from "antd";
-import { Button, Form, Input, Modal } from "antd";
+import { Button, Form, Input, message, Modal } from "antd";
 import "../../css/Button.css";
 import "../../css/Input.css";
+
 type FieldType = {
   email?: string;
   password?: string;
+  code:  number;
+  message: string;
 };
+
 type PropLoginPage = {
   showModalRegister: () => void;
   handleModalLoginCancel: () => void;
   isModalLoginOpen: boolean;
 };
-const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-  console.log("Success:", values);
+
+const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+  try {
+    const response = await axios.post('https://localhost:7196/api/v1/Auth/login', {
+      email: values.email,
+      password: values.password,
+    });
+
+    const data= response.data;
+    if(response.status === 200) {
+      if(data.error.code === 0) {
+        alert(data.error.message);
+      }else{
+        alert(data.error.message);
+      }
+        // Xử lý khi đăng nhập thành công
+    }else{
+      console.error("Unexpected status code:", response.status);
+      alert("Something went wrong. Please try again.");
+    }
+    // Xử lý khi đăng nhập thành công, ví dụ: lưu token, chuyển hướng
+  } catch (error) {
+    console.error("Failed:", error);
+    // Xử lý khi đăng nhập thất bại, ví dụ: hiển thị thông báo lỗi
+  }
 };
 
 const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
@@ -25,7 +53,6 @@ const LoginPage = ({
   handleModalLoginCancel,
   isModalLoginOpen,
 }: PropLoginPage) => {
-  console.log("isModalLoginOpen", isModalLoginOpen);
   return (
     <Modal
       open={isModalLoginOpen}
@@ -48,7 +75,6 @@ const LoginPage = ({
             name="basic"
             labelCol={{ span: 24 }}
             wrapperCol={{ span: 24 }}
-            // className="max-w-[1000px] mx-auto"
             initialValues={{ remember: true }}
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
