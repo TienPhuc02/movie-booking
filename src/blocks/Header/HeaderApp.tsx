@@ -32,7 +32,6 @@ const HeaderApp = () => {
   const showModalRegister = () => {
     setIsModalRegisterOpen(true);
   };
-  console.log(isModalLoginOpen);
   return (
     <>
       <div className="header-wrapper max-h-[6.4rem] shadow ">
