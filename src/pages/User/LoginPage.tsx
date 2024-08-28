@@ -25,7 +25,7 @@ const LoginPage = ({
     console.log(values);
     try {
       const res = await APILogin(values);
-      console.log(" check res>>", res);
+      // console.log(" check res>>", res);
       console.log(res.data.error.code); //26
       if (res && res.data.error.code === 0) {
         message.success("Đăng Nhập Thành Công!!");
@@ -80,10 +80,10 @@ const LoginPage = ({
               label={<div className="font-semibold">Email</div>}
               name="email"
               rules={[
-                { required: true, message: "Please input your Email!" },
+                { required: true, message: "Xin hãy nhập Email của bạn!" },
                 {
                   pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Please enter a valid email address!",
+                  message: "Vui lòng nhập địa chỉ Email hợp lệ!",
                 },
               ]}
             >
@@ -91,10 +91,10 @@ const LoginPage = ({
             </Form.Item>
 
             <Form.Item<FieldType>
-              label={<div className="font-semibold">Password</div>}
+              label={<div className="font-semibold">Mật khẩu</div>}
               name="password"
               rules={[
-                { required: true, message: "Please input your password!" },
+                { required: true, message: "Xin hãy nhập password của bạn!" },
               ]}
             >
               <Input.Password placeholder="Enter Password..." />
