@@ -36,8 +36,8 @@ const HeaderApp = () => {
     <>
       <div className="header-wrapper max-h-[6.4rem] shadow ">
         <div className="header-container max-w-[100rem] mx-auto h-[6.4rem] flex items-center justify-between">
-          <div className="logo-header max-w-[17rem] w-[17rem] h-[4rem] border border-green-300">
-            aaaa
+          <div className="logo-header w-[10rem] h-[6.4rem]">
+          <img className=""src="/images/logo-movie.png"alt="Logo-movie" />
           </div>
           <div className="list-items-header grid grid-cols-6 min-w-[65rem] text-center items-center font-semibold text-[1.5rem] h-[4rem] gap-5 ">
             <div className="item-header">Trang Chủ</div>
