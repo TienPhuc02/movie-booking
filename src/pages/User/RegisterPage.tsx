@@ -48,17 +48,22 @@ const RegisterPage = ({
     // console.log(111);
     const res = await APIRegister(dataRegister);
     console.log(res);
-    if (res && res.status === 200 && res.data.error.code === 0) {
-      message.success("Đăng Ký thành công !!!");
-      handleModalRegisterCancel();
-      form.resetFields();
-    } else if (res && res.status === 400) {
-      console.log(111);
-      // Xử lý lỗi ở đây
-      // const errorMessage = res.data?.message || "Đăng Ký thất bại !!!";
-      // message.error(errorMessage);
-    } else if (res === null) {
-      message.error("Không thể kết nối với server!!!");
+    try {
+      if (res && res.status === 200 && res.data.error.code === 0) {
+        message.success("Đăng Ký thành công !!!");
+        handleModalRegisterCancel();
+        form.resetFields();
+      } else if (res && res.status === 400) {
+        console.log(111);
+        // Xử lý lỗi ở đây
+        // const errorMessage = res.data?.message || "Đăng Ký thất bại !!!";
+        message.error("Đăng Ký thất bại !!!");
+      } else if (res === null) {
+        message.error("Không thể kết nối với server!!!");
+      }
+    } catch (error) {
+      message.error("Dang Ky that bai!!!");
+      console.log(error);
     }
   };
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
