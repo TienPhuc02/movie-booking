@@ -57,7 +57,7 @@ const RegisterPage = ({
         form.resetFields();
       } else {
         // Xử lý lỗi khi đăng ký thất bại
-        const errorMessage = res.data?.error?.message || "Đăng Ký thất bại !!!";
+        const errorMessage = res.data?.error?.errorMessage || "Đăng Ký thất bại !!!";
         message.error(errorMessage);
       }
     } catch (error: any) {
@@ -65,7 +65,7 @@ const RegisterPage = ({
   
       // Trường hợp khi API trả về lỗi với mã trạng thái 400
       if (error.response) {
-        const errorMessage = error.response.data?.error?.message || "Đã xảy ra lỗi khi đăng ký.";
+        const errorMessage = error.response.data?.error?.errorMessage || "Đã xảy ra lỗi khi đăng ký.";
         message.error(errorMessage);
       } else if (error.request) {
         // Xử lý khi yêu cầu đã được gửi nhưng không có phản hồi từ API

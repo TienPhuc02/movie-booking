@@ -28,7 +28,7 @@ const LoginPage = ({
       // console.log(" check res>>", res);
       // console.log(res.data.error.code); //26
       if (res && res.data.data !== null) {
-        // console.log(res.data.data.token);
+         console.log(res.data.data.token);
         message.success("Đăng Nhập Thành Công!!");
         handleModalLoginCancel();
         form.resetFields();
