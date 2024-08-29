@@ -44,7 +44,7 @@ const RegisterPage = ({
       ...restValues,
       birthday: birthdayFormat,
     };
-    console.log("dataRegister", dataRegister);
+    // console.log("dataRegister", dataRegister);
   
     try {
       const res = await APIRegister(dataRegister);
@@ -123,7 +123,7 @@ const RegisterPage = ({
                       },
                     ]}
                   >
-                    <Input placeholder="Enter Email...." />
+                    <Input placeholder="Nhập Email...." />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -138,7 +138,7 @@ const RegisterPage = ({
                       },
                     ]}
                   >
-                    <Input placeholder="Enter Full Name...." />
+                    <Input placeholder="Nhập Họ Tên...." />
                   </Form.Item>
                 </Col>
               </Row>
@@ -153,12 +153,12 @@ const RegisterPage = ({
                       message: "Xin hãy nhập số điện thoại của bạn!",
                     },
                     {
-                      pattern: /^[0][0-9]*$/,
-                      message: "Số điện thoại phải bắt đầu bằng số 0 và chỉ chứa số!",
+                      pattern: /^0\d{9}$/,
+                      message: "Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số!",
                     },
                   ]}
-                >
-                  <Input placeholder="Enter Phone Number...." />
+                  >
+                    <Input placeholder="Nhập số điện thoại..." />
                 </Form.Item>
                 </Col>
 
@@ -193,7 +193,7 @@ const RegisterPage = ({
                       },
                     ]}
                   >
-                    <Input.Password placeholder="Enter Password..." />
+                    <Input.Password placeholder="Nhập mật khẩu..." />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -209,7 +209,7 @@ const RegisterPage = ({
                       },
                     ]}
                   >
-                    <Input.Password placeholder="Enter Confirm Password..." />
+                    <Input.Password placeholder="Xác nhận mật khẩu..." />
                   </Form.Item>
                 </Col>
               </Row>

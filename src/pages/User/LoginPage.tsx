@@ -26,16 +26,17 @@ const LoginPage = ({
     try {
       const res = await APILogin(values);
       // console.log(" check res>>", res);
-      console.log(res.data.error.code); //26
-      if (res && res.data.error.code === 0) {
+      // console.log(res.data.error.code); //26
+      if (res && res.data.data !== null) {
+        // console.log(res.data.data.token);
         message.success("Đăng Nhập Thành Công!!");
         handleModalLoginCancel();
         form.resetFields();
       } else {
-        console.log("error login"); ///  không chạy vào đây mặc dù log ra đúng error.code=26 rồi
-        message.error("Đăng Nhập Thất Bại. Vui lòng kiểm tra lại thông tin!!");
-        handleModalLoginCancel();
-        form.resetFields();
+        // console.log("error login");
+        message.error(res.data.error.message);
+        // handleModalLoginCancel();
+        // form.resetFields();
       }
     } catch (error) {
       console.error("Failed:", error);
