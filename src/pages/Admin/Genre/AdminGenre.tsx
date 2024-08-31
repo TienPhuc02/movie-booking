@@ -1,40 +1,96 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons";
 import type {
+  FormProps,
   InputRef,
   PopconfirmProps,
   TableColumnsType,
   TableColumnType,
 } from "antd";
-import { Button, Input, message, Popconfirm, Space, Table } from "antd";
+import {
+  Button,
+  Drawer,
+  Form,
+  Input,
+  message,
+  Modal,
+  Popconfirm,
+  Space,
+  Table,
+} from "antd";
 import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
 interface DataType {
-  key: string;
-  name: string;
-  age: number;
-  address: string;
+  id: string;
+  uuid: string;
   genreName: string;
 }
 import "../../../css/AdminGenre.css";
+import {
+  APICreateGenre,
+  APIGetAllGenre,
+  APIGetGenreDetail,
+} from "../../../services/service.api";
 
 type DataIndex = keyof DataType;
 
-const data: DataType[] = [
-  {
-    key: "1",
-    name: "John Brown",
-    age: 32,
-    address: "New York No. 1 Lake Park",
-    genreName: "aaaa",
-  },
-];
+type FieldType = {
+  genreName: string;
+};
 
 const AdminGenre: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
+  const [listGenre, setListGenre] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [form] = Form.useForm();
+  const getAllGenre = async () => {
+    const res = await APIGetAllGenre({ pageSize: 10, page: 1 });
+    console.log(res);
+    if (res && res.data && res.data?.data) {
+      setListGenre(res.data?.data?.items);
+      form.resetFields();
+      handleCancel();
+    }
+  };
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    const res = await APICreateGenre(values);
+    console.log(res);
+    if (res && res.data) {
+      message.success(res.data.error.errorMessage);
+      getAllGenre();
+    }
+    console.log("Success:", values);
+  };
 
+  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+    errorInfo
+  ) => {
+    console.log("Failed:", errorInfo);
+  };
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const showDrawer = async (id: string) => {
+    const res = await APIGetGenreDetail(id);
+    console.log(res);
+    setOpen(true);
+  };
+
+  const onClose = () => {
+    setOpen(false);
+  };
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
@@ -148,26 +204,46 @@ const AdminGenre: React.FC = () => {
         text
       ),
   });
-
+  const listGenreMap = listGenre.map((genre, index) => ({
+    key: index + 1,
+    ...genre,
+  }));
   const columns: TableColumnsType<DataType> = [
     {
       title: "Id",
+      dataIndex: "key",
     },
     {
       title: "UUID",
-      dataIndex: "uuid",
-      key: "uuid",
+      // dataIndex: "uuid",
       width: 250,
-      ...getColumnSearchProps("age"),
+      ...getColumnSearchProps("uuid"),
+      render: (record) => {
+        console.log(record);
+        return (
+          <div
+            className="hover:text-[#4096ff] cursor-pointer"
+            onClick={() => showDrawer(record.id)}
+          >
+            {record.uuid}
+          </div>
+        );
+      },
     },
     {
       title: "Genre Name",
       dataIndex: "genreName",
       key: "genreName",
+
       ...getColumnSearchProps("genreName"),
       width: 500,
-      sorter: (a, b) => a.address.length - b.address.length,
+      sorter: (a, b) => a.genreName.length - b.genreName.length,
       sortDirections: ["descend", "ascend"],
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
     },
     {
       title: "Action",
@@ -178,9 +254,7 @@ const AdminGenre: React.FC = () => {
             description="Are you sure to delete this genre?"
             onConfirm={confirm}
             onCancel={cancel}
-            // okText="Yes"
             okText={<>Yes</>}
-            // okButtonProps={<Button type="text">Yes</Button>}
             cancelText="No"
           >
             <Button danger>Delete</Button>
@@ -188,11 +262,71 @@ const AdminGenre: React.FC = () => {
           <Button type="text">Update</Button>
         </div>
       ),
-      //   ...getColumnSearchProps("genreName"),
     },
   ];
+  useEffect(() => {
+    getAllGenre();
+  }, []);
+  return (
+    <>
+      <Button className="float-end mb-4" type="primary" onClick={showModal}>
+        Create Genre
+      </Button>
+      <Drawer title="Basic Drawer" onClose={onClose} open={open}>
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+      </Drawer>
+      <Modal
+        title="Create Genre Modal"
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        footer={<></>}
+      >
+        <Form
+          form={form}
+          name="basic"
+          labelCol={{ span: 8 }}
+          wrapperCol={{ span: 16 }}
+          style={{ maxWidth: 600 }}
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+          autoComplete="off"
+        >
+          <Form.Item<FieldType>
+            label="Genre Name"
+            name="genreName"
+            rules={[
+              { required: true, message: "Please input your genreName!" },
+            ]}
+          >
+            <Input />
+          </Form.Item>
 
-  return <Table columns={columns} dataSource={data} />;
+          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+            <Button type="primary" htmlType="submit">
+              Create Genre
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+      <Table
+        columns={columns}
+        dataSource={listGenreMap}
+        scroll={{ x: 1500, y: 500 }}
+        pagination={{
+          showTotal: (total, range) => {
+            return `${range[0]}-${range[1]} of ${total} items`;
+          },
+          defaultPageSize: 10,
+          showSizeChanger: true,
+          pageSizeOptions: ["5", "10", "20"],
+        }}
+      />
+    </>
+  );
 };
 
 export default AdminGenre;

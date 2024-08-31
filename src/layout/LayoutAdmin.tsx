@@ -58,7 +58,7 @@ const LayoutAdmin: React.FC = () => {
         onCollapse={(value) => setCollapsed(value)}
       >
         <div className="demo-logo-vertical flex justify-center items-center py-8">
-          Admin DashBoard
+          {/* Admin DashBoard */}
         </div>
         <Menu
           theme="light"

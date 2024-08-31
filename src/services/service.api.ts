@@ -16,3 +16,9 @@ export const APIRegister = (data: {
 export const APICreateGenre = (data: { genreName: string }) => {
   return instance.post("Genre/upsert_genre", data);
 };
+export const APIGetAllGenre = (data: any) => {
+  return instance.post("Genre/page_list_genre", data);
+};
+export const APIGetGenreDetail = (data) => {
+  return instance.post("Genre/geren_detail", data);
+};
