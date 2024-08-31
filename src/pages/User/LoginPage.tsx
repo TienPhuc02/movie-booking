@@ -24,19 +24,15 @@ const LoginPage = ({
   const onFinish = async (values: FieldType) => {
     console.log(values);
     try {
-      const res = await APILogin(values);
-      // console.log(" check res>>", res);
-      // console.log(res.data.error.code); //26
-      if (res && res.data.data !== null) {
-        // console.log(res.data.data.token);
+      const res = (await APILogin(values)) as any;
+      console.log(res);
+      if (res && res?.data?.data !== null) {
+        localStorage.setItem("access_token", res.data.data.token);
         message.success("Đăng Nhập Thành Công!!");
         handleModalLoginCancel();
         form.resetFields();
       } else {
-        // console.log("error login");
-        message.error(res.data.error.message);
-        // handleModalLoginCancel();
-        // form.resetFields();
+        message.error(res?.data.error.message);
       }
     } catch (error) {
       console.error("Failed:", error);
@@ -53,7 +49,10 @@ const LoginPage = ({
     <Modal
       open={isModalLoginOpen}
       width={500}
-      onCancel={handleModalLoginCancel}
+      onCancel={() => {
+        form.resetFields();
+        handleModalLoginCancel();
+      }}
       footer={<></>}
     >
       <div className="login-container ">

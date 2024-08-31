@@ -13,3 +13,6 @@ export const APIRegister = (data: {
 }) => {
   return instance.post("User/register", data);
 };
+export const APICreateGenre = (data: { genreName: string }) => {
+  return instance.post("Genre/upsert_genre", data);
+};

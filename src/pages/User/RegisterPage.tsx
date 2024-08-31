@@ -30,9 +30,9 @@ const RegisterPage = ({
   };
   const onFinish = async (values: FieldType) => {
     const { birthday, ...restValues } = values;
-  
+
     const birthdayObj = new Date(birthday);
-  
+
     const formatToDateString = (dateObj: Date) => {
       const year = dateObj.getFullYear();
       const month = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -44,34 +44,29 @@ const RegisterPage = ({
       ...restValues,
       birthday: birthdayFormat,
     };
-    // console.log("dataRegister", dataRegister);
-  
+
     try {
       const res = await APIRegister(dataRegister);
       console.log(res);
-  
-      // Kiểm tra phản hồi thành công
+
       if (res && res.status === 200) {
         message.success("Đăng Ký thành công !!!");
         handleModalRegisterCancel();
         form.resetFields();
-      } else {
-        // Xử lý lỗi khi đăng ký thất bại
-        const errorMessage = res.data?.error?.message || "Đăng Ký thất bại !!!";
-        message.error(errorMessage);
       }
     } catch (error: any) {
       console.error("Failed:", error);
-  
-      // Trường hợp khi API trả về lỗi với mã trạng thái 400
+
       if (error.response) {
-        const errorMessage = error.response.data?.error?.message || "Đã xảy ra lỗi khi đăng ký.";
+        const errorMessage =
+          error.response.data?.error?.errorMessage ||
+          "Đã xảy ra lỗi khi đăng ký.";
         message.error(errorMessage);
       } else if (error.request) {
-        // Xử lý khi yêu cầu đã được gửi nhưng không có phản hồi từ API
-        message.error("Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.");
+        message.error(
+          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+        );
       } else {
-        // Xử lý các lỗi khác
         message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
       }
     }
@@ -85,7 +80,10 @@ const RegisterPage = ({
     <div>
       <Modal
         open={isModalRegisterOpen}
-        onCancel={handleModalRegisterCancel}
+        onCancel={() => {
+          form.resetFields();
+          handleModalRegisterCancel();
+        }}
         footer={<></>}
         style={{ top: 20 }}
       >
@@ -116,7 +114,10 @@ const RegisterPage = ({
                     label={<div className="font-semibold">Email</div>}
                     name="email"
                     rules={[
-                      { required: true, message: "Xin hãy nhập Email của bạn!" },
+                      {
+                        required: true,
+                        message: "Xin hãy nhập Email của bạn!",
+                      },
                       {
                         pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                         message: "Vui lòng nhập địa chỉ Email hợp lệ!",
@@ -131,7 +132,10 @@ const RegisterPage = ({
                     label={<div className="font-semibold">Họ Tên</div>}
                     name="fullname"
                     rules={[
-                      { required: true, message: "Xin hãy nhập họ và tên bạn!" },
+                      {
+                        required: true,
+                        message: "Xin hãy nhập họ và tên bạn!",
+                      },
                       {
                         pattern: /^[a-zA-Z]+$/,
                         message: "Họ tên chỉ được dùng ký tự!",
@@ -144,22 +148,23 @@ const RegisterPage = ({
               </Row>
               <Row gutter={[16, 16]}>
                 <Col span={12}>
-                <Form.Item<FieldType>
-                  label={<div className="font-semibold">Số điện thoại</div>}
-                  name="phoneNumber"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Xin hãy nhập số điện thoại của bạn!",
-                    },
-                    {
-                      pattern: /^0\d{9}$/,
-                      message: "Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số!",
-                    },
-                  ]}
+                  <Form.Item<FieldType>
+                    label={<div className="font-semibold">Số điện thoại</div>}
+                    name="phoneNumber"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Xin hãy nhập số điện thoại của bạn!",
+                      },
+                      {
+                        pattern: /^0\d{9}$/,
+                        message:
+                          "Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số!",
+                      },
+                    ]}
                   >
                     <Input placeholder="Nhập số điện thoại..." />
-                </Form.Item>
+                  </Form.Item>
                 </Col>
 
                 <Col span={12}>

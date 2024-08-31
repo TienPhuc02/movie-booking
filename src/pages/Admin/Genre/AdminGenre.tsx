@@ -1,7 +1,12 @@
 import React, { useRef, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons";
-import type { InputRef, TableColumnsType, TableColumnType } from "antd";
-import { Button, Input, Space, Table } from "antd";
+import type {
+  InputRef,
+  PopconfirmProps,
+  TableColumnsType,
+  TableColumnType,
+} from "antd";
+import { Button, Input, message, Popconfirm, Space, Table } from "antd";
 import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
 interface DataType {
@@ -9,7 +14,9 @@ interface DataType {
   name: string;
   age: number;
   address: string;
+  genreName: string;
 }
+import "../../../css/AdminGenre.css";
 
 type DataIndex = keyof DataType;
 
@@ -19,28 +26,11 @@ const data: DataType[] = [
     name: "John Brown",
     age: 32,
     address: "New York No. 1 Lake Park",
-  },
-  {
-    key: "2",
-    name: "Joe Black",
-    age: 42,
-    address: "London No. 1 Lake Park",
-  },
-  {
-    key: "3",
-    name: "Jim Green",
-    age: 32,
-    address: "Sydney No. 1 Lake Park",
-  },
-  {
-    key: "4",
-    name: "Jim Red",
-    age: 32,
-    address: "London No. 2 Lake Park",
+    genreName: "aaaa",
   },
 ];
 
-const AdminUser: React.FC = () => {
+const AdminGenre: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
@@ -59,7 +49,15 @@ const AdminUser: React.FC = () => {
     clearFilters();
     setSearchText("");
   };
+  const confirm: PopconfirmProps["onConfirm"] = (e) => {
+    console.log(e);
+    message.success("Click on Yes");
+  };
 
+  const cancel: PopconfirmProps["onCancel"] = (e) => {
+    console.log(e);
+    message.error("Click on No");
+  };
   const getColumnSearchProps = (
     dataIndex: DataIndex
   ): TableColumnType<DataType> => ({
@@ -153,30 +151,48 @@ const AdminUser: React.FC = () => {
 
   const columns: TableColumnsType<DataType> = [
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      width: "30%",
-      ...getColumnSearchProps("name"),
+      title: "Id",
     },
     {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
-      width: "20%",
+      title: "UUID",
+      dataIndex: "uuid",
+      key: "uuid",
+      width: 250,
       ...getColumnSearchProps("age"),
     },
     {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
-      ...getColumnSearchProps("address"),
+      title: "Genre Name",
+      dataIndex: "genreName",
+      key: "genreName",
+      ...getColumnSearchProps("genreName"),
+      width: 500,
       sorter: (a, b) => a.address.length - b.address.length,
       sortDirections: ["descend", "ascend"],
+    },
+    {
+      title: "Action",
+      render: () => (
+        <div className="flex gap-4">
+          <Popconfirm
+            title="Delete the genre"
+            description="Are you sure to delete this genre?"
+            onConfirm={confirm}
+            onCancel={cancel}
+            // okText="Yes"
+            okText={<>Yes</>}
+            // okButtonProps={<Button type="text">Yes</Button>}
+            cancelText="No"
+          >
+            <Button danger>Delete</Button>
+          </Popconfirm>
+          <Button type="text">Update</Button>
+        </div>
+      ),
+      //   ...getColumnSearchProps("genreName"),
     },
   ];
 
   return <Table columns={columns} dataSource={data} />;
 };
 
-export default AdminUser;
+export default AdminGenre;

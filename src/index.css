@@ -10,3 +10,25 @@
 html {
   font-size: 62.5%;
 }
+:where(.css-dev-only-do-not-override-1gwfwyx).ant-layout
+  .ant-layout-sider-trigger {
+  position: fixed;
+  bottom: 0;
+  z-index: 1;
+  height: 48px;
+  color: black;
+  line-height: 48px;
+  text-align: center;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ant-layout-sider-trigger:hover {
+  background-color: #d9d9d9;
+}
+:where(.css-dev-only-do-not-override-1gwfwyx).ant-btn-primary:not(
+    :disabled
+  ):not(.ant-btn-disabled):hover {
+  color: #fff;
+  background: #ccc;
+}
