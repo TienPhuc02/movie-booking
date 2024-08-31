@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import {
+  GlobalOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UserOutlined,
+  VideoCameraAddOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
@@ -36,10 +38,19 @@ const items: MenuItem[] = [
     key: "3",
     icon: (
       <Link to={"/admin/genre"}>
-        <VideoCameraOutlined />
+        <VideoCameraAddOutlined />
       </Link>
     ),
     label: "Genre",
+  },
+  {
+    key: "4",
+    icon: (
+      <Link to={"/admin/region"}>
+        <GlobalOutlined  />
+      </Link>
+    ),
+    label: "Region",
   },
 ];
 

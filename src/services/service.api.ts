@@ -19,6 +19,22 @@ export const APICreateGenre = (data: { genreName: string }) => {
 export const APIGetAllGenre = (data: any) => {
   return instance.post("Genre/page_list_genre", data);
 };
-export const APIGetGenreDetail = (data) => {
-  return instance.post("Genre/geren_detail", data);
+export const APIGetGenreDetail = (data:any) => {
+  return instance.post("Genre/genre_detail", data, {headers: {
+    "Content-Type": "application/json", // Đảm bảo Content-Type đúng
+    },
+  }); 
+};
+
+export const APICreateRegion = (data: { regionName: string }) => {
+  return instance.post("Region/upsert_region", data);
+};
+export const APIGetAllRegion = (data: any) => {
+  return instance.post("Region/page_list_region", data);
+};
+export const APIGetRegionDetail = (data:any) => {
+  return instance.post("Region/region_detail", data, {headers: {
+    "Content-Type": "application/json", // Đảm bảo Content-Type đúng
+    },
+  }); 
 };

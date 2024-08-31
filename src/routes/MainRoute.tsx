@@ -3,8 +3,9 @@ import { createBrowserRouter } from "react-router-dom";
 import HomePage from "../pages/User/HomePage";
 import AdminUser from "../pages/Admin/User/AdminUser";
 import LayoutAdmin from "../layout/LayoutAdmin";
-import AdminMovie from "../pages/Admin/Move/AdminMovie";
+import AdminMovie from "../pages/Admin/Movie/AdminMovie";
 import AdminGenre from "../pages/Admin/Genre/AdminGenre";
+import AdminRegion from "../pages/Admin/Region/AdminRegion";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
         path: "genre",
         element: <AdminGenre />,
       },
+      {
+        path:"region",
+        element: <AdminRegion />,
+      }
     ],
   },
 ]);

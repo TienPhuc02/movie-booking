@@ -22,48 +22,48 @@ import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
 import "../../../css/AdminGenre.css";
 import {
-  APICreateGenre,
-  APIGetAllGenre,
-  APIGetGenreDetail,
+    APICreateRegion,
+    APIGetAllRegion,
+    APIGetRegionDetail,
 } from "../../../services/service.api";
 interface DataType {
   id: string;
   uuid: string;
-  genreName: string;
+  regionName: string;
   status: string;
 }
 
 type DataIndex = keyof DataType;
 
 type FieldType = {
-  genreName: string;
+  regionName: string;
 };
 
-const AdminGenre: React.FC = () => {
+const AdminRegion: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
-  const [listGenre, setListGenre] = useState([]);
+  const [listRegion, setListRegion] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
-  const [genreDetail, setGenreDetail] = useState<DataType | null>(null);
-  const getAllGenre = async () => {
-    const res = await APIGetAllGenre({ pageSize: 10, page: 1 });
+  const [regionDetail, setRegionDetail] = useState<DataType | null>(null);
+  const getAllRegion = async () => {
+    const res = await APIGetAllRegion({ pageSize: 10, page: 1 });
     // console.log(res);
     if (res && res.data && res.data?.data) {
-      setListGenre(res.data?.data?.items);
+      setListRegion(res.data?.data?.items);
       form.resetFields();
       handleCancel();
     }
   };
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     try{
-    const res = await APICreateGenre(values);
+    const res = await APICreateRegion(values);
     // console.log(res);
     if (res && res.status === 200) {
       message.success(res.data.error.errorMessage);
-      getAllGenre();
+      getAllRegion();
     }
     // console.log("Success:", values);
     }catch(error:any){
@@ -102,10 +102,10 @@ const AdminGenre: React.FC = () => {
 
   const showDrawer = async (uuid: string) => {
     try {
-      const res = await APIGetGenreDetail({ uuid });
+      const res = await APIGetRegionDetail({ uuid });
       // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
       if (res && res.status === 200) {
-        setGenreDetail(res.data.data);
+        setRegionDetail(res.data.data);
         setOpen(true);
       } else {
         message.error("Không tìm thấy thông tin chi tiết.");
@@ -143,12 +143,12 @@ const AdminGenre: React.FC = () => {
     setSearchText("");
   };
   const confirm: PopconfirmProps["onConfirm"] = (e) => {
-     console.log(e);
+    console.log(e);
     message.success("Click on Yes");
   };
 
   const cancel: PopconfirmProps["onCancel"] = (e) => {
-     console.log(e);
+    console.log(e);
     message.error("Click on No");
   };
   const getColumnSearchProps = (
@@ -241,9 +241,9 @@ const AdminGenre: React.FC = () => {
         text
       ),
   });
-  const listGenreMap = listGenre.map((genre, index) => ({
+  const listRegionMap = listRegion.map((region, index) => ({
     key: index + 1,
-    ...genre,
+    ...region,
   }));
   const columns: TableColumnsType<DataType> = [
     {
@@ -267,13 +267,13 @@ const AdminGenre: React.FC = () => {
       },
     },
     {
-      title: "Genre Name",
-      dataIndex: "genreName",
-      key: "genreName",
+      title: "Region Name",
+      dataIndex: "regionName",
+      key: "regionName",
 
-      ...getColumnSearchProps("genreName"),
+      ...getColumnSearchProps("regionName"),
       width: 100,
-      sorter: (a, b) => a.genreName.length - b.genreName.length,
+      sorter: (a, b) => a.regionName.length - b.regionName.length,
       sortDirections: ["descend", "ascend"],
     },
     {
@@ -289,7 +289,7 @@ const AdminGenre: React.FC = () => {
         <div className="flex gap-4">
           <Popconfirm
             title="Delete the genre"
-            description="Are you sure to delete this genre?"
+            description="Are you sure to delete this region?"
             onConfirm={confirm}
             onCancel={cancel}
             okText={<>Yes</>}
@@ -303,7 +303,7 @@ const AdminGenre: React.FC = () => {
     },
   ];
   useEffect(() => {
-    getAllGenre();
+    getAllRegion();
   }, []);
   return (
     <>
@@ -311,17 +311,17 @@ const AdminGenre: React.FC = () => {
         Create Genre
       </Button>
       <Drawer
-        title="Chi tiết thể loại phim"
+        title="Chi tiết quốc gia"
         placement="right"
         onClose={onClose}
         open={open}
         width={400}
       >
-        {genreDetail ? (
+        {regionDetail ? (
           <div>
-            <p><strong>UUID:</strong> {genreDetail.uuid}</p>
-            <p><strong>Tên Thể Loại:</strong> {genreDetail.genreName}</p>
-            <p><strong>Trạng Thái:</strong> {genreDetail.status}</p>
+            <p><strong>UUID:</strong> {regionDetail.uuid}</p>
+            <p><strong>Tên Thể Loại:</strong> {regionDetail.regionName}</p>
+            <p><strong>Trạng Thái:</strong> {regionDetail.status}</p>
             {/* Thêm các thông tin khác nếu cần */}
           </div>
         ) : (
@@ -329,7 +329,7 @@ const AdminGenre: React.FC = () => {
         )}
       </Drawer>
       <Modal
-        title="Create Genre Modal"
+        title="Create Region Modal"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -347,10 +347,10 @@ const AdminGenre: React.FC = () => {
           autoComplete="off"
         >
           <Form.Item<FieldType>
-            label="Genre Name"
-            name="genreName"
+            label="Region Name"
+            name="regionName"
             rules={[
-              { required: true, message: "Please input your genreName!" },
+              { required: true, message: "Please input your region name!" },
             ]}
           >
             <Input />
@@ -366,7 +366,7 @@ const AdminGenre: React.FC = () => {
       <Table
 
         columns={columns}
-        dataSource={listGenreMap}
+        dataSource={listRegionMap}
         scroll={{ x: 1000, y: 500 }}
         pagination={{
           showTotal: (total, range) => {
@@ -381,4 +381,4 @@ const AdminGenre: React.FC = () => {
   );
 };
 
-export default AdminGenre;
+export default AdminRegion;
