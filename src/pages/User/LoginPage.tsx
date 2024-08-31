@@ -24,10 +24,18 @@ const LoginPage = ({
   const onFinish = async (values: FieldType) => {
     console.log(values);
     try {
+<<<<<<< HEAD
       const res = (await APILogin(values)) as any;
       console.log(res);
       if (res && res?.data?.data !== null) {
         localStorage.setItem("access_token", res.data.data.token);
+=======
+      const res = await APILogin(values);
+      // console.log(" check res>>", res);
+      // console.log(res.data.error.code); //26
+      if (res && res.data.data !== null) {
+         console.log(res.data.data.token);
+>>>>>>> 1b7d60305a287dbe45d16dc830f338eb125721c7
         message.success("Đăng Nhập Thành Công!!");
         handleModalLoginCancel();
         form.resetFields();

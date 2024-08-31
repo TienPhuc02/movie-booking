@@ -53,14 +53,25 @@ const RegisterPage = ({
         message.success("Đăng Ký thành công !!!");
         handleModalRegisterCancel();
         form.resetFields();
+<<<<<<< HEAD
+=======
+      } else {
+        // Xử lý lỗi khi đăng ký thất bại
+        const errorMessage = res.data?.error?.errorMessage || "Đăng Ký thất bại !!!";
+        message.error(errorMessage);
+>>>>>>> 1b7d60305a287dbe45d16dc830f338eb125721c7
       }
     } catch (error: any) {
       console.error("Failed:", error);
 
       if (error.response) {
+<<<<<<< HEAD
         const errorMessage =
           error.response.data?.error?.errorMessage ||
           "Đã xảy ra lỗi khi đăng ký.";
+=======
+        const errorMessage = error.response.data?.error?.errorMessage || "Đã xảy ra lỗi khi đăng ký.";
+>>>>>>> 1b7d60305a287dbe45d16dc830f338eb125721c7
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
