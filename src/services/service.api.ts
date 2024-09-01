@@ -19,11 +19,12 @@ export const APICreateGenre = (data: { genreName: string }) => {
 export const APIGetAllGenre = (data: any) => {
   return instance.post("Genre/page_list_genre", data);
 };
-export const APIGetGenreDetail = (data:any) => {
-  return instance.post("Genre/genre_detail", data, {headers: {
-    "Content-Type": "application/json", // Đảm bảo Content-Type đúng
+export const APIGetGenreDetail = (data: any) => {
+  return instance.post("Genre/genre_detail", data, {
+    headers: {
+      "Content-Type": "application/json", // Đảm bảo Content-Type đúng
     },
-  }); 
+  });
 };
 
 export const APICreateRegion = (data: { regionName: string }) => {
@@ -32,9 +33,17 @@ export const APICreateRegion = (data: { regionName: string }) => {
 export const APIGetAllRegion = (data: any) => {
   return instance.post("Region/page_list_region", data);
 };
-export const APIGetRegionDetail = (data:any) => {
-  return instance.post("Region/region_detail", data, {headers: {
-    "Content-Type": "application/json", // Đảm bảo Content-Type đúng
+export const APIGetRegionDetail = (data: any) => {
+  return instance.post("Region/region_detail", data, {
+    headers: {
+      "Content-Type": "application/json", // Đảm bảo Content-Type đúng
     },
-  }); 
+  });
+};
+export const APIUpdateGenre = (data: any) => {
+  return instance.post("Genre/update_genre_status", data, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 };

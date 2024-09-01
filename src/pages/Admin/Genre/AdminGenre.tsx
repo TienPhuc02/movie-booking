@@ -25,6 +25,7 @@ import {
   APICreateGenre,
   APIGetAllGenre,
   APIGetGenreDetail,
+  APIUpdateGenre,
 } from "../../../services/service.api";
 interface DataType {
   id: string;
@@ -47,26 +48,50 @@ const AdminGenre: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
+  const [formUpdate] = Form.useForm();
   const [genreDetail, setGenreDetail] = useState<DataType | null>(null);
-  const getAllGenre = async () => {
-    const res = await APIGetAllGenre({ pageSize: 10, page: 1 });
-    // console.log(res);
-    if (res && res.data && res.data?.data) {
-      setListGenre(res.data?.data?.items);
-      form.resetFields();
-      handleCancel();
+  const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
+
+  const showModalUpdate = async (uuid: string) => {
+    try {
+      const res = await APIGetGenreDetail({ uuid });
+      if (res && res.status === 200) {
+        const genreDetail = res.data.data;
+        setGenreDetail(genreDetail);
+        formUpdate.setFieldsValue({
+          status: genreDetail.status,
+        });
+        setIsModalUpdateOpen(true);
+      } else {
+        message.error("Không tìm thấy thông tin chi tiết.");
+      }
+    } catch (error: any) {
+      if (error.response) {
+        const errorMessage =
+          error.response.data?.error?.errorMessage ||
+          "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
+        message.error(errorMessage);
+      } else {
+        message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
+      }
     }
   };
-  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    try{
-    const res = await APICreateGenre(values);
-    // console.log(res);
-    if (res && res.status === 200) {
-      message.success(res.data.error.errorMessage);
-      getAllGenre();
-    }
-    // console.log("Success:", values);
-    }catch(error:any){
+  const onFinishUpdateStatus: FormProps<FieldType>["onFinish"] = async (
+    values
+  ) => {
+    try {
+      const res = await APIUpdateGenre({
+        uuid: genreDetail.uuid,
+        status: values.status,
+      });
+      if (res && res.status === 200) {
+        message.success(res.data.error.errorMessage);
+        getAllGenre();
+        formUpdate.resetFields();
+        handleCancelUpdate();
+      }
+      // console.log("Success:", values);
+    } catch (error: any) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
@@ -80,7 +105,39 @@ const AdminGenre: React.FC = () => {
         message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
       }
     }
-      
+  };
+  const getAllGenre = async () => {
+    const res = await APIGetAllGenre({ pageSize: 10, page: 1 });
+    // console.log(res);
+    if (res && res.data && res.data?.data) {
+      setListGenre(res.data?.data?.items);
+      form.resetFields();
+      handleCancel();
+    }
+  };
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    try {
+      const res = await APICreateGenre(values);
+      // console.log(res);
+      if (res && res.status === 200) {
+        message.success(res.data.error.errorMessage);
+        getAllGenre();
+      }
+      // console.log("Success:", values);
+    } catch (error: any) {
+      if (error.response) {
+        const errorMessage =
+          error.response.data?.error?.errorMessage ||
+          "Đã xảy ra lỗi khi thêm mới.";
+        message.error(errorMessage);
+      } else if (error.request) {
+        message.error(
+          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+        );
+      } else {
+        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+      }
+    }
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
@@ -98,6 +155,9 @@ const AdminGenre: React.FC = () => {
 
   const handleCancel = () => {
     setIsModalOpen(false);
+  };
+  const handleCancelUpdate = () => {
+    setIsModalUpdateOpen(false);
   };
 
   const showDrawer = async (uuid: string) => {
@@ -122,7 +182,6 @@ const AdminGenre: React.FC = () => {
       }
     }
   };
-  
 
   const onClose = () => {
     setOpen(false);
@@ -142,15 +201,7 @@ const AdminGenre: React.FC = () => {
     clearFilters();
     setSearchText("");
   };
-  const confirm: PopconfirmProps["onConfirm"] = (e) => {
-     console.log(e);
-    message.success("Click on Yes");
-  };
 
-  const cancel: PopconfirmProps["onCancel"] = (e) => {
-     console.log(e);
-    message.error("Click on No");
-  };
   const getColumnSearchProps = (
     dataIndex: DataIndex
   ): TableColumnType<DataType> => ({
@@ -249,12 +300,12 @@ const AdminGenre: React.FC = () => {
     {
       title: "Id",
       dataIndex: "key",
-      width:50,
+      width: 50,
     },
     {
       title: "UUID",
       width: 200,
-       ...getColumnSearchProps("uuid"),
+      ...getColumnSearchProps("uuid"),
       render: (record) => {
         return (
           <div
@@ -280,24 +331,16 @@ const AdminGenre: React.FC = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width:50,
+      width: 50,
     },
     {
       title: "Action",
-      width:150,
-      render: () => (
+      width: 150,
+      render: (record) => (
         <div className="flex gap-4">
-          <Popconfirm
-            title="Delete the genre"
-            description="Are you sure to delete this genre?"
-            onConfirm={confirm}
-            onCancel={cancel}
-            okText={<>Yes</>}
-            cancelText="No"
-          >
-            <Button danger>Delete</Button>
-          </Popconfirm>
-          <Button type="text">Update</Button>
+          <Button type="text" onClick={() => showModalUpdate(record.uuid)}>
+            Update
+          </Button>
         </div>
       ),
     },
@@ -319,10 +362,15 @@ const AdminGenre: React.FC = () => {
       >
         {genreDetail ? (
           <div>
-            <p><strong>UUID:</strong> {genreDetail.uuid}</p>
-            <p><strong>Tên Thể Loại:</strong> {genreDetail.genreName}</p>
-            <p><strong>Trạng Thái:</strong> {genreDetail.status}</p>
-            {/* Thêm các thông tin khác nếu cần */}
+            <p>
+              <strong>UUID:</strong> {genreDetail.uuid}
+            </p>
+            <p>
+              <strong>Tên Thể Loại:</strong> {genreDetail.genreName}
+            </p>
+            <p>
+              <strong>Trạng Thái:</strong> {genreDetail.status}
+            </p>
           </div>
         ) : (
           <p>Không có thông tin chi tiết để hiển thị.</p>
@@ -363,8 +411,38 @@ const AdminGenre: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-      <Table
+      <Modal
+        title="Update Status Genre Modal"
+        open={isModalUpdateOpen}
+        onCancel={() => setIsModalUpdateOpen(false)}
+      >
+        <Form
+          form={formUpdate}
+          name="basic"
+          labelCol={{ span: 8 }}
+          wrapperCol={{ span: 16 }}
+          style={{ maxWidth: 600 }}
+          initialValues={{ remember: true }}
+          onFinish={onFinishUpdateStatus}
+          onFinishFailed={onFinishFailed}
+          autoComplete="off"
+        >
+          <Form.Item
+            label="Status Genre"
+            name="status"
+            rules={[{ required: true, message: "Please input your status!" }]}
+          >
+            <Input />
+          </Form.Item>
 
+          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+            <Button type="primary" htmlType="submit">
+              Update Genre
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+      <Table
         columns={columns}
         dataSource={listGenreMap}
         scroll={{ x: 1000, y: 500 }}
