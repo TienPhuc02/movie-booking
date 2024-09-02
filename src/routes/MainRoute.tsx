@@ -6,6 +6,7 @@ import LayoutAdmin from "../layout/LayoutAdmin";
 import AdminMovie from "../pages/Admin/Movie/AdminMovie";
 import AdminGenre from "../pages/Admin/Genre/AdminGenre";
 import AdminRegion from "../pages/Admin/Region/AdminRegion";
+import AdminDirector from "../pages/Admin/Director/AdminDirector";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
       {
         path:"region",
         element: <AdminRegion />,
+      },
+      {
+        path:"director",
+        element: <AdminDirector />,
       }
     ],
   },

@@ -9,6 +9,7 @@ import type {
 } from "antd";
 import {
   Button,
+  DatePicker,
   Drawer,
   Form,
   Input,
@@ -22,44 +23,53 @@ import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
 import "../../../css/AdminGenre.css";
 import {
-    APICreateRegion,
-    APIGetAllRegion,
-    APIGetRegionDetail,
-    APIDeleteRegion
+    APICreateDirector,
+    APIGetAllDirector,
+    APIGetDirectorDetail,
+    APIDeleteDirector
 } from "../../../services/service.api";
+
 interface DataType {
   id: string;
   uuid: string;
-  regionName: string;
+  directorName: string;
+  birthday: string;
+  description: string;
   status: number;
 }
 
 type DataIndex = keyof DataType;
 
 type FieldType = {
-  regionName: string;
+    directorName: string;
+    birthday: string;
+    description: string;
 };
 
-const AdminRegion: React.FC = () => {
+const AdminDirector: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
-  const [listRegion, setListRegion] = useState([]);
+  const [listDirector, setListDirector] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
   const [formUpdate] = Form.useForm();
-  const [regionDetail, setRegionDetail] = useState<DataType | null>(null);
+  const [directorDetail, setDirectorDetail] = useState<DataType | null>(null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
 
   const showModalUpdate = async (uuid: string) => {
+
     try {
-      const res = await APIGetRegionDetail({ uuid });
+      const res = await APIGetDirectorDetail({ uuid });
       if (res && res.status === 200) {
-        const regionDetail = res.data.data;
-        setRegionDetail(regionDetail);
+        const directorDetail = res.data.data;
+        setDirectorDetail(directorDetail);
+         console.log(directorDetail.birthday);
         formUpdate.setFieldsValue({
-          regionName: regionDetail.regionName,
+          directorName: directorDetail.directorName,
+         //birthday:directorDetail.birthday,
+          description: directorDetail.description,
         });
         setIsModalUpdateOpen(true);
       } else {
@@ -76,17 +86,32 @@ const AdminRegion: React.FC = () => {
       }
     }
   };
-  const onFinishUpdateRegionName: FormProps<FieldType>["onFinish"] = async (
+
+  const formatToDateString = (dateObj: Date) => {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const onFinishUpdateDirectorInfor: FormProps<FieldType>["onFinish"] = async (
     values
   ) => {
+    // const { birthday, ...restValues } = values;
+    // const birthdayFormat = formatToDateString(new Date(birthday));
+    // const dataDirector = { ...restValues, birthday: birthdayFormat };
+    
     try {
-      const res = await APICreateRegion({
-        uuid: regionDetail.uuid,
-        regionName: values.regionName,
+      const res = await APICreateDirector({
+        uuid: directorDetail.uuid,
+        regionName: values.directorName,
+        birthday: values.birthday,
+        description: values.description,
       });
+      console.log("adasdasd", res)
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
-        getAllRegion();
+        getAllDirector();
         formUpdate.resetFields();
         handleCancelUpdate();
       }
@@ -107,15 +132,16 @@ const AdminRegion: React.FC = () => {
     }
   };
 
-  const getAllRegion = async (): Promise<void> => {
+  const getAllDirector = async (): Promise<void> => {
     try {
-      const res = await APIGetAllRegion({ pageSize: 10, page: 1 });
+      const res = await APIGetAllDirector({ pageSize: 10, page: 1 });
+      console.log(res.data.data)
       if (res && res.data && res.data.data) {
         // Lọc các region có status khác "0"
-        const filteredRegions = res.data?.data?.items.filter(
+        const filteredDirectors = res.data?.data?.items.filter(
           (region: DataType) => region.status !== 0
         );
-        setListRegion(filteredRegions); // Cập nhật danh sách region đã lọc
+        setListDirector(filteredDirectors); // Cập nhật danh sách region đã lọc
         form.resetFields();
         handleCancel();
       }
@@ -124,12 +150,15 @@ const AdminRegion: React.FC = () => {
     }
   };
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    const { birthday, ...restValues } = values;
+    const birthdayFormat = formatToDateString(new Date(birthday));
+    const dataDirector = { ...restValues, birthday: birthdayFormat };
     try{
-    const res = await APICreateRegion(values);
+    const res = await APICreateDirector(dataDirector);
     // console.log(res);
     if (res && res.status === 200) {
       message.success(res.data.error.errorMessage);
-      getAllRegion();
+      getAllDirector();
     }
     // console.log("Success:", values);
     }catch(error:any){
@@ -172,10 +201,10 @@ const AdminRegion: React.FC = () => {
 
   const showDrawer = async (uuid: string) => {
     try {
-      const res = await APIGetRegionDetail({ uuid });
+      const res = await APIGetDirectorDetail({ uuid });
       // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
       if (res && res.status === 200) {
-        setRegionDetail(res.data.data);
+        setDirectorDetail(res.data.data);
         setOpen(true);
       } else {
         message.error("Không tìm thấy thông tin chi tiết.");
@@ -214,10 +243,10 @@ const AdminRegion: React.FC = () => {
   };
   const confirm: PopconfirmProps["onConfirm"] = async (uuid: string): Promise<void> => {
     try {
-      const res = await APIDeleteRegion({ uuid, status:0});
+      const res = await APIDeleteDirector({ uuid, status:0});
       if (res && res.status === 200) {
         message.success("Đã xoá thành công.");
-        getAllRegion(); // Cập nhật lại danh sách region sau khi xoá
+        getAllDirector(); // Cập nhật lại danh sách region sau khi xoá
       } else {
         message.error("Xoá thất bại.");
       }
@@ -327,9 +356,9 @@ const AdminRegion: React.FC = () => {
         text
       ),
   });
-  const listRegionMap = listRegion.map((region, index) => ({
+  const listDirectorMap = listDirector.map((director, index) => ({
     key: index + 1,
-    ...region,
+    ...director,
   }));
   const columns: TableColumnsType<DataType> = [
     {
@@ -353,12 +382,12 @@ const AdminRegion: React.FC = () => {
     //   },
     // },
     {
-      title: "Region Name",
-      dataIndex: "regionName",
-      key: "regionName",
-      ...getColumnSearchProps("regionName"),
-      width: 100,
-      sorter: (a, b) => a.regionName.length - b.regionName.length,
+      title: "Director Name",
+      dataIndex: "directorName",
+      key: "directorName",
+      ...getColumnSearchProps("directorName"),
+      width: 50,
+      sorter: (a, b) => a.directorName.length - b.directorName.length,
       sortDirections: ["descend", "ascend"],
       render: (region: string, record: DataType) => {
         return (
@@ -372,6 +401,20 @@ const AdminRegion: React.FC = () => {
       }
     },
     {
+        title: "Birth Day",
+        dataIndex: "birthday",
+        key: "birthday",
+        ...getColumnSearchProps("birthday"),
+        width:50,
+      },
+      {
+        title: "Decription",
+        dataIndex: "description",
+        key: "description",
+        ...getColumnSearchProps("description"),
+        width:100,
+      },
+    {
       title: "Status",
       dataIndex: "status",
       key: "status",
@@ -379,12 +422,12 @@ const AdminRegion: React.FC = () => {
     },
     {
       title: "Action",
-      width:150,
+      width:50,
       render: (record) => (
         <div className="flex gap-4">
           <Popconfirm
-            title="Delete the region"
-            description="Are you sure to delete this region?"
+            title="Delete the director"
+            description="Are you sure to delete this director?"
             onConfirm={() => confirm(record.uuid)}
             okText={<>Yes</>}
             cancelText="No"
@@ -399,12 +442,12 @@ const AdminRegion: React.FC = () => {
     },
   ];
   useEffect(() => {
-    getAllRegion();
+    getAllDirector();
   }, []);
   return (
     <>
       <Button className="float-end mb-4" type="primary" onClick={showModal}>
-        Create Region
+        Create Director
       </Button>
       <Drawer
         title="Chi tiết quốc gia"
@@ -413,11 +456,13 @@ const AdminRegion: React.FC = () => {
         open={open}
         width={400}
       >
-        {regionDetail ? (
+        {directorDetail ? (
           <div>
             {/* <p><strong>UUID:</strong> {regionDetail.uuid}</p> */}
-            <p><strong>Tên Thể Loại:</strong> {regionDetail.regionName}</p>
-            <p><strong>Trạng Thái:</strong> {regionDetail.status}</p>
+            <p><strong>Tên Thể Loại:</strong> {directorDetail.directorName}</p>
+            <p><strong>Ngày sinh:</strong> {directorDetail.birthday}</p>
+            <p><strong>Mô tả:</strong> {directorDetail.description}</p>
+            <p><strong>Trạng Thái:</strong> {directorDetail.status}</p>
             {/* Thêm các thông tin khác nếu cần */}
           </div>
         ) : (
@@ -425,7 +470,7 @@ const AdminRegion: React.FC = () => {
         )}
       </Drawer>
       <Modal
-        title="Create Region Modal"
+        title="Create Director Modal"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -443,24 +488,56 @@ const AdminRegion: React.FC = () => {
           autoComplete="off"
         >
           <Form.Item<FieldType>
-            label="Region Name"
-            name="regionName"
+            label="Director Name"
+            name="directorName"
             rules={[
-              { required: true, message: "Please input your region name!" },
+              { required: true, message: "Please input your director name!" },
             ]}
           >
             <Input />
           </Form.Item>
 
+          <Form.Item<FieldType>
+                label="Ngày sinh"
+                name="birthday"
+                rules={[
+                {
+                    required: true,
+                    message: "Hãy nhập ngày sinh của bạn!",
+                },
+                ]}
+            >
+                <DatePicker
+                    placeholder="Ngày sinh"
+                    variant="filled"
+                    className="w-full"
+                />
+            </Form.Item>
+            
+            <Form.Item<FieldType>
+                    label="Mô tả"
+                    name="description"
+                    rules={[
+                    ]}
+                  >
+                    <Input.TextArea
+                        placeholder="Nhập mô tả...."
+                        autoSize={{ minRows: 2, maxRows: 6 }}
+                        maxLength={300}
+                        onChange={(e) => {
+                        // Optional: Handle text area change if needed
+                        }}
+                    />
+            </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
-              Create Region
+              Create Director
             </Button>
           </Form.Item>
         </Form>
       </Modal>
       <Modal
-        title="Update Region Name Modal"
+        title="Update Director Name Modal"
         open={isModalUpdateOpen}
         onCancel={() => setIsModalUpdateOpen(false)}
         footer ={
@@ -476,19 +553,52 @@ const AdminRegion: React.FC = () => {
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 600 }}
           initialValues={{ remember: true }}
-          onFinish={onFinishUpdateRegionName}
+          onFinish={onFinishUpdateDirectorInfor}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
           
         >
           <Form.Item
-            label="Region Name"
-            name="regionName"
-            rules={[{ required: true, message: "Please input your regionName!" }]}
+            label="Director Name"
+            name="directorName"
+            rules={[{ required: true, message: "Please input your director Name!" }]}
           >
             <Input />
           </Form.Item>
+        
+          <Form.Item<FieldType>
+                label="Ngày sinh"
+                name="birthday"
+                rules={[
+                {
+                    required: true,
+                    message: "Hãy nhập ngày sinh của bạn!",
+                },
+                ]}
+            >
+                <DatePicker
+                    placeholder="Ngày sinh"
+                    variant="filled"
+                    className="w-full"
+                />
+            </Form.Item>
 
+          <Form.Item<FieldType>
+                    label="Mô tả"
+                    name="description"
+                    rules={[
+                    ]}
+                  >
+                    <Input.TextArea
+                        placeholder="Nhập mô tả...."
+                        autoSize={{ minRows: 2, maxRows: 6 }}
+                        maxLength={300}
+                        onChange={(e) => {
+                        // Optional: Handle text area change if needed
+                        }}
+                    />
+            </Form.Item>
+          
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
               Update Region
@@ -499,7 +609,7 @@ const AdminRegion: React.FC = () => {
       <Table
 
         columns={columns}
-        dataSource={listRegionMap}
+        dataSource={listDirectorMap}
         scroll={{ x: 1000, y: 500 }}
         pagination={{
           showTotal: (total, range) => {
@@ -514,4 +624,4 @@ const AdminRegion: React.FC = () => {
   );
 };
 
-export default AdminRegion;
+export default AdminDirector;

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   GlobalOutlined,
+  IdcardOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UserOutlined,
@@ -51,6 +52,15 @@ const items: MenuItem[] = [
       </Link>
     ),
     label: "Region",
+  },
+  {
+    key: "5",
+    icon: (
+      <Link to={"/admin/director"}>
+        <IdcardOutlined />
+      </Link>
+    ),
+    label: "Director",
   },
 ];
 

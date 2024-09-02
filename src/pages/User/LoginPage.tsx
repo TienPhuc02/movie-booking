@@ -32,7 +32,7 @@ const LoginPage = ({
         handleModalLoginCancel();
         form.resetFields();
       } else {
-        message.error(res?.data.error.message);
+        message.error(res?.data.error.errorMessage);
       }
     } catch (error) {
       console.error("Failed:", error);

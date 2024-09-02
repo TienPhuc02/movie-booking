@@ -13,8 +13,14 @@ export const APIRegister = (data: {
 }) => {
   return instance.post("User/register", data);
 };
-export const APICreateGenre = (data: { genreName: string }) => {
-  return instance.post("Genre/upsert_genre", data);
+
+//Genre
+export const APICreateGenre = (data:any) => {
+  return instance.post("Genre/upsert_genre", data,{
+    headers: {
+      "Content-Type": "application/json", // Đảm bảo Content-Type đúng
+    },
+  });
 };
 export const APIGetAllGenre = (data: any) => {
   return instance.post("Genre/page_list_genre", data);
@@ -27,7 +33,17 @@ export const APIGetGenreDetail = (data: any) => {
   });
 };
 
-export const APICreateRegion = (data: { regionName: string }) => {
+export const APIDeleteGenre = (data: any) => {
+  return instance.post("Genre/update_genre_status", data, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+
+//Region
+export const APICreateRegion = (data:any) => {
   return instance.post("Region/upsert_region", data);
 };
 export const APIGetAllRegion = (data: any) => {
@@ -40,8 +56,33 @@ export const APIGetRegionDetail = (data: any) => {
     },
   });
 };
-export const APIUpdateGenre = (data: any) => {
-  return instance.post("Genre/update_genre_status", data, {
+
+export const APIDeleteRegion = (data: any) => {
+  return instance.post("Region/update_region_status", data, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+
+//Director
+export const APICreateDirector = (data:any) => {
+  return instance.post("Director/upsert_director", data);
+};
+export const APIGetAllDirector = (data: any) => {
+  return instance.post("Director/page_list_director", data);
+};
+export const APIGetDirectorDetail = (data: any) => {
+  return instance.post("Director/director_detail", data, {
+    headers: {
+      "Content-Type": "application/json", // Đảm bảo Content-Type đúng
+    },
+  });
+};
+
+export const APIDeleteDirector = (data: any) => {
+  return instance.post("Director/update_director_status", data, {
     headers: {
       "Content-Type": "application/json",
     },
