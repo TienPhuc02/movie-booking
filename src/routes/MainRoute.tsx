@@ -8,6 +8,7 @@ import AdminGenre from "../pages/Admin/Genre/AdminGenre";
 import AdminRegion from "../pages/Admin/Region/AdminRegion";
 import AdminDirector from "../pages/Admin/Director/AdminDirector";
 import AdminCast from "../pages/Admin/Cast/AdminCast";
+import ProtectRoute from "./ProtectRoute";
 
 const router = createBrowserRouter([
   {
@@ -16,7 +17,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin",
-    element: <LayoutAdmin />,
+    element: (
+      <ProtectRoute>
+        <LayoutAdmin />
+      </ProtectRoute>
+    ),
     children: [
       {
         path: "user",
@@ -32,17 +37,17 @@ const router = createBrowserRouter([
         element: <AdminGenre />,
       },
       {
-        path:"region",
+        path: "region",
         element: <AdminRegion />,
       },
       {
-        path:"director",
+        path: "director",
         element: <AdminDirector />,
       },
       {
-        path:"cast",
+        path: "cast",
         element: <AdminCast />,
-      }
+      },
     ],
   },
 ]);

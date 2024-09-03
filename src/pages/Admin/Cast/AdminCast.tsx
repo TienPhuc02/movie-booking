@@ -106,7 +106,7 @@ const AdminCast: React.FC = () => {
       return `${year}-${month}-${day}`;
     };
     const birthdayFormat = formatToDateString(birthdayObj);
-    console.log(birthdayFormat)
+    console.log(birthdayFormat);
     try {
       const res = await APICreateCast({
         uuid: castDetail?.uuid,
@@ -161,7 +161,6 @@ const AdminCast: React.FC = () => {
     const dataCast = { ...restValues, birthday: birthdayFormat };
     try {
       const res = await APICreateCast(dataCast);
-      // console.log(res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
         getAllCast();

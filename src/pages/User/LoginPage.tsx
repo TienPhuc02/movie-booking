@@ -27,10 +27,11 @@ const LoginPage = ({
       const res = (await APILogin(values)) as any;
       console.log(res);
       if (res && res?.data?.data !== null) {
-        localStorage.setItem("access_token", res.data.data.token);
         message.success("Đăng Nhập Thành Công!!");
         handleModalLoginCancel();
         form.resetFields();
+        localStorage.setItem("access_token", res.data.data.token);
+        localStorage.setItem("role", res.data.data.role);
       } else {
         message.error(res?.data.error.errorMessage);
       }
