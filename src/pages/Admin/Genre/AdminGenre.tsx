@@ -81,11 +81,11 @@ const AdminGenre: React.FC = () => {
   ) => {
     try {
       const res = await APICreateGenre({
-        uuid: genreDetail.uuid,
+        uuid: genreDetail?.uuid,
         genreName: values.genreName,
       });
       if (res && res.status === 200) {
-        message.success(res.data.error.errorMessage);
+        message.success(res?.data.error.errorMessage);
         getAllGenre();
         formUpdate.resetFields();
         handleCancelUpdate();

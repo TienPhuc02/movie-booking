@@ -23,10 +23,10 @@ import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
 import "../../../css/AdminGenre.css";
 import {
-    APICreateCast,
-    APIGetAllCast,
-    APIGetCastDetail,
-    APIDeleteCast
+  APICreateCast,
+  APIGetAllCast,
+  APIGetCastDetail,
+  APIDeleteCast,
 } from "../../../services/service.api";
 
 interface DataType {
@@ -41,9 +41,9 @@ interface DataType {
 type DataIndex = keyof DataType;
 
 type FieldType = {
-    castName: string;
-    birthday: string;
-    description: string;
+  castName: string;
+  birthday: string;
+  description: string;
 };
 
 const AdminCast: React.FC = () => {
@@ -59,16 +59,15 @@ const AdminCast: React.FC = () => {
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
 
   const showModalUpdate = async (uuid: string) => {
-
     try {
       const res = await APIGetCastDetail({ uuid });
       if (res && res.status === 200) {
         const castDetail = res.data.data;
         setCastDetail(castDetail);
-         console.log(castDetail.birthday);
+        console.log(castDetail.birthday);
         formUpdate.setFieldsValue({
           castName: castDetail.castName,
-         //birthday:directorDetail.birthday,
+          //birthday:directorDetail.birthday,
           description: castDetail.description,
         });
         setIsModalUpdateOpen(true);
@@ -97,18 +96,25 @@ const AdminCast: React.FC = () => {
   const onFinishUpdateCastInfor: FormProps<FieldType>["onFinish"] = async (
     values
   ) => {
-    // const { birthday, ...restValues } = values;
-    // const birthdayFormat = formatToDateString(new Date(birthday));
-    // const dataDirector = { ...restValues, birthday: birthdayFormat };
-    
+    const { birthday } = values;
+    const birthdayObj = new Date(birthday);
+
+    const formatToDateString = (dateObj: Date) => {
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const day = String(dateObj.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+    const birthdayFormat = formatToDateString(birthdayObj);
+    console.log(birthdayFormat)
     try {
       const res = await APICreateCast({
-        uuid: castDetail.uuid,
+        uuid: castDetail?.uuid,
         castName: values.castName,
-        birthday: values.birthday,
+        birthday: birthdayFormat,
         description: values.description,
       });
-      console.log("adasdasd", res)
+      console.log("adasdasd", res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
         getAllCast();
@@ -135,7 +141,7 @@ const AdminCast: React.FC = () => {
   const getAllCast = async (): Promise<void> => {
     try {
       const res = await APIGetAllCast({ pageSize: 10, page: 1 });
-      console.log(res.data.data)
+      console.log(res.data.data);
       if (res && res.data && res.data.data) {
         // Lọc các cast có status khác "0"
         const filteredCasts = res.data?.data?.items.filter(
@@ -153,15 +159,15 @@ const AdminCast: React.FC = () => {
     const { birthday, ...restValues } = values;
     const birthdayFormat = formatToDateString(new Date(birthday));
     const dataCast = { ...restValues, birthday: birthdayFormat };
-    try{
-    const res = await APICreateCast(dataCast);
-    // console.log(res);
-    if (res && res.status === 200) {
-      message.success(res.data.error.errorMessage);
-      getAllCast();
-    }
-    // console.log("Success:", values);
-    }catch(error:any){
+    try {
+      const res = await APICreateCast(dataCast);
+      // console.log(res);
+      if (res && res.status === 200) {
+        message.success(res.data.error.errorMessage);
+        getAllCast();
+      }
+      // console.log("Success:", values);
+    } catch (error: any) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
@@ -175,7 +181,6 @@ const AdminCast: React.FC = () => {
         message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
       }
     }
-      
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
@@ -221,11 +226,10 @@ const AdminCast: React.FC = () => {
       }
     }
   };
-  
 
   const onClose = () => {
     setOpen(false);
-    setIsModalUpdateOpen(false)
+    setIsModalUpdateOpen(false);
   };
   const handleSearch = (
     selectedKeys: string[],
@@ -241,9 +245,11 @@ const AdminCast: React.FC = () => {
     clearFilters();
     setSearchText("");
   };
-  const confirm: PopconfirmProps["onConfirm"] = async (uuid: string): Promise<void> => {
+  const confirm: PopconfirmProps["onConfirm"] = async (
+    uuid: string
+  ): Promise<void> => {
     try {
-      const res = await APIDeleteCast({ uuid, status:0});
+      const res = await APIDeleteCast({ uuid, status: 0 });
       if (res && res.status === 200) {
         message.success("Đã xoá thành công.");
         getAllCast(); // Cập nhật lại danh sách cast sau khi xoá
@@ -364,7 +370,7 @@ const AdminCast: React.FC = () => {
     {
       title: "Id",
       dataIndex: "key",
-      width:50,
+      width: 50,
     },
     // {
     //   title: "UUID",
@@ -398,31 +404,31 @@ const AdminCast: React.FC = () => {
             {cast} {/* Hiển thị tên diễn viên */}
           </div>
         );
-      }
+      },
     },
     {
-        title: "Birth Day",
-        dataIndex: "birthday",
-        key: "birthday",
-        ...getColumnSearchProps("birthday"),
-        width:50,
-      },
-      {
-        title: "Decription",
-        dataIndex: "description",
-        key: "description",
-        ...getColumnSearchProps("description"),
-        width:100,
-      },
+      title: "Birth Day",
+      dataIndex: "birthday",
+      key: "birthday",
+      ...getColumnSearchProps("birthday"),
+      width: 50,
+    },
+    {
+      title: "Decription",
+      dataIndex: "description",
+      key: "description",
+      ...getColumnSearchProps("description"),
+      width: 100,
+    },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width:50,
+      width: 50,
     },
     {
       title: "Action",
-      width:50,
+      width: 50,
       render: (record) => (
         <div className="flex gap-4">
           <Popconfirm
@@ -459,10 +465,18 @@ const AdminCast: React.FC = () => {
         {castDetail ? (
           <div>
             {/* <p><strong>UUID:</strong> {regionDetail.uuid}</p> */}
-            <p><strong>Tên Thể Loại:</strong> {castDetail.castName}</p>
-            <p><strong>Ngày sinh:</strong> {castDetail.birthday}</p>
-            <p><strong>Mô tả:</strong> {castDetail.description}</p>
-            <p><strong>Trạng Thái:</strong> {castDetail.status}</p>
+            <p>
+              <strong>Tên Thể Loại:</strong> {castDetail.castName}
+            </p>
+            <p>
+              <strong>Ngày sinh:</strong> {castDetail.birthday}
+            </p>
+            <p>
+              <strong>Mô tả:</strong> {castDetail.description}
+            </p>
+            <p>
+              <strong>Trạng Thái:</strong> {castDetail.status}
+            </p>
             {/* Thêm các thông tin khác nếu cần */}
           </div>
         ) : (
@@ -498,37 +512,32 @@ const AdminCast: React.FC = () => {
           </Form.Item>
 
           <Form.Item<FieldType>
-                label="Ngày sinh"
-                name="birthday"
-                rules={[
-                {
-                    required: true,
-                    message: "Please input your birthday!",
-                },
-                ]}
-            >
-                <DatePicker
-                    placeholder="Ngày sinh"
-                    variant="filled"
-                    className="w-full"
-                />
-            </Form.Item>
-            
-            <Form.Item<FieldType>
-                    label="Mô tả"
-                    name="description"
-                    rules={[
-                    ]}
-                  >
-                    <Input.TextArea
-                        placeholder="Nhập mô tả...."
-                        autoSize={{ minRows: 2, maxRows: 6 }}
-                        maxLength={300}
-                        onChange={(e) => {
-                        // Optional: Handle text area change if needed
-                        }}
-                    />
-            </Form.Item>
+            label="Ngày sinh"
+            name="birthday"
+            rules={[
+              {
+                required: true,
+                message: "Please input your birthday!",
+              },
+            ]}
+          >
+            <DatePicker
+              placeholder="Ngày sinh"
+              variant="filled"
+              className="w-full"
+            />
+          </Form.Item>
+
+          <Form.Item<FieldType> label="Mô tả" name="description" rules={[]}>
+            <Input.TextArea
+              placeholder="Nhập mô tả...."
+              autoSize={{ minRows: 2, maxRows: 6 }}
+              maxLength={300}
+              onChange={(e) => {
+                // Optional: Handle text area change if needed
+              }}
+            />
+          </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
               Create Cast
@@ -540,10 +549,8 @@ const AdminCast: React.FC = () => {
         title="Update Cast Name Modal"
         open={isModalUpdateOpen}
         onCancel={() => setIsModalUpdateOpen(false)}
-        footer ={
-          <Button onClick={() => setIsModalUpdateOpen(false)}>
-             Cancel
-          </Button>
+        footer={
+          <Button onClick={() => setIsModalUpdateOpen(false)}>Cancel</Button>
         }
       >
         <Form
@@ -556,49 +563,45 @@ const AdminCast: React.FC = () => {
           onFinish={onFinishUpdateCastInfor}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
-          
         >
           <Form.Item
             label="Cast Name"
             name="castName"
-            rules={[{ required: true, message: "Please input your cast Name!" }]}
+            rules={[
+              { required: true, message: "Please input your cast Name!" },
+            ]}
           >
             <Input />
           </Form.Item>
-        
-          <Form.Item<FieldType>
-                label="Ngày sinh"
-                name="birthday"
-                rules={[
-                {
-                    required: true,
-                    message: "Hãy nhập ngày sinh của bạn!",
-                },
-                ]}
-            >
-                <DatePicker
-                    placeholder="Ngày sinh"
-                    variant="filled"
-                    className="w-full"
-                />
-            </Form.Item>
 
           <Form.Item<FieldType>
-                    label="Mô tả"
-                    name="description"
-                    rules={[
-                    ]}
-                  >
-                    <Input.TextArea
-                        placeholder="Nhập mô tả...."
-                        autoSize={{ minRows: 2, maxRows: 6 }}
-                        maxLength={300}
-                        onChange={(e) => {
-                        // Optional: Handle text area change if needed
-                        }}
-                    />
-            </Form.Item>
-          
+            label="Ngày sinh"
+            name="birthday"
+            rules={[
+              {
+                required: true,
+                message: "Hãy nhập ngày sinh của bạn!",
+              },
+            ]}
+          >
+            <DatePicker
+              placeholder="Ngày sinh"
+              variant="filled"
+              className="w-full"
+            />
+          </Form.Item>
+
+          <Form.Item<FieldType> label="Mô tả" name="description" rules={[]}>
+            <Input.TextArea
+              placeholder="Nhập mô tả...."
+              autoSize={{ minRows: 2, maxRows: 6 }}
+              maxLength={300}
+              onChange={(e) => {
+                // Optional: Handle text area change if needed
+              }}
+            />
+          </Form.Item>
+
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
               Update Cast
@@ -607,7 +610,6 @@ const AdminCast: React.FC = () => {
         </Form>
       </Modal>
       <Table
-
         columns={columns}
         dataSource={listCastMap}
         scroll={{ x: 1000, y: 500 }}
