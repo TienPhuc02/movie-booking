@@ -104,7 +104,7 @@ const AdminCast: React.FC = () => {
     try {
       const res = await APICreateCast({
         uuid: castDetail.uuid,
-        regionName: values.castName,
+        castName: values.castName,
         birthday: values.birthday,
         description: values.description,
       });
@@ -137,9 +137,9 @@ const AdminCast: React.FC = () => {
       const res = await APIGetAllCast({ pageSize: 10, page: 1 });
       console.log(res.data.data)
       if (res && res.data && res.data.data) {
-        // Lọc các region có status khác "0"
+        // Lọc các cast có status khác "0"
         const filteredCasts = res.data?.data?.items.filter(
-          (region: DataType) => region.status !== 0
+          (cast: DataType) => cast.status !== 0
         );
         setListCast(filteredCasts); // Cập nhật danh sách cast đã lọc
         form.resetFields();
@@ -601,7 +601,7 @@ const AdminCast: React.FC = () => {
           
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
-              Update Region
+              Update Cast
             </Button>
           </Form.Item>
         </Form>

@@ -104,7 +104,7 @@ const AdminDirector: React.FC = () => {
     try {
       const res = await APICreateDirector({
         uuid: directorDetail.uuid,
-        regionName: values.directorName,
+        directorName: values.directorName,
         birthday: values.birthday,
         description: values.description,
       });
@@ -139,14 +139,14 @@ const AdminDirector: React.FC = () => {
       if (res && res.data && res.data.data) {
         // Lọc các region có status khác "0"
         const filteredDirectors = res.data?.data?.items.filter(
-          (region: DataType) => region.status !== 0
+          (director: DataType) => director.status !== 0
         );
-        setListDirector(filteredDirectors); // Cập nhật danh sách region đã lọc
+        setListDirector(filteredDirectors); // Cập nhật danh sách director đã lọc
         form.resetFields();
         handleCancel();
       }
     } catch (error) {
-      message.error("Đã xảy ra lỗi khi lấy danh sách thể loại.");
+      message.error("Đã xảy ra lỗi khi lấy danh sách đạo diễn.");
     }
   };
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
@@ -246,7 +246,7 @@ const AdminDirector: React.FC = () => {
       const res = await APIDeleteDirector({ uuid, status:0});
       if (res && res.status === 200) {
         message.success("Đã xoá thành công.");
-        getAllDirector(); // Cập nhật lại danh sách region sau khi xoá
+        getAllDirector(); // Cập nhật lại danh sách director sau khi xoá
       } else {
         message.error("Xoá thất bại.");
       }
@@ -389,13 +389,13 @@ const AdminDirector: React.FC = () => {
       width: 50,
       sorter: (a, b) => a.directorName.length - b.directorName.length,
       sortDirections: ["descend", "ascend"],
-      render: (region: string, record: DataType) => {
+      render: (director: string, record: DataType) => {
         return (
           <div
             className="hover:text-[#4096ff] cursor-pointer"
             onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
           >
-            {region} {/* Hiển thị tên quốc gia */}
+            {director} {/* Hiển thị tên quốc gia */}
           </div>
         );
       }
@@ -601,7 +601,7 @@ const AdminDirector: React.FC = () => {
           
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
-              Update Region
+              Update Director
             </Button>
           </Form.Item>
         </Form>
