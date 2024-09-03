@@ -88,3 +88,27 @@ export const APIDeleteDirector = (data: any) => {
     },
   });
 };
+
+
+//Cast
+export const APICreateCast = (data:any) => {
+  return instance.post("Cast/upsert_cast", data);
+};
+export const APIGetAllCast = (data: any) => {
+  return instance.post("Cast/page_list_cast", data);
+};
+export const APIGetCastDetail = (data: any) => {
+  return instance.post("Cast/cast_detail", data, {
+    headers: {
+      "Content-Type": "application/json", // Đảm bảo Content-Type đúng
+    },
+  });
+};
+
+export const APIDeleteCast = (data: any) => {
+  return instance.post("Cast/update_cast_status", data, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};

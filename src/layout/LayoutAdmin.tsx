@@ -5,6 +5,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UserOutlined,
+  UserSwitchOutlined,
   VideoCameraAddOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
@@ -61,6 +62,15 @@ const items: MenuItem[] = [
       </Link>
     ),
     label: "Director",
+  },
+  {
+    key: "6",
+    icon: (
+      <Link to={"/admin/cast"}>
+          <UserSwitchOutlined />
+      </Link>
+    ),
+    label: "Cast",
   },
 ];
 
