@@ -31,7 +31,7 @@ const LoginPage = ({
         handleModalLoginCancel();
         form.resetFields();
         localStorage.setItem("access_token", res.data.data.token);
-        localStorage.setItem("role", res.data.data.role);
+        // localStorage.setItem("role", res.data.data.role);
       } else {
         message.error(res?.data.error.errorMessage);
       }

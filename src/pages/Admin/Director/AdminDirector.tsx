@@ -59,7 +59,6 @@ const AdminDirector: React.FC = () => {
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
 
   const showModalUpdate = async (uuid: string) => {
-
     try {
       const res = await APIGetDirectorDetail({ uuid });
       if (res && res.status === 200) {
@@ -97,15 +96,14 @@ const AdminDirector: React.FC = () => {
   const onFinishUpdateDirectorInfor: FormProps<FieldType>["onFinish"] = async (
     values
   ) => {
-    // const { birthday, ...restValues } = values;
-    // const birthdayFormat = formatToDateString(new Date(birthday));
-    // const dataDirector = { ...restValues, birthday: birthdayFormat };
-    
+    const { birthday } = values;
+    const birthdayObj = new Date(birthday);
+    const birthdayFormat = formatToDateString(birthdayObj);
     try {
       const res = await APICreateDirector({
         uuid: directorDetail.uuid,
         directorName: values.directorName,
-        birthday: values.birthday,
+        birthday: birthdayFormat,
         description: values.description,
       });
       console.log("adasdasd", res)

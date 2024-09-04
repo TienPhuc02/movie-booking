@@ -28,7 +28,7 @@ import {
   APIGetCastDetail,
   APIDeleteCast,
 } from "../../../services/service.api";
-
+import moment from "moment";
 interface DataType {
   id: string;
   uuid: string;
@@ -64,10 +64,11 @@ const AdminCast: React.FC = () => {
       if (res && res.status === 200) {
         const castDetail = res.data.data;
         setCastDetail(castDetail);
-        console.log(castDetail.birthday);
+        const birthdayFormat = 'YYYY-MM-DD';
+        console.log(moment(castDetail.birthday, birthdayFormat));
         formUpdate.setFieldsValue({
           castName: castDetail.castName,
-          //birthday:directorDetail.birthday,
+          birthday: castDetail.birthday ? moment(castDetail.birthday, birthdayFormat) : null,
           description: castDetail.description,
         });
         setIsModalUpdateOpen(true);
@@ -98,15 +99,8 @@ const AdminCast: React.FC = () => {
   ) => {
     const { birthday } = values;
     const birthdayObj = new Date(birthday);
-
-    const formatToDateString = (dateObj: Date) => {
-      const year = dateObj.getFullYear();
-      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-      const day = String(dateObj.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
-    };
     const birthdayFormat = formatToDateString(birthdayObj);
-    console.log(birthdayFormat);
+    // console.log(birthdayFormat);
     try {
       const res = await APICreateCast({
         uuid: castDetail?.uuid,
@@ -587,6 +581,7 @@ const AdminCast: React.FC = () => {
               placeholder="Ngày sinh"
               variant="filled"
               className="w-full"
+              
             />
           </Form.Item>
 
