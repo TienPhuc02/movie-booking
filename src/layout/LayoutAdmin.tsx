@@ -43,7 +43,7 @@ const items: MenuItem[] = [
         <VideoCameraAddOutlined />
       </Link>
     ),
-    label: "Genre",
+    label: "Quản lý thể loại",
   },
   {
     key: "4",
@@ -52,7 +52,7 @@ const items: MenuItem[] = [
         <GlobalOutlined  />
       </Link>
     ),
-    label: "Region",
+    label: "Quản lý quốc gia",
   },
   {
     key: "5",
@@ -61,7 +61,7 @@ const items: MenuItem[] = [
         <IdcardOutlined />
       </Link>
     ),
-    label: "Director",
+    label: "Quản lý đạo diễn",
   },
   {
     key: "6",
@@ -70,7 +70,7 @@ const items: MenuItem[] = [
           <UserSwitchOutlined />
       </Link>
     ),
-    label: "Cast",
+    label: "Quản lý diễn viên",
   },
 ];
 

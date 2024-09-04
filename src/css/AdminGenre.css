@@ -4,3 +4,12 @@
   color: #fff;
   background: #ccc;
 }
+
+.truncate-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Number of lines to show */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}

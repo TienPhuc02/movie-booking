@@ -3,11 +3,13 @@ import type { FormProps, RadioChangeEvent } from "antd";
 import { Button, Form, Input } from "antd";
 import { useState } from "react";
 import { APIRegister } from "../../services/service.api";
+
 type PropRegisterPage = {
   isModalRegisterOpen: boolean;
   handleModalRegisterCancel: () => void;
   showModalLogin: () => void;
 };
+
 type FieldType = {
   email: string;
   fullname: string;
@@ -17,6 +19,7 @@ type FieldType = {
   password: string;
   password2: string;
 };
+
 const RegisterPage = ({
   isModalRegisterOpen,
   handleModalRegisterCancel,
@@ -24,10 +27,21 @@ const RegisterPage = ({
 }: PropRegisterPage) => {
   const [value, setValue] = useState(1);
   const [form] = Form.useForm();
+
   const onChange = (e: RadioChangeEvent) => {
     console.log("radio checked", e.target.value);
     setValue(e.target.value);
   };
+
+  const handleFullnameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    
+    // Chỉ xử lý khi người dùng dừng nhập
+    const formattedValue = inputValue.replace(/\s{2,}/g, ' ');
+    
+    form.setFieldsValue({ fullname: formattedValue });
+  };
+
   const onFinish = async (values: FieldType) => {
     const { birthday, ...restValues } = values;
 
@@ -39,6 +53,7 @@ const RegisterPage = ({
       const day = String(dateObj.getDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
     };
+
     const birthdayFormat = formatToDateString(birthdayObj);
     const dataRegister = {
       ...restValues,
@@ -71,11 +86,13 @@ const RegisterPage = ({
       }
     }
   };
+
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
     errorInfo
   ) => {
     console.log("Failed:", errorInfo);
   };
+
   return (
     <div>
       <Modal
@@ -137,12 +154,15 @@ const RegisterPage = ({
                         message: "Xin hãy nhập họ và tên bạn!",
                       },
                       {
-                        pattern: /^[a-zA-Z]+$/,
+                        pattern: /^[\p{L}\s]+$/u,
                         message: "Họ tên chỉ được dùng ký tự!",
                       },
                     ]}
                   >
-                    <Input placeholder="Nhập Họ Tên...." />
+                    <Input
+                      placeholder="Nhập Họ Tên...."
+                      onChange={handleFullnameChange}
+                    />
                   </Form.Item>
                 </Col>
               </Row>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { SearchOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
 import type {
   FormProps,
   InputRef,
@@ -197,28 +197,28 @@ const AdminCast: React.FC = () => {
     setIsModalUpdateOpen(false);
   };
 
-  const showDrawer = async (uuid: string) => {
-    try {
-      const res = await APIGetCastDetail({ uuid });
-      // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
-      if (res && res.status === 200) {
-        setCastDetail(res.data.data);
-        setOpen(true);
-      } else {
-        message.error("Không tìm thấy thông tin chi tiết.");
-      }
-    } catch (error: any) {
-      if (error.response) {
-        console.error(error.response.data);
-        const errorMessage =
-          error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
-        message.error(errorMessage);
-      } else {
-        message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
-      }
-    }
-  };
+  // const showDrawer = async (uuid: string) => {
+  //   try {
+  //     const res = await APIGetCastDetail({ uuid });
+  //     // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
+  //     if (res && res.status === 200) {
+  //       setCastDetail(res.data.data);
+  //       setOpen(true);
+  //     } else {
+  //       message.error("Không tìm thấy thông tin chi tiết.");
+  //     }
+  //   } catch (error: any) {
+  //     if (error.response) {
+  //       console.error(error.response.data);
+  //       const errorMessage =
+  //         error.response.data?.error?.errorMessage ||
+  //         "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
+  //       message.error(errorMessage);
+  //     } else {
+  //       message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
+  //     }
+  //   }
+  // };
 
   const onClose = () => {
     setOpen(false);
@@ -278,7 +278,7 @@ const AdminCast: React.FC = () => {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Tìm kiếm tên diễn viên`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -298,14 +298,14 @@ const AdminCast: React.FC = () => {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            Tìm kiếm
           </Button>
           <Button
             onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            Đặt lại
           </Button>
           <Button
             type="link"
@@ -316,7 +316,7 @@ const AdminCast: React.FC = () => {
               setSearchedColumn(dataIndex);
             }}
           >
-            Filter
+            Lọc
           </Button>
           <Button
             type="link"
@@ -325,7 +325,7 @@ const AdminCast: React.FC = () => {
               close();
             }}
           >
-            close
+            Đóng
           </Button>
         </Space>
       </div>
@@ -381,7 +381,7 @@ const AdminCast: React.FC = () => {
     //   },
     // },
     {
-      title: "Cast Name",
+      title: "Tên diễn viên",
       dataIndex: "castName",
       key: "castName",
       ...getColumnSearchProps("castName"),
@@ -391,8 +391,8 @@ const AdminCast: React.FC = () => {
       render: (cast: string, record: DataType) => {
         return (
           <div
-            className="hover:text-[#4096ff] cursor-pointer"
-            onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
+            // className="hover:text-[#4096ff] cursor-pointer"
+            // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
           >
             {cast} {/* Hiển thị tên diễn viên */}
           </div>
@@ -400,41 +400,49 @@ const AdminCast: React.FC = () => {
       },
     },
     {
-      title: "Birth Day",
+      title: "Ngày sinh",
       dataIndex: "birthday",
       key: "birthday",
-      ...getColumnSearchProps("birthday"),
+      // ...getColumnSearchProps("birthday"),
       width: 50,
     },
     {
-      title: "Decription",
+      title: "Mô tả",
       dataIndex: "description",
       key: "description",
-      ...getColumnSearchProps("description"),
+      // ...getColumnSearchProps("description"),
       width: 100,
+      render: (description: string) => (
+        <div className="truncate-description">{description}</div>
+      ),
     },
+    // {
+    //   title: "Status",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   width: 50,
+    // },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      width: 50,
-    },
-    {
-      title: "Action",
+      title: "Hành động",
       width: 50,
       render: (record) => (
         <div className="flex gap-4">
           <Popconfirm
-            title="Delete the cast"
-            description="Are you sure to delete this cast?"
+            title="Xoá diễn viên"
+            description="Bạn muốn xoá diễn viên này?"
             onConfirm={() => confirm(record.uuid)}
-            okText={<>Yes</>}
-            cancelText="No"
+            okText={<>Có</>}
+            cancelText="Không"
           >
-            <Button danger>Delete</Button>
+            <Button danger><DeleteOutlined /></Button>
           </Popconfirm>
-          <Button type="text" onClick={() => showModalUpdate(record.uuid)}>
-            Update
+          <Button 
+          type="text" 
+          className="bg-blue-700 text-white"
+          
+          onClick={() => showModalUpdate(record.uuid)}>
+
+            <EditOutlined />
           </Button>
         </div>
       ),
@@ -446,9 +454,9 @@ const AdminCast: React.FC = () => {
   return (
     <>
       <Button className="float-end mb-4" type="primary" onClick={showModal}>
-        Create Cast
+        Thêm mới diễn viên
       </Button>
-      <Drawer
+      {/* <Drawer
         title="Chi tiết quốc gia"
         placement="right"
         onClose={onClose}
@@ -457,7 +465,7 @@ const AdminCast: React.FC = () => {
       >
         {castDetail ? (
           <div>
-            {/* <p><strong>UUID:</strong> {regionDetail.uuid}</p> */}
+            <p><strong>UUID:</strong> {regionDetail.uuid}</p>
             <p>
               <strong>Tên Thể Loại:</strong> {castDetail.castName}
             </p>
@@ -470,14 +478,14 @@ const AdminCast: React.FC = () => {
             <p>
               <strong>Trạng Thái:</strong> {castDetail.status}
             </p>
-            {/* Thêm các thông tin khác nếu cần */}
+            Thêm các thông tin khác nếu cần
           </div>
         ) : (
           <p>Không có thông tin chi tiết để hiển thị.</p>
         )}
-      </Drawer>
+      </Drawer> */}
       <Modal
-        title="Create Cast Modal"
+        title="Thêm mới diễn viên"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -495,10 +503,10 @@ const AdminCast: React.FC = () => {
           autoComplete="off"
         >
           <Form.Item<FieldType>
-            label="Cast Name"
+            label="Tên diên viên"
             name="castName"
             rules={[
-              { required: true, message: "Please input your cast name!" },
+              { required: true, message: "Hãy nhập tên diễn viên!" },
             ]}
           >
             <Input />
@@ -510,7 +518,7 @@ const AdminCast: React.FC = () => {
             rules={[
               {
                 required: true,
-                message: "Please input your birthday!",
+                message: "Hãy nhập ngày sinh của bạn!",
               },
             ]}
           >
@@ -525,7 +533,6 @@ const AdminCast: React.FC = () => {
             <Input.TextArea
               placeholder="Nhập mô tả...."
               autoSize={{ minRows: 2, maxRows: 6 }}
-              maxLength={300}
               onChange={(e) => {
                 // Optional: Handle text area change if needed
               }}
@@ -533,17 +540,17 @@ const AdminCast: React.FC = () => {
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
-              Create Cast
+              Thêm mới
             </Button>
           </Form.Item>
         </Form>
       </Modal>
       <Modal
-        title="Update Cast Name Modal"
+        title="Cập nhật diễn viên"
         open={isModalUpdateOpen}
         onCancel={() => setIsModalUpdateOpen(false)}
         footer={
-          <Button onClick={() => setIsModalUpdateOpen(false)}>Cancel</Button>
+          <Button onClick={() => setIsModalUpdateOpen(false)}>Đóng</Button>
         }
       >
         <Form
@@ -558,10 +565,10 @@ const AdminCast: React.FC = () => {
           autoComplete="off"
         >
           <Form.Item
-            label="Cast Name"
+            label="Tên diễn viên"
             name="castName"
             rules={[
-              { required: true, message: "Please input your cast Name!" },
+              { required: true, message: "Hãy nhập tên diễn viên!" },
             ]}
           >
             <Input />
@@ -589,7 +596,6 @@ const AdminCast: React.FC = () => {
             <Input.TextArea
               placeholder="Nhập mô tả...."
               autoSize={{ minRows: 2, maxRows: 6 }}
-              maxLength={300}
               onChange={(e) => {
                 // Optional: Handle text area change if needed
               }}
@@ -598,7 +604,7 @@ const AdminCast: React.FC = () => {
 
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
-              Update Cast
+              Cập nhật
             </Button>
           </Form.Item>
         </Form>

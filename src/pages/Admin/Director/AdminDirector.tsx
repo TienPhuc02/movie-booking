@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { SearchOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
 import type {
   FormProps,
   InputRef,
@@ -197,28 +197,28 @@ const AdminDirector: React.FC = () => {
     setIsModalUpdateOpen(false);
   };
 
-  const showDrawer = async (uuid: string) => {
-    try {
-      const res = await APIGetDirectorDetail({ uuid });
-      // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
-      if (res && res.status === 200) {
-        setDirectorDetail(res.data.data);
-        setOpen(true);
-      } else {
-        message.error("Không tìm thấy thông tin chi tiết.");
-      }
-    } catch (error: any) {
-      if (error.response) {
-        console.error(error.response.data);
-        const errorMessage =
-          error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
-        message.error(errorMessage);
-      } else {
-        message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
-      }
-    }
-  };
+  // const showDrawer = async (uuid: string) => {
+  //   try {
+  //     const res = await APIGetDirectorDetail({ uuid });
+  //     // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
+  //     if (res && res.status === 200) {
+  //       setDirectorDetail(res.data.data);
+  //       setOpen(true);
+  //     } else {
+  //       message.error("Không tìm thấy thông tin chi tiết.");
+  //     }
+  //   } catch (error: any) {
+  //     if (error.response) {
+  //       console.error(error.response.data);
+  //       const errorMessage =
+  //         error.response.data?.error?.errorMessage ||
+  //         "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
+  //       message.error(errorMessage);
+  //     } else {
+  //       message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
+  //     }
+  //   }
+  // };
   
 
   const onClose = () => {
@@ -277,7 +277,7 @@ const AdminDirector: React.FC = () => {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Tìm kiếm đạo diễn`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -297,14 +297,14 @@ const AdminDirector: React.FC = () => {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            Tìm kiếm
           </Button>
           <Button
             onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            Đặt lại
           </Button>
           <Button
             type="link"
@@ -315,7 +315,7 @@ const AdminDirector: React.FC = () => {
               setSearchedColumn(dataIndex);
             }}
           >
-            Filter
+            Lọc
           </Button>
           <Button
             type="link"
@@ -324,7 +324,7 @@ const AdminDirector: React.FC = () => {
               close();
             }}
           >
-            close
+            Đóng
           </Button>
         </Space>
       </div>
@@ -380,7 +380,7 @@ const AdminDirector: React.FC = () => {
     //   },
     // },
     {
-      title: "Director Name",
+      title: "Tên đạo diễn",
       dataIndex: "directorName",
       key: "directorName",
       ...getColumnSearchProps("directorName"),
@@ -390,8 +390,8 @@ const AdminDirector: React.FC = () => {
       render: (director: string, record: DataType) => {
         return (
           <div
-            className="hover:text-[#4096ff] cursor-pointer"
-            onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
+            // className="hover:text-[#4096ff] cursor-pointer"
+            // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
           >
             {director} {/* Hiển thị tên quốc gia */}
           </div>
@@ -399,41 +399,49 @@ const AdminDirector: React.FC = () => {
       }
     },
     {
-        title: "Birth Day",
+        title: "Ngày sinh",
         dataIndex: "birthday",
         key: "birthday",
-        ...getColumnSearchProps("birthday"),
+        // ...getColumnSearchProps("birthday"),
         width:50,
       },
       {
-        title: "Decription",
+        title: "Mô tả",
         dataIndex: "description",
         key: "description",
-        ...getColumnSearchProps("description"),
+        // ...getColumnSearchProps("description"),
         width:100,
+        render: (description: string) => (
+          <div className="truncate-description">{description}</div>
+        ),
       },
+    // {
+    //   title: "Status",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   width:50,
+    // },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      width:50,
-    },
-    {
-      title: "Action",
+      title: "Hành động",
       width:50,
       render: (record) => (
         <div className="flex gap-4">
           <Popconfirm
-            title="Delete the director"
-            description="Are you sure to delete this director?"
+            title="Xoá đạo diễn"
+            description="Bạn muốn xoá đạo diễn này?"
             onConfirm={() => confirm(record.uuid)}
-            okText={<>Yes</>}
-            cancelText="No"
+            okText={<>Có</>}
+            cancelText="Không"
           >
-            <Button danger>Delete</Button>
+            <Button danger><DeleteOutlined /></Button>
           </Popconfirm>
-          <Button type="text" onClick={() => showModalUpdate(record.uuid)}>
-            Update
+          <Button 
+          type="text" 
+          className="bg-blue-700 text-white"
+          
+          onClick={() => showModalUpdate(record.uuid)}>
+
+            <EditOutlined />
           </Button>
         </div>
       ),
@@ -445,9 +453,9 @@ const AdminDirector: React.FC = () => {
   return (
     <>
       <Button className="float-end mb-4" type="primary" onClick={showModal}>
-        Create Director
+        Thêm mới đạo diễn
       </Button>
-      <Drawer
+      {/* <Drawer
         title="Chi tiết quốc gia"
         placement="right"
         onClose={onClose}
@@ -456,19 +464,19 @@ const AdminDirector: React.FC = () => {
       >
         {directorDetail ? (
           <div>
-            {/* <p><strong>UUID:</strong> {regionDetail.uuid}</p> */}
+            <p><strong>UUID:</strong> {directorDetail.uuid}</p>
             <p><strong>Tên Thể Loại:</strong> {directorDetail.directorName}</p>
             <p><strong>Ngày sinh:</strong> {directorDetail.birthday}</p>
             <p><strong>Mô tả:</strong> {directorDetail.description}</p>
             <p><strong>Trạng Thái:</strong> {directorDetail.status}</p>
-            {/* Thêm các thông tin khác nếu cần */}
+            Thêm các thông tin khác nếu cần
           </div>
         ) : (
           <p>Không có thông tin chi tiết để hiển thị.</p>
         )}
-      </Drawer>
+      </Drawer> */}
       <Modal
-        title="Create Director Modal"
+        title="Thêm mới đạo diễn"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -486,10 +494,10 @@ const AdminDirector: React.FC = () => {
           autoComplete="off"
         >
           <Form.Item<FieldType>
-            label="Director Name"
+            label="Tên đạo diễn"
             name="directorName"
             rules={[
-              { required: true, message: "Please input your director name!" },
+              { required: true, message: "Hãy nhập tên đạo diễn!" },
             ]}
           >
             <Input />
@@ -521,7 +529,6 @@ const AdminDirector: React.FC = () => {
                     <Input.TextArea
                         placeholder="Nhập mô tả...."
                         autoSize={{ minRows: 2, maxRows: 6 }}
-                        maxLength={300}
                         onChange={(e) => {
                         // Optional: Handle text area change if needed
                         }}
@@ -529,18 +536,18 @@ const AdminDirector: React.FC = () => {
             </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
-              Create Director
+              Thêm mới
             </Button>
           </Form.Item>
         </Form>
       </Modal>
       <Modal
-        title="Update Director Name Modal"
+        title="Cập nhật đạo diễn"
         open={isModalUpdateOpen}
         onCancel={() => setIsModalUpdateOpen(false)}
         footer ={
           <Button onClick={() => setIsModalUpdateOpen(false)}>
-             Cancel
+             Đóng
           </Button>
         }
       >
@@ -557,9 +564,9 @@ const AdminDirector: React.FC = () => {
           
         >
           <Form.Item
-            label="Director Name"
+            label="Tên đạo diễn"
             name="directorName"
-            rules={[{ required: true, message: "Please input your director Name!" }]}
+            rules={[{ required: true, message: "Hãy nhập tên đạo diễn!" }]}
           >
             <Input />
           </Form.Item>
@@ -590,7 +597,6 @@ const AdminDirector: React.FC = () => {
                     <Input.TextArea
                         placeholder="Nhập mô tả...."
                         autoSize={{ minRows: 2, maxRows: 6 }}
-                        maxLength={300}
                         onChange={(e) => {
                         // Optional: Handle text area change if needed
                         }}
@@ -599,7 +605,7 @@ const AdminDirector: React.FC = () => {
           
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
-              Update Director
+              Cập nhật
             </Button>
           </Form.Item>
         </Form>

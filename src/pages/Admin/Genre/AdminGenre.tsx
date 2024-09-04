@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { SearchOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
 import type {
   FormProps,
   InputRef,
@@ -168,28 +168,28 @@ const AdminGenre: React.FC = () => {
     setIsModalUpdateOpen(false);
   };
 
-  const showDrawer = async (uuid: string) => {
-    try {
-      const res = await APIGetGenreDetail({ uuid });
-      // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
-      if (res && res.status === 200) {
-        setGenreDetail(res.data.data);
-        setOpen(true);
-      } else {
-        message.error("Không tìm thấy thông tin chi tiết.");
-      }
-    } catch (error: any) {
-      if (error.response) {
-        console.error(error.response.data);
-        const errorMessage =
-          error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
-        message.error(errorMessage);
-      } else {
-        message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
-      }
-    }
-  };
+  // const showDrawer = async (uuid: string) => {
+  //   try {
+  //     const res = await APIGetGenreDetail({ uuid });
+  //     // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
+  //     if (res && res.status === 200) {
+  //       setGenreDetail(res.data.data);
+  //       setOpen(true);
+  //     } else {
+  //       message.error("Không tìm thấy thông tin chi tiết.");
+  //     }
+  //   } catch (error: any) {
+  //     if (error.response) {
+  //       console.error(error.response.data);
+  //       const errorMessage =
+  //         error.response.data?.error?.errorMessage ||
+  //         "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
+  //       message.error(errorMessage);
+  //     } else {
+  //       message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
+  //     }
+  //   }
+  // };
 
   const onClose = () => {
     setOpen(false);
@@ -251,7 +251,7 @@ const AdminGenre: React.FC = () => {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Tìm kiếm thê loại`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -271,14 +271,14 @@ const AdminGenre: React.FC = () => {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            Tìm kiếm
           </Button>
           <Button
             onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            Đặt lại
           </Button>
           <Button
             type="link"
@@ -289,7 +289,7 @@ const AdminGenre: React.FC = () => {
               setSearchedColumn(dataIndex);
             }}
           >
-            Filter
+            Lọc
           </Button>
           <Button
             type="link"
@@ -298,7 +298,7 @@ const AdminGenre: React.FC = () => {
               close();
             }}
           >
-            close
+            Đóng
           </Button>
         </Space>
       </div>
@@ -354,7 +354,7 @@ const AdminGenre: React.FC = () => {
     //   },
     // },
     {
-      title: "Genre Name",
+      title: "Tên thể loại",
       dataIndex: "genreName",
       key: "genreName",
 
@@ -365,37 +365,42 @@ const AdminGenre: React.FC = () => {
       render: (genre: string, record: DataType) => {
         return (
           <div
-            className="hover:text-[#4096ff] cursor-pointer"
-            onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
+            // className="hover:text-[#4096ff] cursor-pointer"
+            // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
           >
             {genre} {/* Hiển thị tên quốc gia */}
           </div>
         );
       }
     },
+    // {
+    //   title: "Status",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   width: 50,
+    // },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
+      title: "Hành động",
       width: 50,
-    },
-    {
-      title: "Action",
-      width: 150,
       render: (record) => (
         <div className="flex gap-4">
           <Popconfirm
-            title="Delete the genre"
-            description="Are you sure to delete this genre?"
+            title="Xoá thể loại"
+            description="Bạn chắc chắn muốn xoá thể loại này?"
             onConfirm={() => confirm(record.uuid)}
             
-            okText={<>Yes</>}
-            cancelText="No"
+            okText={<>Có</>}
+            cancelText="Không"
           >
-            <Button danger>Delete</Button>
+            <Button danger><DeleteOutlined /></Button>
           </Popconfirm>
-          <Button type="text" onClick={() => showModalUpdate(record.uuid)}>
-            Update
+          <Button 
+          type="text" 
+          className="bg-blue-700 text-white"
+          
+          onClick={() => showModalUpdate(record.uuid)}>
+
+            <EditOutlined />
           </Button>
         </div>
       ),
@@ -407,9 +412,9 @@ const AdminGenre: React.FC = () => {
   return (
     <>
       <Button className="float-end mb-4" type="primary" onClick={showModal}>
-        Create Genre
+        Thêm mới thể loại
       </Button>
-      <Drawer
+      {/* <Drawer
         title="Chi tiết thể loại phim"
         placement="right"
         onClose={onClose}
@@ -418,9 +423,9 @@ const AdminGenre: React.FC = () => {
       >
         {genreDetail ? (
           <div>
-            {/* <p>
+            <p>
               <strong>UUID:</strong> {genreDetail.uuid}
-            </p> */}
+            </p>
             <p>
               <strong>Tên Thể Loại:</strong> {genreDetail.genreName}
             </p>
@@ -431,9 +436,9 @@ const AdminGenre: React.FC = () => {
         ) : (
           <p>Không có thông tin chi tiết để hiển thị.</p>
         )}
-      </Drawer>
+      </Drawer> */}
       <Modal
-        title="Create Genre Modal"
+        title="Thêm mới thể loại"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -451,10 +456,10 @@ const AdminGenre: React.FC = () => {
           autoComplete="off"
         >
           <Form.Item<FieldType>
-            label="Genre Name"
+            label="Tên thể loại"
             name="genreName"
             rules={[
-              { required: true, message: "Please input your genreName!" },
+              { required: true, message: "Nhập tên thể loại!" },
             ]}
           >
             <Input />
@@ -462,18 +467,18 @@ const AdminGenre: React.FC = () => {
 
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
-              Create Genre
+              Thêm mới
             </Button>
           </Form.Item>
         </Form>
       </Modal>
       <Modal
-        title="Update Genre Name Modal"
+        title="Cập nhật thể loại"
         open={isModalUpdateOpen}
         onCancel={() => setIsModalUpdateOpen(false)}
         footer ={
           <Button onClick={() => setIsModalUpdateOpen(false)}>
-             Cancel
+             Đóng
           </Button>
         }
       >
@@ -489,16 +494,16 @@ const AdminGenre: React.FC = () => {
           autoComplete="off"
         >
           <Form.Item
-            label="Genre Name"
+            label="Tên thể loại"
             name="genreName"
-            rules={[{ required: true, message: "Please input your genreName!" }]}
+            rules={[{ required: true, message: "Nhập tên thể loại" }]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
-              Update Genre
+              Cập nhật
             </Button>
           </Form.Item>
         </Form>

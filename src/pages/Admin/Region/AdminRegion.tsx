@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { SearchOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, EditTwoTone, SearchOutlined } from "@ant-design/icons";
 import type {
   FormProps,
   InputRef,
@@ -170,28 +170,28 @@ const AdminRegion: React.FC = () => {
     setIsModalUpdateOpen(false);
   };
 
-  const showDrawer = async (uuid: string) => {
-    try {
-      const res = await APIGetRegionDetail({ uuid });
-      // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
-      if (res && res.status === 200) {
-        setRegionDetail(res.data.data);
-        setOpen(true);
-      } else {
-        message.error("Không tìm thấy thông tin chi tiết.");
-      }
-    } catch (error: any) {
-      if (error.response) {
-        console.error(error.response.data);
-        const errorMessage =
-          error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
-        message.error(errorMessage);
-      } else {
-        message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
-      }
-    }
-  };
+  // const showDrawer = async (uuid: string) => {
+  //   try {
+  //     const res = await APIGetRegionDetail({ uuid });
+  //     // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
+  //     if (res && res.status === 200) {
+  //       setRegionDetail(res.data.data);
+  //       setOpen(true);
+  //     } else {
+  //       message.error("Không tìm thấy thông tin chi tiết.");
+  //     }
+  //   } catch (error: any) {
+  //     if (error.response) {
+  //       console.error(error.response.data);
+  //       const errorMessage =
+  //         error.response.data?.error?.errorMessage ||
+  //         "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
+  //       message.error(errorMessage);
+  //     } else {
+  //       message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
+  //     }
+  //   }
+  // };
   
 
   const onClose = () => {
@@ -250,7 +250,7 @@ const AdminRegion: React.FC = () => {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Tìm kiếm quốc gia`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -270,14 +270,14 @@ const AdminRegion: React.FC = () => {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            Tìm kiếm
           </Button>
           <Button
             onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            Đăt lại
           </Button>
           <Button
             type="link"
@@ -288,7 +288,7 @@ const AdminRegion: React.FC = () => {
               setSearchedColumn(dataIndex);
             }}
           >
-            Filter
+            Lọc
           </Button>
           <Button
             type="link"
@@ -297,7 +297,7 @@ const AdminRegion: React.FC = () => {
               close();
             }}
           >
-            close
+            Đóng
           </Button>
         </Space>
       </div>
@@ -353,7 +353,7 @@ const AdminRegion: React.FC = () => {
     //   },
     // },
     {
-      title: "Region Name",
+      title: "Tên quốc gia",
       dataIndex: "regionName",
       key: "regionName",
       ...getColumnSearchProps("regionName"),
@@ -363,36 +363,41 @@ const AdminRegion: React.FC = () => {
       render: (region: string, record: DataType) => {
         return (
           <div
-            className="hover:text-[#4096ff] cursor-pointer"
-            onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
+            // className="hover:text-[#4096ff] cursor-pointer"
+            // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
           >
             {region} {/* Hiển thị tên quốc gia */}
           </div>
         );
       }
     },
+    // {
+    //   title: "Status",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   width:50,
+    // },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
+      title: "Hành động",
       width:50,
-    },
-    {
-      title: "Action",
-      width:150,
       render: (record) => (
         <div className="flex gap-4">
           <Popconfirm
-            title="Delete the region"
-            description="Are you sure to delete this region?"
+            title="Xoá quốc gia"
+            description="Bạn chắc chắn muốn xoá quốc gia này?"
             onConfirm={() => confirm(record.uuid)}
-            okText={<>Yes</>}
-            cancelText="No"
+            okText={<>Có</>}
+            cancelText="Không"
           >
-            <Button danger>Delete</Button>
+            <Button danger><DeleteOutlined /></Button>
           </Popconfirm>
-          <Button type="text" onClick={() => showModalUpdate(record.uuid)}>
-            Update
+          <Button 
+          type="text" 
+          className="bg-blue-700 text-white"
+          
+          onClick={() => showModalUpdate(record.uuid)}>
+
+            <EditOutlined />
           </Button>
         </div>
       ),
@@ -404,28 +409,28 @@ const AdminRegion: React.FC = () => {
   return (
     <>
       <Button className="float-end mb-4" type="primary" onClick={showModal}>
-        Create Region
+        Thêm mới quốc gia
       </Button>
-      <Drawer
+       {/* <Drawer
         title="Chi tiết quốc gia"
         placement="right"
         onClose={onClose}
         open={open}
         width={400}
-      >
-        {regionDetail ? (
+      > 
+       {regionDetail ? (
           <div>
-            {/* <p><strong>UUID:</strong> {regionDetail.uuid}</p> */}
+             <p><strong>UUID:</strong> {regionDetail.uuid}</p> 
             <p><strong>Tên Thể Loại:</strong> {regionDetail.regionName}</p>
             <p><strong>Trạng Thái:</strong> {regionDetail.status}</p>
-            {/* Thêm các thông tin khác nếu cần */}
+             Thêm các thông tin khác nếu cần 
           </div>
         ) : (
           <p>Không có thông tin chi tiết để hiển thị.</p>
         )}
-      </Drawer>
+       </Drawer> */}
       <Modal
-        title="Create Region Modal"
+        title="Thêm mới quốc gia"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -443,10 +448,10 @@ const AdminRegion: React.FC = () => {
           autoComplete="off"
         >
           <Form.Item<FieldType>
-            label="Region Name"
+            label="Tên quốc gia"
             name="regionName"
             rules={[
-              { required: true, message: "Please input your region name!" },
+              { required: true, message: "Nhập tên quốc gia!" },
             ]}
           >
             <Input />
@@ -454,18 +459,18 @@ const AdminRegion: React.FC = () => {
 
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
-              Create Region
+              Thêm mới 
             </Button>
           </Form.Item>
         </Form>
       </Modal>
       <Modal
-        title="Update Region Name Modal"
+        title="Cập nhật quốc gia"
         open={isModalUpdateOpen}
         onCancel={() => setIsModalUpdateOpen(false)}
         footer ={
           <Button onClick={() => setIsModalUpdateOpen(false)}>
-             Cancel
+             Đóng
           </Button>
         }
       >
@@ -482,16 +487,16 @@ const AdminRegion: React.FC = () => {
           
         >
           <Form.Item
-            label="Region Name"
+            label="Tên quốc gia"
             name="regionName"
-            rules={[{ required: true, message: "Please input your regionName!" }]}
+            rules={[{ required: true, message: "Nhập tên quốc gia!" }]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
-              Update Region
+              Cập nhật
             </Button>
           </Form.Item>
         </Form>
