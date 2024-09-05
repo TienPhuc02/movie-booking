@@ -9,6 +9,7 @@ import AdminRegion from "../pages/Admin/Region/AdminRegion";
 import AdminDirector from "../pages/Admin/Director/AdminDirector";
 import AdminCast from "../pages/Admin/Cast/AdminCast";
 import ProtectRoute from "./ProtectRoute";
+import LoginAdminPage from "../pages/Admin/LoginAdminPage";
 
 const router = createBrowserRouter([
   {
@@ -16,11 +17,16 @@ const router = createBrowserRouter([
     element: <HomePage />,
   },
   {
+    path: "/login",
+    element: <LoginAdminPage />, // Trang đăng nhập
+  },
+
+  {
     path: "/admin",
     element: (
-      // <ProtectRoute>
+      <ProtectRoute>
         <LayoutAdmin />
-      // </ProtectRoute>
+      </ProtectRoute>
     ),
     children: [
       {

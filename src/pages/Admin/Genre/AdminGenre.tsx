@@ -31,6 +31,7 @@ interface DataType {
   id: string;
   uuid: string;
   genreName: string;
+  timeCreated:string;
   status: number;
 }
 
@@ -109,8 +110,8 @@ const AdminGenre: React.FC = () => {
   const getAllGenre = async (): Promise<void> => {
     try {
       const res = await APIGetAllGenre({ pageSize: 10, page: 1 });
+      console.log(res);
       if (res && res.data && res.data.data) {
-        // Lọc các genre có status khác "0"
         const filteredGenres = res.data?.data?.items.filter(
           (genre: DataType) => genre.status !== 0
         );
@@ -126,12 +127,12 @@ const AdminGenre: React.FC = () => {
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     try {
       const res = await APICreateGenre(values);
-      // console.log(res);
+   
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
         getAllGenre();
       }
-      // console.log("Success:", values);
+ 
     } catch (error: any) {
       if (error.response) {
         const errorMessage =

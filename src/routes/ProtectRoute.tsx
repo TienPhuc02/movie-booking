@@ -7,7 +7,7 @@ const ProtectRoute = ({ children }: any) => {
   console.log(role);
   return (
     <>
-      {role && (role === undefined || +role !== 1) ? (
+      {role && (role === undefined || +role !== 0) ? (
         <>
           <NotPermission />
         </>

@@ -25,13 +25,13 @@ const LoginPage = ({
     console.log(values);
     try {
       const res = (await APILogin(values)) as any;
-      console.log(res);
+      console.log(res.data.data.role);
       if (res && res?.data?.data !== null) {
         message.success("Đăng Nhập Thành Công!!");
         handleModalLoginCancel();
         form.resetFields();
         localStorage.setItem("access_token", res.data.data.token);
-        // localStorage.setItem("role", res.data.data.role);
+        localStorage.setItem("role", res.data.data.role);
       } else {
         message.error(res?.data.error.errorMessage);
       }
