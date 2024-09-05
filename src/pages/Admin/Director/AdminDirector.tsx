@@ -1,33 +1,38 @@
-import React, { useEffect, useRef, useState } from "react";
-import { DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  SearchOutlined
+} from '@ant-design/icons';
 import type {
   FormProps,
   InputRef,
   PopconfirmProps,
   TableColumnsType,
-  TableColumnType,
-} from "antd";
+  TableColumnType
+} from 'antd';
 import {
   Button,
   DatePicker,
-  Drawer,
   Form,
   Input,
   message,
   Modal,
   Popconfirm,
   Space,
-  Table,
-} from "antd";
-import type { FilterDropdownProps } from "antd/es/table/interface";
-import Highlighter from "react-highlight-words";
-import "../../../css/AdminGenre.css";
+  Table
+} from 'antd';
+
+import type { FilterDropdownProps } from 'antd/es/table/interface';
+import Highlighter from 'react-highlight-words';
+import '../../../css/AdminGenre.css';
 import {
-    APICreateDirector,
-    APIGetAllDirector,
-    APIGetDirectorDetail,
-    APIDeleteDirector
-} from "../../../services/service.api";
+  APICreateDirector,
+  APIGetAllDirector,
+  APIGetDirectorDetail,
+  APIDeleteDirector
+} from '../../../services/service.api';
+import moment from 'moment';
 
 interface DataType {
   id: string;
@@ -41,14 +46,14 @@ interface DataType {
 type DataIndex = keyof DataType;
 
 type FieldType = {
-    directorName: string;
-    birthday: string;
-    description: string;
+  directorName: string;
+  birthday: string;
+  description: string;
 };
 
 const AdminDirector: React.FC = () => {
-  const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef<InputRef>(null);
   const [listDirector, setListDirector] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -61,39 +66,40 @@ const AdminDirector: React.FC = () => {
   const showModalUpdate = async (uuid: string) => {
     try {
       const res = await APIGetDirectorDetail({ uuid });
+      console.log('update', res);
       if (res && res.status === 200) {
         const directorDetail = res.data.data;
         setDirectorDetail(directorDetail);
-         console.log(directorDetail.birthday);
+        console.log(directorDetail.birthday);
         formUpdate.setFieldsValue({
           directorName: directorDetail.directorName,
-         //birthday:directorDetail.birthday,
-          description: directorDetail.description,
+          birthday: moment(directorDetail.birthday, 'YYYY-MM-DD'),
+          description: directorDetail.description
         });
         setIsModalUpdateOpen(true);
       } else {
-        message.error("Không tìm thấy thông tin chi tiết.");
+        message.error('Không tìm thấy thông tin chi tiết.');
       }
     } catch (error: any) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
+          'Đã xảy ra lỗi khi lấy thông tin chi tiết.';
         message.error(errorMessage);
       } else {
-        message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
+        message.error('Đã xảy ra lỗi khi lấy thông tin chi tiết.');
       }
     }
   };
 
   const formatToDateString = (dateObj: Date) => {
     const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-    const day = String(dateObj.getDate()).padStart(2, "0");
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
 
-  const onFinishUpdateDirectorInfor: FormProps<FieldType>["onFinish"] = async (
+  const onFinishUpdateDirectorInfor: FormProps<FieldType>['onFinish'] = async (
     values
   ) => {
     const { birthday } = values;
@@ -104,9 +110,9 @@ const AdminDirector: React.FC = () => {
         uuid: directorDetail.uuid,
         directorName: values.directorName,
         birthday: birthdayFormat,
-        description: values.description,
+        description: values.description
       });
-      console.log("adasdasd", res)
+      console.log('adasdasd', res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
         getAllDirector();
@@ -118,14 +124,14 @@ const AdminDirector: React.FC = () => {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi update.";
+          'Đã xảy ra lỗi khi update.';
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
-          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
         );
       } else {
-        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
   };
@@ -133,7 +139,7 @@ const AdminDirector: React.FC = () => {
   const getAllDirector = async (): Promise<void> => {
     try {
       const res = await APIGetAllDirector({ pageSize: 10, page: 1 });
-      console.log(res.data.data)
+      console.log(res.data.data);
       if (res && res.data && res.data.data) {
         // Lọc các region có status khác "0"
         const filteredDirectors = res.data?.data?.items.filter(
@@ -144,42 +150,41 @@ const AdminDirector: React.FC = () => {
         handleCancel();
       }
     } catch (error) {
-      message.error("Đã xảy ra lỗi khi lấy danh sách đạo diễn.");
+      message.error('Đã xảy ra lỗi khi lấy danh sách đạo diễn.');
     }
   };
-  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+  const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     const { birthday, ...restValues } = values;
     const birthdayFormat = formatToDateString(new Date(birthday));
     const dataDirector = { ...restValues, birthday: birthdayFormat };
-    try{
-    const res = await APICreateDirector(dataDirector);
-    // console.log(res);
-    if (res && res.status === 200) {
-      message.success(res.data.error.errorMessage);
-      getAllDirector();
-    }
-    // console.log("Success:", values);
-    }catch(error:any){
+    try {
+      const res = await APICreateDirector(dataDirector);
+      // console.log(res);
+      if (res && res.status === 200) {
+        message.success(res.data.error.errorMessage);
+        getAllDirector();
+      }
+      // console.log("Success:", values);
+    } catch (error: any) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi thêm mới.";
+          'Đã xảy ra lỗi khi thêm mới.';
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
-          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
         );
       } else {
-        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
-      
   };
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+  const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (
     errorInfo
   ) => {
-    console.log("Failed:", errorInfo);
+    console.log('Failed:', errorInfo);
   };
   const showModal = () => {
     setIsModalOpen(true);
@@ -197,37 +202,13 @@ const AdminDirector: React.FC = () => {
     setIsModalUpdateOpen(false);
   };
 
-  // const showDrawer = async (uuid: string) => {
-  //   try {
-  //     const res = await APIGetDirectorDetail({ uuid });
-  //     // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
-  //     if (res && res.status === 200) {
-  //       setDirectorDetail(res.data.data);
-  //       setOpen(true);
-  //     } else {
-  //       message.error("Không tìm thấy thông tin chi tiết.");
-  //     }
-  //   } catch (error: any) {
-  //     if (error.response) {
-  //       console.error(error.response.data);
-  //       const errorMessage =
-  //         error.response.data?.error?.errorMessage ||
-  //         "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
-  //       message.error(errorMessage);
-  //     } else {
-  //       message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
-  //     }
-  //   }
-  // };
-  
-
   const onClose = () => {
     setOpen(false);
-    setIsModalUpdateOpen(false)
+    setIsModalUpdateOpen(false);
   };
   const handleSearch = (
     selectedKeys: string[],
-    confirm: FilterDropdownProps["confirm"],
+    confirm: FilterDropdownProps['confirm'],
     dataIndex: DataIndex
   ) => {
     confirm();
@@ -237,29 +218,31 @@ const AdminDirector: React.FC = () => {
 
   const handleReset = (clearFilters: () => void) => {
     clearFilters();
-    setSearchText("");
+    setSearchText('');
   };
-  const confirm: PopconfirmProps["onConfirm"] = async (uuid: string): Promise<void> => {
+  const confirm: PopconfirmProps['onConfirm'] = async (
+    uuid: string
+  ): Promise<void> => {
     try {
-      const res = await APIDeleteDirector({ uuid, status:0});
+      const res = await APIDeleteDirector({ uuid, status: 0 });
       if (res && res.status === 200) {
-        message.success("Đã xoá thành công.");
+        message.success('Đã xoá thành công.');
         getAllDirector(); // Cập nhật lại danh sách director sau khi xoá
       } else {
-        message.error("Xoá thất bại.");
+        message.error('Xoá thất bại.');
       }
     } catch (error: any) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi cập nhật status.";
+          'Đã xảy ra lỗi khi cập nhật status.';
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
-          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
         );
       } else {
-        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
   };
@@ -272,7 +255,7 @@ const AdminDirector: React.FC = () => {
       selectedKeys,
       confirm,
       clearFilters,
-      close,
+      close
     }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
@@ -285,7 +268,7 @@ const AdminDirector: React.FC = () => {
           onPressEnter={() =>
             handleSearch(selectedKeys as string[], confirm, dataIndex)
           }
-          style={{ marginBottom: 8, display: "block" }}
+          style={{ marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
@@ -330,7 +313,7 @@ const AdminDirector: React.FC = () => {
       </div>
     ),
     filterIcon: (filtered: boolean) => (
-      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
     onFilter: (value, record) =>
       record[dataIndex]
@@ -345,53 +328,39 @@ const AdminDirector: React.FC = () => {
     render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
           searchWords={[searchText]}
           autoEscape
-          textToHighlight={text ? text.toString() : ""}
+          textToHighlight={text ? text.toString() : ''}
         />
       ) : (
         text
-      ),
+      )
   });
   const listDirectorMap = listDirector.map((director, index) => ({
     key: index + 1,
-    ...director,
+    ...director
   }));
   const columns: TableColumnsType<DataType> = [
     {
-      title: "Id",
-      dataIndex: "key",
-      width:50,
+      title: 'Id',
+      dataIndex: 'key',
+      width: 50
     },
-    // {
-    //   title: "UUID",
-    //   width: 200,
-    //    ...getColumnSearchProps("uuid"),
-    //   render: (record) => {
-    //     return (
-    //       <div
-    //         className="hover:text-[#4096ff] cursor-pointer"
-    //         onClick={() => showDrawer(record.uuid)} // Gọi showDrawer với uuid
-    //       >
-    //         {record.uuid}
-    //       </div>
-    //     );
-    //   },
-    // },
+
     {
-      title: "Tên đạo diễn",
-      dataIndex: "directorName",
-      key: "directorName",
-      ...getColumnSearchProps("directorName"),
+      title: 'Tên đạo diễn',
+      dataIndex: 'directorName',
+      key: 'directorName',
+      ...getColumnSearchProps('directorName'),
       width: 50,
       sorter: (a, b) => a.directorName.length - b.directorName.length,
-      sortDirections: ["descend", "ascend"],
+      sortDirections: ['descend', 'ascend'],
       render: (director: string, record: DataType) => {
         return (
           <div
-            // className="hover:text-[#4096ff] cursor-pointer"
-            // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
+          // className="hover:text-[#4096ff] cursor-pointer"
+          // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
           >
             {director} {/* Hiển thị tên quốc gia */}
           </div>
@@ -399,31 +368,26 @@ const AdminDirector: React.FC = () => {
       }
     },
     {
-        title: "Ngày sinh",
-        dataIndex: "birthday",
-        key: "birthday",
-        // ...getColumnSearchProps("birthday"),
-        width:50,
-      },
-      {
-        title: "Mô tả",
-        dataIndex: "description",
-        key: "description",
-        // ...getColumnSearchProps("description"),
-        width:100,
-        render: (description: string) => (
-          <div className="truncate-description">{description}</div>
-        ),
-      },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   width:50,
-    // },
+      title: 'Ngày sinh',
+      dataIndex: 'birthday',
+      key: 'birthday',
+      // ...getColumnSearchProps("birthday"),
+      width: 50
+    },
     {
-      title: "Hành động",
-      width:50,
+      title: 'Mô tả',
+      dataIndex: 'description',
+      key: 'description',
+      // ...getColumnSearchProps("description"),
+      width: 100,
+      render: (description: string) => (
+        <div className="truncate-description">{description}</div>
+      )
+    },
+
+    {
+      title: 'Hành động',
+      width: 50,
       render: (record) => (
         <div className="flex gap-4">
           <Popconfirm
@@ -433,19 +397,20 @@ const AdminDirector: React.FC = () => {
             okText={<>Có</>}
             cancelText="Không"
           >
-            <Button danger><DeleteOutlined /></Button>
+            <Button danger>
+              <DeleteOutlined />
+            </Button>
           </Popconfirm>
-          <Button 
-          type="text" 
-          className="bg-blue-700 text-white"
-          
-          onClick={() => showModalUpdate(record.uuid)}>
-
+          <Button
+            type="text"
+            className="bg-blue-700 text-white"
+            onClick={() => showModalUpdate(record.uuid)}
+          >
             <EditOutlined />
           </Button>
         </div>
-      ),
-    },
+      )
+    }
   ];
   useEffect(() => {
     getAllDirector();
@@ -455,26 +420,6 @@ const AdminDirector: React.FC = () => {
       <Button className="float-end mb-4" type="primary" onClick={showModal}>
         Thêm mới đạo diễn
       </Button>
-      {/* <Drawer
-        title="Chi tiết quốc gia"
-        placement="right"
-        onClose={onClose}
-        open={open}
-        width={400}
-      >
-        {directorDetail ? (
-          <div>
-            <p><strong>UUID:</strong> {directorDetail.uuid}</p>
-            <p><strong>Tên Thể Loại:</strong> {directorDetail.directorName}</p>
-            <p><strong>Ngày sinh:</strong> {directorDetail.birthday}</p>
-            <p><strong>Mô tả:</strong> {directorDetail.description}</p>
-            <p><strong>Trạng Thái:</strong> {directorDetail.status}</p>
-            Thêm các thông tin khác nếu cần
-          </div>
-        ) : (
-          <p>Không có thông tin chi tiết để hiển thị.</p>
-        )}
-      </Drawer> */}
       <Modal
         title="Thêm mới đạo diễn"
         open={isModalOpen}
@@ -496,44 +441,37 @@ const AdminDirector: React.FC = () => {
           <Form.Item<FieldType>
             label="Tên đạo diễn"
             name="directorName"
-            rules={[
-              { required: true, message: "Hãy nhập tên đạo diễn!" },
-            ]}
+            rules={[{ required: true, message: 'Hãy nhập tên đạo diễn!' }]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item<FieldType>
-                label="Ngày sinh"
-                name="birthday"
-                rules={[
-                {
-                    required: true,
-                    message: "Hãy nhập ngày sinh của bạn!",
-                },
-                ]}
-            >
-                <DatePicker
-                    placeholder="Ngày sinh"
-                    variant="filled"
-                    className="w-full"
-                />
-            </Form.Item>
-            
-            <Form.Item<FieldType>
-                    label="Mô tả"
-                    name="description"
-                    rules={[
-                    ]}
-                  >
-                    <Input.TextArea
-                        placeholder="Nhập mô tả...."
-                        autoSize={{ minRows: 2, maxRows: 6 }}
-                        onChange={(e) => {
-                        // Optional: Handle text area change if needed
-                        }}
-                    />
-            </Form.Item>
+            label="Ngày sinh"
+            name="birthday"
+            rules={[
+              {
+                required: true,
+                message: 'Hãy nhập ngày sinh của bạn!'
+              }
+            ]}
+          >
+            <DatePicker
+              placeholder="Ngày sinh"
+              variant="filled"
+              className="w-full"
+            />
+          </Form.Item>
+
+          <Form.Item<FieldType> label="Mô tả" name="description" rules={[]}>
+            <Input.TextArea
+              placeholder="Nhập mô tả...."
+              autoSize={{ minRows: 2, maxRows: 6 }}
+              onChange={(e) => {
+                // Optional: Handle text area change if needed
+              }}
+            />
+          </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
               Thêm mới
@@ -545,10 +483,8 @@ const AdminDirector: React.FC = () => {
         title="Cập nhật đạo diễn"
         open={isModalUpdateOpen}
         onCancel={() => setIsModalUpdateOpen(false)}
-        footer ={
-          <Button onClick={() => setIsModalUpdateOpen(false)}>
-             Đóng
-          </Button>
+        footer={
+          <Button onClick={() => setIsModalUpdateOpen(false)}>Đóng</Button>
         }
       >
         <Form
@@ -561,48 +497,42 @@ const AdminDirector: React.FC = () => {
           onFinish={onFinishUpdateDirectorInfor}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
-          
         >
           <Form.Item
             label="Tên đạo diễn"
             name="directorName"
-            rules={[{ required: true, message: "Hãy nhập tên đạo diễn!" }]}
+            rules={[{ required: true, message: 'Hãy nhập tên đạo diễn!' }]}
           >
             <Input />
           </Form.Item>
-        
-          <Form.Item<FieldType>
-                label="Ngày sinh"
-                name="birthday"
-                rules={[
-                {
-                    required: true,
-                    message: "Hãy nhập ngày sinh của bạn!",
-                },
-                ]}
-            >
-                <DatePicker
-                    placeholder="Ngày sinh"
-                    variant="filled"
-                    className="w-full"
-                />
-            </Form.Item>
 
           <Form.Item<FieldType>
-                    label="Mô tả"
-                    name="description"
-                    rules={[
-                    ]}
-                  >
-                    <Input.TextArea
-                        placeholder="Nhập mô tả...."
-                        autoSize={{ minRows: 2, maxRows: 6 }}
-                        onChange={(e) => {
-                        // Optional: Handle text area change if needed
-                        }}
-                    />
-            </Form.Item>
-          
+            label="Ngày sinh"
+            name="birthday"
+            rules={[
+              {
+                required: true,
+                message: 'Hãy nhập ngày sinh của bạn!'
+              }
+            ]}
+          >
+            <DatePicker
+              placeholder="Ngày sinh"
+              variant="filled"
+              className="w-full"
+            />
+          </Form.Item>
+
+          <Form.Item<FieldType> label="Mô tả" name="description" rules={[]}>
+            <Input.TextArea
+              placeholder="Nhập mô tả...."
+              autoSize={{ minRows: 2, maxRows: 6 }}
+              onChange={(e) => {
+                // Optional: Handle text area change if needed
+              }}
+            />
+          </Form.Item>
+
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
               Cập nhật
@@ -611,7 +541,6 @@ const AdminDirector: React.FC = () => {
         </Form>
       </Modal>
       <Table
-
         columns={columns}
         dataSource={listDirectorMap}
         scroll={{ x: 1000, y: 500 }}
@@ -621,7 +550,7 @@ const AdminDirector: React.FC = () => {
           },
           defaultPageSize: 10,
           showSizeChanger: true,
-          pageSizeOptions: ["5", "10", "20"],
+          pageSizeOptions: ['5', '10', '20']
         }}
       />
     </>

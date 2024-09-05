@@ -1,34 +1,51 @@
-import React, { useEffect, useRef, useState } from "react";
-import { DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  SearchOutlined
+} from '@ant-design/icons';
 import type {
   FormProps,
   InputRef,
   PopconfirmProps,
   TableColumnsType,
-  TableColumnType,
-} from "antd";
+  TableColumnType
+} from 'antd';
 import {
   Button,
   DatePicker,
-  Drawer,
   Form,
   Input,
   message,
   Modal,
   Popconfirm,
   Space,
-  Table,
-} from "antd";
-import type { FilterDropdownProps } from "antd/es/table/interface";
-import Highlighter from "react-highlight-words";
-import "../../../css/AdminGenre.css";
+  Table
+} from 'antd';
+import type { FilterDropdownProps } from 'antd/es/table/interface';
+import Highlighter from 'react-highlight-words';
+import '../../../css/AdminGenre.css';
 import {
   APICreateCast,
   APIGetAllCast,
   APIGetCastDetail,
   APIDeleteCast,
-} from "../../../services/service.api";
-import moment from "moment";
+  APIUploadImage
+} from '../../../services/service.api';
+import { PlusOutlined } from '@ant-design/icons';
+import { Image, Upload } from 'antd';
+import type { GetProp, UploadFile, UploadProps } from 'antd';
+
+import moment from 'moment';
+type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+
+const getBase64 = (file: FileType): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
 interface DataType {
   id: string;
   uuid: string;
@@ -36,6 +53,7 @@ interface DataType {
   birthday: string;
   description: string;
   status: number;
+  imagesUuid: string;
 }
 
 type DataIndex = keyof DataType;
@@ -43,12 +61,13 @@ type DataIndex = keyof DataType;
 type FieldType = {
   castName: string;
   birthday: string;
+  imagesUuid: string;
   description: string;
 };
 
 const AdminCast: React.FC = () => {
-  const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef<InputRef>(null);
   const [listCast, setListCast] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,44 +76,79 @@ const AdminCast: React.FC = () => {
   const [formUpdate] = Form.useForm();
   const [castDetail, setCastDetail] = useState<DataType | null>(null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [imagesUuid, setImagesUuid] = useState('');
+  const handlePreviewCreateImage = async (file: UploadFile) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as FileType);
+    }
 
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
+  };
+  console.log('fileList,', fileList);
+  const dummyRequestCreateImageCast = async ({ file, onSuccess }: any) => {
+    console.log(file);
+    const res = await APIUploadImage(file, '3');
+    console.log(res);
+    if (res && res.status === 200) {
+      setImagesUuid(res.data.data);
+    }
+    // form.setFieldsValue({ avatar: file as string });
+    // setAvatar(file as string);
+    onSuccess('ok');
+  };
+  const handleChangeCreateImage: UploadProps['onChange'] = ({
+    fileList: newFileList
+  }) => setFileList(newFileList);
+
+  const uploadButton = (
+    <button style={{ border: 0, background: 'none' }} type="button">
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Upload</div>
+    </button>
+  );
   const showModalUpdate = async (uuid: string) => {
     try {
       const res = await APIGetCastDetail({ uuid });
       if (res && res.status === 200) {
-        const castDetail = res.data.data;
+        const castDetail = res.data.data as any;
         setCastDetail(castDetail);
         const birthdayFormat = 'YYYY-MM-DD';
         console.log(moment(castDetail.birthday, birthdayFormat));
         formUpdate.setFieldsValue({
           castName: castDetail.castName,
-          birthday: castDetail.birthday ? moment(castDetail.birthday, birthdayFormat) : null,
-          description: castDetail.description,
+          birthday: castDetail.birthday
+            ? moment(castDetail.birthday, birthdayFormat)
+            : null,
+          description: castDetail.description
         });
         setIsModalUpdateOpen(true);
       } else {
-        message.error("Không tìm thấy thông tin chi tiết.");
+        message.error('Không tìm thấy thông tin chi tiết.');
       }
     } catch (error: any) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
+          'Đã xảy ra lỗi khi lấy thông tin chi tiết.';
         message.error(errorMessage);
       } else {
-        message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
+        message.error('Đã xảy ra lỗi khi lấy thông tin chi tiết.');
       }
     }
   };
 
   const formatToDateString = (dateObj: Date) => {
     const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-    const day = String(dateObj.getDate()).padStart(2, "0");
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
 
-  const onFinishUpdateCastInfor: FormProps<FieldType>["onFinish"] = async (
+  const onFinishUpdateCastInfor: FormProps<FieldType>['onFinish'] = async (
     values
   ) => {
     const { birthday } = values;
@@ -106,9 +160,9 @@ const AdminCast: React.FC = () => {
         uuid: castDetail?.uuid,
         castName: values.castName,
         birthday: birthdayFormat,
-        description: values.description,
+        description: values.description
       });
-      console.log("adasdasd", res);
+      console.log('adasdasd', res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
         getAllCast();
@@ -120,14 +174,14 @@ const AdminCast: React.FC = () => {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi update.";
+          'Đã xảy ra lỗi khi update.';
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
-          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
         );
       } else {
-        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
   };
@@ -146,40 +200,46 @@ const AdminCast: React.FC = () => {
         handleCancel();
       }
     } catch (error) {
-      message.error("Đã xảy ra lỗi khi lấy danh sách thể loại.");
+      message.error('Đã xảy ra lỗi khi lấy danh sách thể loại.');
     }
   };
-  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+  console.log('imagesUuid', imagesUuid);
+  const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     const { birthday, ...restValues } = values;
     const birthdayFormat = formatToDateString(new Date(birthday));
-    const dataCast = { ...restValues, birthday: birthdayFormat };
+    const dataCast = {
+      ...restValues,
+      birthday: birthdayFormat,
+      imagesUuid: imagesUuid
+    };
     try {
       const res = await APICreateCast(dataCast);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
         getAllCast();
+        form.resetFields();
       }
       // console.log("Success:", values);
     } catch (error: any) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi thêm mới.";
+          'Đã xảy ra lỗi khi thêm mới.';
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
-          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
         );
       } else {
-        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
   };
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+  const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (
     errorInfo
   ) => {
-    console.log("Failed:", errorInfo);
+    console.log('Failed:', errorInfo);
   };
   const showModal = () => {
     setIsModalOpen(true);
@@ -187,38 +247,18 @@ const AdminCast: React.FC = () => {
 
   const handleOk = () => {
     setIsModalOpen(false);
+    form.resetFields();
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    setFileList([]);
+    form.resetFields();
   };
 
   const handleCancelUpdate = () => {
     setIsModalUpdateOpen(false);
   };
-
-  // const showDrawer = async (uuid: string) => {
-  //   try {
-  //     const res = await APIGetCastDetail({ uuid });
-  //     // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
-  //     if (res && res.status === 200) {
-  //       setCastDetail(res.data.data);
-  //       setOpen(true);
-  //     } else {
-  //       message.error("Không tìm thấy thông tin chi tiết.");
-  //     }
-  //   } catch (error: any) {
-  //     if (error.response) {
-  //       console.error(error.response.data);
-  //       const errorMessage =
-  //         error.response.data?.error?.errorMessage ||
-  //         "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
-  //       message.error(errorMessage);
-  //     } else {
-  //       message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
-  //     }
-  //   }
-  // };
 
   const onClose = () => {
     setOpen(false);
@@ -226,7 +266,7 @@ const AdminCast: React.FC = () => {
   };
   const handleSearch = (
     selectedKeys: string[],
-    confirm: FilterDropdownProps["confirm"],
+    confirm: FilterDropdownProps['confirm'],
     dataIndex: DataIndex
   ) => {
     confirm();
@@ -236,31 +276,31 @@ const AdminCast: React.FC = () => {
 
   const handleReset = (clearFilters: () => void) => {
     clearFilters();
-    setSearchText("");
+    setSearchText('');
   };
-  const confirm: PopconfirmProps["onConfirm"] = async (
+  const confirm: PopconfirmProps['onConfirm'] = async (
     uuid: string
   ): Promise<void> => {
     try {
       const res = await APIDeleteCast({ uuid, status: 0 });
       if (res && res.status === 200) {
-        message.success("Đã xoá thành công.");
+        message.success('Đã xoá thành công.');
         getAllCast(); // Cập nhật lại danh sách cast sau khi xoá
       } else {
-        message.error("Xoá thất bại.");
+        message.error('Xoá thất bại.');
       }
     } catch (error: any) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi cập nhật status.";
+          'Đã xảy ra lỗi khi cập nhật status.';
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
-          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
         );
       } else {
-        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
   };
@@ -273,7 +313,7 @@ const AdminCast: React.FC = () => {
       selectedKeys,
       confirm,
       clearFilters,
-      close,
+      close
     }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
@@ -286,7 +326,7 @@ const AdminCast: React.FC = () => {
           onPressEnter={() =>
             handleSearch(selectedKeys as string[], confirm, dataIndex)
           }
-          style={{ marginBottom: 8, display: "block" }}
+          style={{ marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
@@ -331,7 +371,7 @@ const AdminCast: React.FC = () => {
       </div>
     ),
     filterIcon: (filtered: boolean) => (
-      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
     onFilter: (value, record) =>
       record[dataIndex]
@@ -346,24 +386,24 @@ const AdminCast: React.FC = () => {
     render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
           searchWords={[searchText]}
           autoEscape
-          textToHighlight={text ? text.toString() : ""}
+          textToHighlight={text ? text.toString() : ''}
         />
       ) : (
         text
-      ),
+      )
   });
   const listCastMap = listCast.map((cast, index) => ({
     key: index + 1,
-    ...cast,
+    ...cast
   }));
   const columns: TableColumnsType<DataType> = [
     {
-      title: "Id",
-      dataIndex: "key",
-      width: 50,
+      title: 'Id',
+      dataIndex: 'key',
+      width: 50
     },
     // {
     //   title: "UUID",
@@ -381,49 +421,44 @@ const AdminCast: React.FC = () => {
     //   },
     // },
     {
-      title: "Tên diễn viên",
-      dataIndex: "castName",
-      key: "castName",
-      ...getColumnSearchProps("castName"),
+      title: 'Tên diễn viên',
+      dataIndex: 'castName',
+      key: 'castName',
+      ...getColumnSearchProps('castName'),
       width: 50,
       sorter: (a, b) => a.castName.length - b.castName.length,
-      sortDirections: ["descend", "ascend"],
+      sortDirections: ['descend', 'ascend'],
       render: (cast: string, record: DataType) => {
         return (
           <div
-            // className="hover:text-[#4096ff] cursor-pointer"
-            // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
+          // className="hover:text-[#4096ff] cursor-pointer"
+          // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
           >
             {cast} {/* Hiển thị tên diễn viên */}
           </div>
         );
-      },
+      }
     },
     {
-      title: "Ngày sinh",
-      dataIndex: "birthday",
-      key: "birthday",
+      title: 'Ngày sinh',
+      dataIndex: 'birthday',
+      key: 'birthday',
       // ...getColumnSearchProps("birthday"),
-      width: 50,
+      width: 50
     },
     {
-      title: "Mô tả",
-      dataIndex: "description",
-      key: "description",
-      // ...getColumnSearchProps("description"),
+      title: 'Mô tả',
+      dataIndex: 'description',
+      key: 'description',
+
       width: 100,
       render: (description: string) => (
         <div className="truncate-description">{description}</div>
-      ),
+      )
     },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   width: 50,
-    // },
+
     {
-      title: "Hành động",
+      title: 'Hành động',
       width: 50,
       render: (record) => (
         <div className="flex gap-4">
@@ -434,19 +469,20 @@ const AdminCast: React.FC = () => {
             okText={<>Có</>}
             cancelText="Không"
           >
-            <Button danger><DeleteOutlined /></Button>
+            <Button danger>
+              <DeleteOutlined />
+            </Button>
           </Popconfirm>
-          <Button 
-          type="text" 
-          className="bg-blue-700 text-white"
-          
-          onClick={() => showModalUpdate(record.uuid)}>
-
+          <Button
+            type="text"
+            className="bg-blue-700 text-white"
+            onClick={() => showModalUpdate(record.uuid)}
+          >
             <EditOutlined />
           </Button>
         </div>
-      ),
-    },
+      )
+    }
   ];
   useEffect(() => {
     getAllCast();
@@ -456,34 +492,7 @@ const AdminCast: React.FC = () => {
       <Button className="float-end mb-4" type="primary" onClick={showModal}>
         Thêm mới diễn viên
       </Button>
-      {/* <Drawer
-        title="Chi tiết quốc gia"
-        placement="right"
-        onClose={onClose}
-        open={open}
-        width={400}
-      >
-        {castDetail ? (
-          <div>
-            <p><strong>UUID:</strong> {regionDetail.uuid}</p>
-            <p>
-              <strong>Tên Thể Loại:</strong> {castDetail.castName}
-            </p>
-            <p>
-              <strong>Ngày sinh:</strong> {castDetail.birthday}
-            </p>
-            <p>
-              <strong>Mô tả:</strong> {castDetail.description}
-            </p>
-            <p>
-              <strong>Trạng Thái:</strong> {castDetail.status}
-            </p>
-            Thêm các thông tin khác nếu cần
-          </div>
-        ) : (
-          <p>Không có thông tin chi tiết để hiển thị.</p>
-        )}
-      </Drawer> */}
+
       <Modal
         title="Thêm mới diễn viên"
         open={isModalOpen}
@@ -505,9 +514,7 @@ const AdminCast: React.FC = () => {
           <Form.Item<FieldType>
             label="Tên diên viên"
             name="castName"
-            rules={[
-              { required: true, message: "Hãy nhập tên diễn viên!" },
-            ]}
+            rules={[{ required: true, message: 'Hãy nhập tên diễn viên!' }]}
           >
             <Input />
           </Form.Item>
@@ -518,8 +525,8 @@ const AdminCast: React.FC = () => {
             rules={[
               {
                 required: true,
-                message: "Hãy nhập ngày sinh của bạn!",
-              },
+                message: 'Hãy nhập ngày sinh của bạn!'
+              }
             ]}
           >
             <DatePicker
@@ -533,10 +540,30 @@ const AdminCast: React.FC = () => {
             <Input.TextArea
               placeholder="Nhập mô tả...."
               autoSize={{ minRows: 2, maxRows: 6 }}
-              onChange={(e) => {
-                // Optional: Handle text area change if needed
-              }}
             />
+          </Form.Item>
+          <Form.Item<FieldType> label="Image" name="imagesUuid" rules={[]}>
+            <Upload
+              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+              listType="picture-circle"
+              fileList={fileList}
+              onPreview={handlePreviewCreateImage}
+              onChange={handleChangeCreateImage}
+              customRequest={dummyRequestCreateImageCast}
+            >
+              {fileList.length >= 8 ? null : uploadButton}
+            </Upload>
+            {previewImage && (
+              <Image
+                wrapperStyle={{ display: 'none' }}
+                preview={{
+                  visible: previewOpen,
+                  onVisibleChange: (visible) => setPreviewOpen(visible),
+                  afterOpenChange: (visible) => !visible && setPreviewImage('')
+                }}
+                src={previewImage}
+              />
+            )}
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
@@ -567,9 +594,7 @@ const AdminCast: React.FC = () => {
           <Form.Item
             label="Tên diễn viên"
             name="castName"
-            rules={[
-              { required: true, message: "Hãy nhập tên diễn viên!" },
-            ]}
+            rules={[{ required: true, message: 'Hãy nhập tên diễn viên!' }]}
           >
             <Input />
           </Form.Item>
@@ -580,15 +605,14 @@ const AdminCast: React.FC = () => {
             rules={[
               {
                 required: true,
-                message: "Hãy nhập ngày sinh của bạn!",
-              },
+                message: 'Hãy nhập ngày sinh của bạn!'
+              }
             ]}
           >
             <DatePicker
               placeholder="Ngày sinh"
               variant="filled"
               className="w-full"
-              
             />
           </Form.Item>
 
@@ -596,11 +620,34 @@ const AdminCast: React.FC = () => {
             <Input.TextArea
               placeholder="Nhập mô tả...."
               autoSize={{ minRows: 2, maxRows: 6 }}
-              onChange={(e) => {
-                // Optional: Handle text area change if needed
-              }}
+              // onChange={(e) => {
+              //   // Optional: Handle text area change if needed
+              // }}
             />
           </Form.Item>
+          {/* <Form.Item<FieldType> label="Image" name="imagesUuid" rules={[]}>
+            <Upload
+              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+              listType="picture-circle"
+              fileList={fileList}
+              onPreview={handlePreview}
+              onChange={handleChange}
+              // customRequest={dummyRequestUpdateCast}
+            >
+              {fileList.length >= 8 ? null : uploadButton}
+            </Upload>
+            {previewImage && (
+              <Image
+                wrapperStyle={{ display: 'none' }}
+                preview={{
+                  visible: previewOpen,
+                  onVisibleChange: (visible) => setPreviewOpen(visible),
+                  afterOpenChange: (visible) => !visible && setPreviewImage('')
+                }}
+                src={previewImage}
+              />
+            )}
+          </Form.Item> */}
 
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
@@ -619,7 +666,7 @@ const AdminCast: React.FC = () => {
           },
           defaultPageSize: 10,
           showSizeChanger: true,
-          pageSizeOptions: ["5", "10", "20"],
+          pageSizeOptions: ['5', '10', '20']
         }}
       />
     </>
