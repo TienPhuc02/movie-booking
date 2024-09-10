@@ -30,9 +30,24 @@ import {
   APICreateDirector,
   APIGetAllDirector,
   APIGetDirectorDetail,
-  APIDeleteDirector
+  APIDeleteDirector,
+  APIUploadImage
 } from '../../../services/service.api';
+
+import { PlusOutlined } from '@ant-design/icons';
+import { Image, Upload } from 'antd';
+import type { GetProp, UploadFile, UploadProps } from 'antd';
+
 import moment from 'moment';
+type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+
+const getBase64 = (file: FileType): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
 
 interface DataType {
   id: string;
@@ -41,6 +56,7 @@ interface DataType {
   birthday: string;
   description: string;
   status: number;
+  imagesUuid: string;
 }
 
 type DataIndex = keyof DataType;
@@ -48,6 +64,7 @@ type DataIndex = keyof DataType;
 type FieldType = {
   directorName: string;
   birthday: string;
+  imagesUuid: string;
   description: string;
 };
 
@@ -62,6 +79,40 @@ const AdminDirector: React.FC = () => {
   const [formUpdate] = Form.useForm();
   const [directorDetail, setDirectorDetail] = useState<DataType | null>(null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [imagesUuid, setImagesUuid] = useState('');
+  const handlePreviewCreateImage = async (file: UploadFile) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as FileType);
+    }
+
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
+  };
+  console.log('fileList,', fileList);
+  const dummyRequestCreateImageCast = async ({ file, onSuccess }: any) => {
+    console.log(file);
+    const res = await APIUploadImage(file, '3');
+    console.log(res);
+    if (res && res.status === 200) {
+      setImagesUuid(res.data.data);
+    }
+    // form.setFieldsValue({ avatar: file as string });
+    // setAvatar(file as string);
+    onSuccess('ok');
+  };
+  const handleChangeCreateImage: UploadProps['onChange'] = ({
+    fileList: newFileList
+  }) => setFileList(newFileList);
+
+  const uploadButton = (
+    <button style={{ border: 0, background: 'none' }} type="button">
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Upload</div>
+    </button>
+  );
 
   const showModalUpdate = async (uuid: string) => {
     try {
@@ -153,6 +204,7 @@ const AdminDirector: React.FC = () => {
       message.error('Đã xảy ra lỗi khi lấy danh sách đạo diễn.');
     }
   };
+  console.log('imagesUuid', imagesUuid);
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     const { birthday, ...restValues } = values;
     const birthdayFormat = formatToDateString(new Date(birthday));
@@ -188,14 +240,17 @@ const AdminDirector: React.FC = () => {
   };
   const showModal = () => {
     setIsModalOpen(true);
+    
   };
 
   const handleOk = () => {
     setIsModalOpen(false);
+    form.resetFields();
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    form.resetFields();
   };
 
   const handleCancelUpdate = () => {
@@ -467,10 +522,30 @@ const AdminDirector: React.FC = () => {
             <Input.TextArea
               placeholder="Nhập mô tả...."
               autoSize={{ minRows: 2, maxRows: 6 }}
-              onChange={(e) => {
-                // Optional: Handle text area change if needed
-              }}
             />
+          </Form.Item>
+          <Form.Item<FieldType> label="Image" name="imagesUuid" rules={[]}>
+            <Upload
+              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+              listType="picture-circle"
+              fileList={fileList}
+              onPreview={handlePreviewCreateImage}
+              onChange={handleChangeCreateImage}
+              customRequest={dummyRequestCreateImageCast}
+            >
+              {fileList.length >= 8 ? null : uploadButton}
+            </Upload>
+            {previewImage && (
+              <Image
+                wrapperStyle={{ display: 'none' }}
+                preview={{
+                  visible: previewOpen,
+                  onVisibleChange: (visible) => setPreviewOpen(visible),
+                  afterOpenChange: (visible) => !visible && setPreviewImage('')
+                }}
+                src={previewImage}
+              />
+            )}
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">

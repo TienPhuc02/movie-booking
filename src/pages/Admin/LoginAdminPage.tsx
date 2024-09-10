@@ -35,27 +35,45 @@ const LoginAdminPage: React.FC = () => {
   };
 
   return (
-    <Form onFinish={onFinish} layout="vertical">
-      <Form.Item<FieldType>
-        label="Email"
-        name="email"
-        rules={[{ required: true, message: 'Please input your email!' }]}
-      >
-        <Input />
-      </Form.Item>
-      <Form.Item<FieldType>
-        label="Password"
-        name="password"
-        rules={[{ required: true, message: 'Please input your password!' }]}
-      >
-        <Input.Password />
-      </Form.Item>
-      <Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>
-          Đăng nhập
-        </Button>
-      </Form.Item>
-    </Form>
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200">
+      <div className="w-full max-w-2xl p-16 bg-white rounded-xl shadow-2xl">
+        <h2 className="text-4xl font-bold text-center mb-10 text-blue-600">ĐĂNG NHẬP ADMIN</h2>
+        <Form onFinish={onFinish} layout="vertical">
+          <Form.Item
+            label={<div className="font-semibold text-xl">Email</div>}
+            name="email"
+            rules={[
+              { required: true, message: "Xin hãy nhập Email của bạn!" },
+              {
+                pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: "Vui lòng nhập địa chỉ Email hợp lệ!",
+              },
+            ]}
+          >
+            <Input placeholder="Nhập Email..." className="rounded-lg h-14 text-lg" />
+          </Form.Item>
+
+          <Form.Item
+            label={<div className="font-semibold text-xl">Mật khẩu</div>}
+            name="password"
+            rules={[{ required: true, message: "Xin hãy nhập mật khẩu của bạn!" }]}
+          >
+            <Input.Password placeholder="Nhập mật khẩu..." className="rounded-lg h-14 text-lg" />
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              className="w-full h-14 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg text-3xl"
+            >
+              Đăng nhập
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+    </div>
   );
 };
 

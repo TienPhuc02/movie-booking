@@ -17,8 +17,8 @@ const router = createBrowserRouter([
     element: <HomePage />,
   },
   {
-    path: "/login",
-    element: <LoginAdminPage />, // Trang đăng nhập
+    path: "/login/admin",
+    element: <LoginAdminPage />, // Trang đăng nhập admin
   },
 
   {

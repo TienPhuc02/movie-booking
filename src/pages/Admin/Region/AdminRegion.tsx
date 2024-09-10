@@ -120,7 +120,7 @@ const AdminRegion: React.FC = () => {
         handleCancel();
       }
     } catch (error) {
-      message.error("Đã xảy ra lỗi khi lấy danh sách thể loại.");
+      message.error("Đã xảy ra lỗi khi lấy danh sách quốc gia.");
     }
   };
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {

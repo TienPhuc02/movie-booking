@@ -169,29 +169,6 @@ const AdminGenre: React.FC = () => {
     setIsModalUpdateOpen(false);
   };
 
-  // const showDrawer = async (uuid: string) => {
-  //   try {
-  //     const res = await APIGetGenreDetail({ uuid });
-  //     // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
-  //     if (res && res.status === 200) {
-  //       setGenreDetail(res.data.data);
-  //       setOpen(true);
-  //     } else {
-  //       message.error("Không tìm thấy thông tin chi tiết.");
-  //     }
-  //   } catch (error: any) {
-  //     if (error.response) {
-  //       console.error(error.response.data);
-  //       const errorMessage =
-  //         error.response.data?.error?.errorMessage ||
-  //         "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
-  //       message.error(errorMessage);
-  //     } else {
-  //       message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
-  //     }
-  //   }
-  // };
-
   const onClose = () => {
     setOpen(false);
     // setGenreDetail(null);
@@ -339,21 +316,7 @@ const AdminGenre: React.FC = () => {
       dataIndex: "key",
       width: 50,
     },
-    // {
-    //   title: "UUID",
-    //   width: 200,
-    //   ...getColumnSearchProps("uuid"),
-    //   render: (record) => {
-    //     return (
-    //       <div
-    //         className="hover:text-[#4096ff] cursor-pointer"
-    //         onClick={() => showDrawer(record.uuid)} // Gọi showDrawer với uuid
-    //       >
-    //         {record.uuid}
-    //       </div>
-    //     );
-    //   },
-    // },
+
     {
       title: "Tên thể loại",
       dataIndex: "genreName",
@@ -374,12 +337,6 @@ const AdminGenre: React.FC = () => {
         );
       }
     },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   width: 50,
-    // },
     {
       title: "Hành động",
       width: 50,
@@ -415,29 +372,6 @@ const AdminGenre: React.FC = () => {
       <Button className="float-end mb-4" type="primary" onClick={showModal}>
         Thêm mới thể loại
       </Button>
-      {/* <Drawer
-        title="Chi tiết thể loại phim"
-        placement="right"
-        onClose={onClose}
-        open={open}
-        width={400}
-      >
-        {genreDetail ? (
-          <div>
-            <p>
-              <strong>UUID:</strong> {genreDetail.uuid}
-            </p>
-            <p>
-              <strong>Tên Thể Loại:</strong> {genreDetail.genreName}
-            </p>
-            <p>
-              <strong>Trạng Thái:</strong> {genreDetail.status}
-            </p>
-          </div>
-        ) : (
-          <p>Không có thông tin chi tiết để hiển thị.</p>
-        )}
-      </Drawer> */}
       <Modal
         title="Thêm mới thể loại"
         open={isModalOpen}

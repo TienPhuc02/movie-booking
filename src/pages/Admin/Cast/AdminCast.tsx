@@ -200,7 +200,7 @@ const AdminCast: React.FC = () => {
         handleCancel();
       }
     } catch (error) {
-      message.error('Đã xảy ra lỗi khi lấy danh sách thể loại.');
+      message.error('Đã xảy ra lỗi khi lấy danh sách diễn viên.');
     }
   };
   console.log('imagesUuid', imagesUuid);
@@ -405,21 +405,6 @@ const AdminCast: React.FC = () => {
       dataIndex: 'key',
       width: 50
     },
-    // {
-    //   title: "UUID",
-    //   width: 200,
-    //    ...getColumnSearchProps("uuid"),
-    //   render: (record) => {
-    //     return (
-    //       <div
-    //         className="hover:text-[#4096ff] cursor-pointer"
-    //         onClick={() => showDrawer(record.uuid)} // Gọi showDrawer với uuid
-    //       >
-    //         {record.uuid}
-    //       </div>
-    //     );
-    //   },
-    // },
     {
       title: 'Tên diễn viên',
       dataIndex: 'castName',
