@@ -84,7 +84,6 @@ const AdminDirector: React.FC = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [imagesUuid, setImagesUuid] = useState('');
   const baseURL = import.meta.env.VITE_BASE_URL; // Lấy base URL từ biến môi trường
-  const fullURL = baseURL + imagesUuid
   const handlePreviewCreateImage = async (file: UploadFile) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj as FileType);
@@ -96,8 +95,11 @@ const AdminDirector: React.FC = () => {
   // console.log('fileList,', fileList);
   const dummyRequestCreateImageCast = async ({ file, onSuccess }: any) => {
     console.log("Đây là file gì " + file);
-    const res = await APIUploadImage(file, '3');
-    // console.log(res);
+    const owner_uuid = directorDetail?.uuid || ""; // Lấy UUID của đạo diễn hiện tại
+    console.log(owner_uuid)
+    const owner_type = "director"; // Loại owner, bạn có thể tùy chỉnh giá trị này
+    const res = await APIUploadImage(file, '3', owner_uuid, owner_type);
+     console.log(res);
     if (res && res.status === 200) {
       setImagesUuid(res.data.data);
     }
@@ -409,6 +411,7 @@ const AdminDirector: React.FC = () => {
       key: 'imagesUuid',
       width: 60,
       render: () => {
+        const fullURL = imagesUuid ? `${baseURL}${imagesUuid}` : null;
         return fullURL ? (
           <Image
             width={70}
@@ -418,7 +421,6 @@ const AdminDirector: React.FC = () => {
             style={{ borderRadius: '50%', objectFit: 'cover' }}
           />
         ) : null;
-        
       },
     },
     {
