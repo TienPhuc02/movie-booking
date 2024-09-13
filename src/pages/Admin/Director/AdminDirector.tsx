@@ -83,6 +83,8 @@ const AdminDirector: React.FC = () => {
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [imagesUuid, setImagesUuid] = useState('');
+  const baseURL = import.meta.env.VITE_BASE_URL; // Lấy base URL từ biến môi trường
+  const fullURL = baseURL + imagesUuid
   const handlePreviewCreateImage = async (file: UploadFile) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj as FileType);
@@ -91,11 +93,11 @@ const AdminDirector: React.FC = () => {
     setPreviewImage(file.url || (file.preview as string));
     setPreviewOpen(true);
   };
-  console.log('fileList,', fileList);
+  // console.log('fileList,', fileList);
   const dummyRequestCreateImageCast = async ({ file, onSuccess }: any) => {
-    console.log(file);
+    console.log("Đây là file gì " + file);
     const res = await APIUploadImage(file, '3');
-    console.log(res);
+    // console.log(res);
     if (res && res.status === 200) {
       setImagesUuid(res.data.data);
     }
@@ -208,7 +210,7 @@ const AdminDirector: React.FC = () => {
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     const { birthday, ...restValues } = values;
     const birthdayFormat = formatToDateString(new Date(birthday));
-    const dataDirector = { ...restValues, birthday: birthdayFormat };
+    const dataDirector = { ...restValues, birthday: birthdayFormat, imagesUuid };
     try {
       const res = await APICreateDirector(dataDirector);
       // console.log(res);
@@ -232,7 +234,6 @@ const AdminDirector: React.FC = () => {
       }
     }
   };
-
   const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (
     errorInfo
   ) => {
@@ -402,7 +403,24 @@ const AdminDirector: React.FC = () => {
       dataIndex: 'key',
       width: 50
     },
-
+    {
+      title: 'Ảnh đại diện',
+      dataIndex: 'imagesUuid',
+      key: 'imagesUuid',
+      width: 60,
+      render: () => {
+        return fullURL ? (
+          <Image
+            width={70}
+            height={70}
+            src={fullURL}
+            alt="Ảnh đạo diễn"
+            style={{ borderRadius: '50%', objectFit: 'cover' }}
+          />
+        ) : null;
+        
+      },
+    },
     {
       title: 'Tên đạo diễn',
       dataIndex: 'directorName',
@@ -607,7 +625,29 @@ const AdminDirector: React.FC = () => {
               }}
             />
           </Form.Item>
-
+          <Form.Item<FieldType> label="Image" name="imagesUuid" rules={[]}>
+            <Upload
+              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+              listType="picture-circle"
+              fileList={fileList}
+              onPreview={handlePreviewCreateImage}
+              onChange={handleChangeCreateImage}
+              customRequest={dummyRequestCreateImageCast}
+            >
+              {fileList.length >= 8 ? null : uploadButton}
+            </Upload>
+            {previewImage && (
+              <Image
+                wrapperStyle={{ display: 'none' }}
+                preview={{
+                  visible: previewOpen,
+                  onVisibleChange: (visible) => setPreviewOpen(visible),
+                  afterOpenChange: (visible) => !visible && setPreviewImage('')
+                }}
+                src={previewImage}
+              />
+            )}
+          </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
               Cập nhật
