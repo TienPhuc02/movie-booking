@@ -56,7 +56,7 @@ interface DataType {
   birthday: string;
   description: string;
   status: number;
-  imagesUuid: string;
+  imageUrl: string;
 }
 
 type DataIndex = keyof DataType;
@@ -64,7 +64,7 @@ type DataIndex = keyof DataType;
 type FieldType = {
   directorName: string;
   birthday: string;
-  imagesUuid: string;
+  imageUrl: string;
   description: string;
 };
 
@@ -95,12 +95,10 @@ const AdminDirector: React.FC = () => {
   // console.log('fileList,', fileList);
   const dummyRequestCreateImageCast = async ({ file, onSuccess }: any) => {
     console.log("Đây là file gì " + file);
-    const owner_uuid = directorDetail?.uuid || ""; // Lấy UUID của đạo diễn hiện tại
-    console.log(owner_uuid)
-    const owner_type = "director"; // Loại owner, bạn có thể tùy chỉnh giá trị này
-    const res = await APIUploadImage(file, '3', owner_uuid, owner_type);
-     console.log(res);
+    const res = await APIUploadImage(file, '3');
+    console.log("Check var" + res);
     if (res && res.status === 200) {
+      console.log('UUID của ảnh:', res.data.data);
       setImagesUuid(res.data.data);
     }
     // form.setFieldsValue({ avatar: file as string });
@@ -215,7 +213,7 @@ const AdminDirector: React.FC = () => {
     const dataDirector = { ...restValues, birthday: birthdayFormat, imagesUuid };
     try {
       const res = await APICreateDirector(dataDirector);
-      // console.log(res);
+      console.log(res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
         getAllDirector();
@@ -407,11 +405,11 @@ const AdminDirector: React.FC = () => {
     },
     {
       title: 'Ảnh đại diện',
-      dataIndex: 'imagesUuid',
-      key: 'imagesUuid',
+      dataIndex: 'imageUrl',
+      key: 'imageUrl',
       width: 60,
-      render: () => {
-        const fullURL = imagesUuid ? `${baseURL}${imagesUuid}` : null;
+      render: (text, record) => {
+        const fullURL = record.imageUrl ? `${baseURL}${record.imageUrl}` : null;
         return fullURL ? (
           <Image
             width={70}
@@ -544,7 +542,7 @@ const AdminDirector: React.FC = () => {
               autoSize={{ minRows: 2, maxRows: 6 }}
             />
           </Form.Item>
-          <Form.Item<FieldType> label="Image" name="imagesUuid" rules={[]}>
+          <Form.Item<FieldType> label="Image" name="imageUrl" rules={[]}>
             <Upload
               action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               listType="picture-circle"
@@ -627,7 +625,7 @@ const AdminDirector: React.FC = () => {
               }}
             />
           </Form.Item>
-          <Form.Item<FieldType> label="Image" name="imagesUuid" rules={[]}>
+          <Form.Item<FieldType> label="Image" name="imageUrl" rules={[]}>
             <Upload
               action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               listType="picture-circle"

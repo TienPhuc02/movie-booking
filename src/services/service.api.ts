@@ -80,13 +80,11 @@ export const APIDeleteCast = (data: any) => {
 
 //Upload Image
 
-export const APIUploadImage = (FileData: string, Type: string, owner_uuid:string, owner_type :string) => {
+export const APIUploadImage = (FileData: string, Type: string) => {
   const formData = new FormData();
 
   if (FileData) formData.append('FileData', FileData);
   if (Type) formData.append('Type', Type);
-  if (owner_uuid) formData.append('owner_uuid', owner_uuid);
-  if (owner_type) formData.append('owner_type', owner_type);
   const config = {
     headers: { 'Content-Type': 'multipart/form-data' },
     // Authorization: `Bearer ${localStorage.getItem('access_token')}`
