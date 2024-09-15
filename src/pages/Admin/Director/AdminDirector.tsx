@@ -94,9 +94,9 @@ const AdminDirector: React.FC = () => {
   };
   // console.log('fileList,', fileList);
   const dummyRequestCreateImageCast = async ({ file, onSuccess }: any) => {
-    console.log("Đây là file gì " + file);
+    console.log('Đây là file gì ' + file);
     const res = await APIUploadImage(file, '3');
-    console.log("Check var" + res);
+    console.log('Check var' + res);
     if (res && res.status === 200) {
       console.log('UUID của ảnh:', res.data.data);
       setImagesUuid(res.data.data);
@@ -210,7 +210,11 @@ const AdminDirector: React.FC = () => {
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     const { birthday, ...restValues } = values;
     const birthdayFormat = formatToDateString(new Date(birthday));
-    const dataDirector = { ...restValues, birthday: birthdayFormat, imagesUuid };
+    const dataDirector = {
+      ...restValues,
+      birthday: birthdayFormat,
+      imagesUuid
+    };
     try {
       const res = await APICreateDirector(dataDirector);
       console.log(res);
@@ -241,7 +245,6 @@ const AdminDirector: React.FC = () => {
   };
   const showModal = () => {
     setIsModalOpen(true);
-    
   };
 
   const handleOk = () => {
@@ -409,7 +412,11 @@ const AdminDirector: React.FC = () => {
       key: 'imageUrl',
       width: 60,
       render: (text, record) => {
-        const fullURL = record.imageUrl ? `${baseURL}${record.imageUrl}` : null;
+        console.log(record);
+        const fullURL = record?.imageUrl
+          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${record?.imageUrl}`
+          : null;
+        console.log(fullURL);
         return fullURL ? (
           <Image
             width={70}
@@ -419,7 +426,7 @@ const AdminDirector: React.FC = () => {
             style={{ borderRadius: '50%', objectFit: 'cover' }}
           />
         ) : null;
-      },
+      }
     },
     {
       title: 'Tên đạo diễn',
