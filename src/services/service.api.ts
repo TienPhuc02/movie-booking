@@ -78,6 +78,17 @@ export const APIDeleteCast = (data: any) => {
   return instance.post('/api/v1/Cast/update_cast_status', data);
 };
 
+//Movie
+export const APICreateMovies = (data: any) => {
+  return instance.post('/api/v1/Movies/upsert_movies', data);
+};
+export const APIGetAllMovies = (data: any) => {
+  return instance.post('/api/v1/Movies/page_list_movies', data);
+};
+export const APIGetMoviesDetail = (data: any) => {
+  return instance.post('/api/v1/Movies/movies_detail', data);
+};
+
 //Upload Image
 
 export const APIUploadImage = (FileData: string, Type: string) => {

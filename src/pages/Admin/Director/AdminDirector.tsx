@@ -83,7 +83,7 @@ const AdminDirector: React.FC = () => {
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [imagesUuid, setImagesUuid] = useState('');
-  const baseURL = import.meta.env.VITE_BASE_URL; // Lấy base URL từ biến môi trường
+  // const baseURL = import.meta.env.VITE_BASE_URL; // Lấy base URL từ biến môi trường
   const handlePreviewCreateImage = async (file: UploadFile) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj as FileType);
@@ -130,6 +130,8 @@ const AdminDirector: React.FC = () => {
           description: directorDetail.description
         });
         setIsModalUpdateOpen(true);
+        // setFileList([]);
+        // setPreviewImage('');
       } else {
         message.error('Không tìm thấy thông tin chi tiết.');
       }
@@ -171,6 +173,8 @@ const AdminDirector: React.FC = () => {
         getAllDirector();
         formUpdate.resetFields();
         handleCancelUpdate();
+        setFileList([]);
+        setPreviewImage('');
       }
       // console.log("Success:", values);
     } catch (error: any) {
@@ -414,7 +418,9 @@ const AdminDirector: React.FC = () => {
       render: (text, record) => {
         console.log(record);
         const fullURL = record?.imageUrl
-          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${record?.imageUrl}`
+          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${
+              record?.imageUrl
+            }`
           : null;
         console.log(fullURL);
         return fullURL ? (
