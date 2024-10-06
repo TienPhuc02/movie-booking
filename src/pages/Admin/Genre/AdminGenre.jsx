@@ -1,5 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
-import { DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  SearchOutlined
+} from '@ant-design/icons';
 
 import {
   Button,
@@ -10,17 +14,16 @@ import {
   Modal,
   Popconfirm,
   Space,
-  Table,
-} from "antd";
-import Highlighter from "react-highlight-words";
-import "../../../css/AdminGenre.css";
+  Table
+} from 'antd';
+import Highlighter from 'react-highlight-words';
+import '../../../css/AdminGenre.css';
 import {
   APICreateGenre,
   APIGetAllGenre,
   APIGetGenreDetail,
-  APIDeleteGenre,
-} from "../../../services/service.api";
-
+  APIDeleteGenre
+} from '../../../services/service.api';
 
 const AdminGenre = () => {
   const [searchText, setSearchText] = useState("");
@@ -41,30 +44,28 @@ const AdminGenre = () => {
         const genreDetail = res.data.data;
         setGenreDetail(genreDetail);
         formUpdate.setFieldsValue({
-          genreName: genreDetail.genreName,
+          genreName: genreDetail.genreName
         });
         setIsModalUpdateOpen(true);
       } else {
-        message.error("Không tìm thấy thông tin chi tiết.");
+        message.error('Không tìm thấy thông tin chi tiết.');
       }
     } catch (error) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
+          'Đã xảy ra lỗi khi lấy thông tin chi tiết.';
         message.error(errorMessage);
       } else {
-        message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
+        message.error('Đã xảy ra lỗi khi lấy thông tin chi tiết.');
       }
     }
   };
-  const onFinishUpdateGenreName = async (
-    values
-  ) => {
+  const onFinishUpdateGenreName = async (values) => {
     try {
       const res = await APICreateGenre({
         uuid: genreDetail?.uuid,
-        genreName: values.genreName,
+        genreName: values.genreName
       });
       if (res && res.status === 200) {
         message.success(res?.data.error.errorMessage);
@@ -77,14 +78,14 @@ const AdminGenre = () => {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi update.";
+          'Đã xảy ra lỗi khi update.';
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
-          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
         );
       } else {
-        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
   };
@@ -101,39 +102,36 @@ const AdminGenre = () => {
         handleCancel();
       }
     } catch (error) {
-      message.error("Đã xảy ra lỗi khi lấy danh sách thể loại.");
+      message.error('Đã xảy ra lỗi khi lấy danh sách thể loại.');
     }
   };
-  
+
   const onFinish = async (values) => {
     try {
       const res = await APICreateGenre(values);
-   
+
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
         getAllGenre();
       }
- 
     } catch (error) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi thêm mới.";
+          'Đã xảy ra lỗi khi thêm mới.';
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
-          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
         );
       } else {
-        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
   };
 
-  const onFinishFailed= (
-    errorInfo
-  ) => {
-    console.log("Failed:", errorInfo);
+  const onFinishFailed = (errorInfo) => {
+    console.log('Failed:', errorInfo);
   };
   const showModal = () => {
     setIsModalOpen(true);
@@ -154,40 +152,36 @@ const AdminGenre = () => {
     setOpen(false);
     // setGenreDetail(null);
   };
-  const handleSearch = (
-    selectedKeys,
-    confirm,
-    dataIndex
-  ) => {
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
   const handleReset = (clearFilters) => {
     clearFilters();
-    setSearchText("");
+    setSearchText('');
   };
   const confirm = async (uuid) => {
     try {
-      const res = await APIDeleteGenre({ uuid, status:0});
+      const res = await APIDeleteGenre({ uuid, status: 0 });
       if (res && res.status === 200) {
-        message.success("Đã xoá thành công.");
+        message.success('Đã xoá thành công.');
         getAllGenre(); // Cập nhật lại danh sách genre sau khi xoá
       } else {
-        message.error("Xoá thất bại.");
+        message.error('Xoá thất bại.');
       }
     } catch (error) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi cập nhật status.";
+          'Đã xảy ra lỗi khi cập nhật status.';
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
-          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
         );
       } else {
-        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
   };
@@ -197,15 +191,13 @@ const AdminGenre = () => {
   //   message.error("Click on No");
   // };
 
-  const getColumnSearchProps = (
-    dataIndex
-  ) => ({
+  const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
       confirm,
       clearFilters,
-      close,
+      close
     }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
@@ -215,17 +207,13 @@ const AdminGenre = () => {
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
-          onPressEnter={() =>
-            handleSearch(selectedKeys , confirm, dataIndex)
-          }
-          style={{ marginBottom: 8, display: "block" }}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{ marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
             type="primary"
-            onClick={() =>
-              handleSearch(selectedKeys , confirm, dataIndex)
-            }
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
             icon={<SearchOutlined />}
             size="small"
             style={{ width: 90 }}
@@ -244,7 +232,7 @@ const AdminGenre = () => {
             size="small"
             onClick={() => {
               confirm({ closeDropdown: false });
-              setSearchText((selectedKeys )[0]);
+              setSearchText(selectedKeys[0]);
               setSearchedColumn(dataIndex);
             }}
           >
@@ -263,13 +251,10 @@ const AdminGenre = () => {
       </div>
     ),
     filterIcon: (filtered) => (
-      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
     onFilter: (value, record) =>
-      record[dataIndex]
-        .toString()
-        .toLowerCase()
-        .includes((value).toLowerCase()),
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.current?.select(), 100);
@@ -278,40 +263,40 @@ const AdminGenre = () => {
     render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
           searchWords={[searchText]}
           autoEscape
-          textToHighlight={text ? text.toString() : ""}
+          textToHighlight={text ? text.toString() : ''}
         />
       ) : (
         text
-      ),
+      )
   });
   const listGenreMap = listGenre.map((genre, index) => ({
     key: index + 1,
-    ...genre,
+    ...genre
   }));
   const columns = [
     {
-      title: "Id",
-      dataIndex: "key",
-      width: 50,
+      title: 'Id',
+      dataIndex: 'key',
+      width: 50
     },
 
     {
-      title: "Tên thể loại",
-      dataIndex: "genreName",
-      key: "genreName",
+      title: 'Tên thể loại',
+      dataIndex: 'genreName',
+      key: 'genreName',
 
-      ...getColumnSearchProps("genreName"),
+      ...getColumnSearchProps('genreName'),
       width: 100,
       sorter: (a, b) => a.genreName.length - b.genreName.length,
-      sortDirections: ["descend", "ascend"],
+      sortDirections: ['descend', 'ascend'],
       render: (genre, record) => {
         return (
           <div
-            // className="hover:text-[#4096ff] cursor-pointer"
-            // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
+          // className="hover:text-[#4096ff] cursor-pointer"
+          // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
           >
             {genre} {/* Hiển thị tên quốc gia */}
           </div>
@@ -319,7 +304,7 @@ const AdminGenre = () => {
       }
     },
     {
-      title: "Hành động",
+      title: 'Hành động',
       width: 50,
       render: (record) => (
         <div className="flex gap-4">
@@ -327,23 +312,23 @@ const AdminGenre = () => {
             title="Xoá thể loại"
             description="Bạn chắc chắn muốn xoá thể loại này?"
             onConfirm={() => confirm(record.uuid)}
-            
             okText={<>Có</>}
             cancelText="Không"
           >
-            <Button danger><DeleteOutlined /></Button>
+            <Button danger>
+              <DeleteOutlined />
+            </Button>
           </Popconfirm>
-          <Button 
-          type="text" 
-          className="bg-blue-700 text-white"
-          
-          onClick={() => showModalUpdate(record.uuid)}>
-
+          <Button
+            type="text"
+            className="bg-blue-700 text-white"
+            onClick={() => showModalUpdate(record.uuid)}
+          >
             <EditOutlined />
           </Button>
         </div>
-      ),
-    },
+      )
+    }
   ];
   useEffect(() => {
     getAllGenre();
@@ -374,9 +359,7 @@ const AdminGenre = () => {
           <Form.Item
             label="Tên thể loại"
             name="genreName"
-            rules={[
-              { required: true, message: "Nhập tên thể loại!" },
-            ]}
+            rules={[{ required: true, message: 'Nhập tên thể loại!' }]}
           >
             <Input />
           </Form.Item>
@@ -392,10 +375,8 @@ const AdminGenre = () => {
         title="Cập nhật thể loại"
         open={isModalUpdateOpen}
         onCancel={() => setIsModalUpdateOpen(false)}
-        footer ={
-          <Button onClick={() => setIsModalUpdateOpen(false)}>
-             Đóng
-          </Button>
+        footer={
+          <Button onClick={() => setIsModalUpdateOpen(false)}>Đóng</Button>
         }
       >
         <Form
@@ -412,7 +393,7 @@ const AdminGenre = () => {
           <Form.Item
             label="Tên thể loại"
             name="genreName"
-            rules={[{ required: true, message: "Nhập tên thể loại" }]}
+            rules={[{ required: true, message: 'Nhập tên thể loại' }]}
           >
             <Input />
           </Form.Item>
@@ -434,7 +415,7 @@ const AdminGenre = () => {
           },
           defaultPageSize: 10,
           showSizeChanger: true,
-          pageSizeOptions: ["5", "10", "20"],
+          pageSizeOptions: ['5', '10', '20']
         }}
       />
     </>

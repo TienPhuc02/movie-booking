@@ -2,8 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   DeleteOutlined,
   EditOutlined,
-  SearchOutlined,
-  PlusOutlined
+  SearchOutlined
 } from '@ant-design/icons';
 
 import {
@@ -15,11 +14,8 @@ import {
   Modal,
   Popconfirm,
   Space,
-  Table,
-  Upload,
-  Image
+  Table
 } from 'antd';
-
 import Highlighter from 'react-highlight-words';
 import '../../../css/AdminGenre.css';
 import {
@@ -29,9 +25,9 @@ import {
   APIDeleteDirector,
   APIUploadImage
 } from '../../../services/service.api';
-
+import { PlusOutlined } from '@ant-design/icons';
+import { Image, Upload } from 'antd';
 import moment from 'moment';
-
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -49,32 +45,37 @@ const AdminDirector = () => {
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
   const [formUpdate] = Form.useForm();
-  const [directorDetail, setDirectorDetail] =useState (null);
+  const [directorDetail, setDirectorDetail] = useState (null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState([]);
   const [imagesUuid, setImagesUuid] = useState('');
-
+  // const baseURL = import.meta.env.VITE_BASE_URL; // Lấy base URL từ biến môi trường
   const handlePreviewCreateImage = async (file) => {
     if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
+      file.preview = await getBase64(file.originFileObj );
     }
 
-    setPreviewImage(file.url || file.preview);
+    setPreviewImage(file.url || (file.preview));
     setPreviewOpen(true);
   };
-
+  // console.log('fileList,', fileList);
   const dummyRequestCreateImageCast = async ({ file, onSuccess }) => {
+    console.log('Đây là file gì ' + file);
     const res = await APIUploadImage(file, '3');
+    console.log('Check var' + res);
     if (res && res.status === 200) {
+      console.log('UUID của ảnh:', res.data.data);
       setImagesUuid(res.data.data);
     }
+    // form.setFieldsValue({ avatar: file as string });
+    // setAvatar(file as string);
     onSuccess('ok');
   };
-
-  const handleChangeCreateImage = ({ fileList: newFileList }) =>
-    setFileList(newFileList);
+  const handleChangeCreateImage = ({
+    fileList: newFileList
+  }) => setFileList(newFileList);
 
   const uploadButton = (
     <button style={{ border: 0, background: 'none' }} type="button">
@@ -86,15 +87,19 @@ const AdminDirector = () => {
   const showModalUpdate = async (uuid) => {
     try {
       const res = await APIGetDirectorDetail({ uuid });
+      console.log('update', res);
       if (res && res.status === 200) {
         const directorDetail = res.data.data;
         setDirectorDetail(directorDetail);
+        // console.log(directorDetail.birthday);
         formUpdate.setFieldsValue({
           directorName: directorDetail.directorName,
           birthday: moment(directorDetail.birthday, 'YYYY-MM-DD'),
           description: directorDetail.description
         });
         setIsModalUpdateOpen(true);
+        // setFileList([]);
+        // setPreviewImage('');
       } else {
         message.error('Không tìm thấy thông tin chi tiết.');
       }
@@ -116,25 +121,28 @@ const AdminDirector = () => {
     const day = String(dateObj.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
-
+  console.log("Nhanh lên còn đi ngủ",fileList)
   const onFinishUpdateDirectorInfor = async (values) => {
-    const { birthday } = values;
+    console.log("Nhanh lên đi trời", values)
+    const { birthday, ...restValues } = values;
     const birthdayObj = new Date(birthday);
     const birthdayFormat = formatToDateString(birthdayObj);
     try {
       const res = await APICreateDirector({
-        uuid: directorDetail?.uuid,
-        directorName: values.directorName,
+        uuid: directorDetail.uuid, // UUID của đạo diễn cần cập nhật
+        directorName: restValues.directorName,
         birthday: birthdayFormat,
-        description: values.description
+        description: restValues.description,
+        imageUrl: imagesUuid, // Gửi URL của ảnh nếu có
       });
+      
+      console.log('Response:', res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
-        getAllDirector();
-        formUpdate.resetFields();
-        handleCancelUpdate();
-        setFileList([]);
-        setPreviewImage('');
+        form.resetFields(); 
+        setFileList([]);    
+        setImagesUuid(''); 
+        getAllDirector();  
       }
     } catch (error) {
       if (error.response) {
@@ -151,15 +159,18 @@ const AdminDirector = () => {
       }
     }
   };
+  
 
   const getAllDirector = async () => {
     try {
       const res = await APIGetAllDirector({ pageSize: 10, page: 1 });
+      console.log(res.data.data);
       if (res && res.data && res.data.data) {
-        const filteredDirectors = res.data.data.items.filter(
+        // Lọc các region có status khác "0"
+        const filteredDirectors = res.data?.data?.items.filter(
           (director) => director.status !== 0
         );
-        setListDirector(filteredDirectors);
+        setListDirector(filteredDirectors); // Cập nhật danh sách director đã lọc
         form.resetFields();
         handleCancel();
       }
@@ -167,7 +178,7 @@ const AdminDirector = () => {
       message.error('Đã xảy ra lỗi khi lấy danh sách đạo diễn.');
     }
   };
-
+  console.log('imagesUuid', imagesUuid);
   const onFinish = async (values) => {
     const { birthday, ...restValues } = values;
     const birthdayFormat = formatToDateString(new Date(birthday));
@@ -178,10 +189,14 @@ const AdminDirector = () => {
     };
     try {
       const res = await APICreateDirector(dataDirector);
+      console.log(res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
+        form.resetFields();
+        setFileList([]);
         getAllDirector();
       }
+      // console.log("Success:", values);
     } catch (error) {
       if (error.response) {
         const errorMessage =
@@ -197,11 +212,11 @@ const AdminDirector = () => {
       }
     }
   };
-
-  const onFinishFailed = (errorInfo) => {
+  const onFinishFailed = (
+    errorInfo
+  ) => {
     console.log('Failed:', errorInfo);
   };
-
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -220,7 +235,15 @@ const AdminDirector = () => {
     setIsModalUpdateOpen(false);
   };
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  const onClose = () => {
+    setOpen(false);
+    setIsModalUpdateOpen(false);
+  };
+  const handleSearch = (
+    selectedKeys,
+    confirm,
+    dataIndex
+  ) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
@@ -230,48 +253,62 @@ const AdminDirector = () => {
     clearFilters();
     setSearchText('');
   };
-
-  const confirm = async (uuid) => {
+  const confirm = async (
+    uuid
+  ) => {
     try {
       const res = await APIDeleteDirector({ uuid, status: 0 });
       if (res && res.status === 200) {
         message.success('Đã xoá thành công.');
-        getAllDirector();
+        getAllDirector(); // Cập nhật lại danh sách director sau khi xoá
       } else {
         message.error('Xoá thất bại.');
       }
     } catch (error) {
       if (error.response) {
         const errorMessage =
-          error.response.data?.error?.errorMessage || 'Đã xảy ra lỗi khi xoá.';
+          error.response.data?.error?.errorMessage ||
+          'Đã xảy ra lỗi khi cập nhật status.';
         message.error(errorMessage);
+      } else if (error.request) {
+        message.error(
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
+        );
       } else {
-        message.error('Đã xảy ra lỗi khi xoá.');
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
   };
 
-  const getColumnSearchProps = (dataIndex) => ({
+  const getColumnSearchProps = (
+    dataIndex
+  ) => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
       confirm,
-      clearFilters
+      clearFilters,
+      close
     }) => (
-      <div style={{ padding: 8 }}>
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
-          placeholder={`Tìm kiếm ${dataIndex}`}
-          value={selectedKeys[0]}
-          onChange={(e) => {
-            setSelectedKeys(e.target.value ? [e.target.value] : []);
-          }}
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
           ref={searchInput}
+          placeholder={`Tìm kiếm đạo diễn`}
+          value={selectedKeys[0]}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() =>
+            handleSearch(selectedKeys, confirm, dataIndex)
+          }
+          style={{ marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
             type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            onClick={() =>
+              handleSearch(selectedKeys, confirm, dataIndex)
+            }
             icon={<SearchOutlined />}
             size="small"
             style={{ width: 90 }}
@@ -279,25 +316,46 @@ const AdminDirector = () => {
             Tìm kiếm
           </Button>
           <Button
-            onClick={() => handleReset(clearFilters)}
+            onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            Đặt lại
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({ closeDropdown: false });
+              setSearchText((selectedKeys )[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Lọc
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            Đóng
           </Button>
         </Space>
       </div>
     ),
     filterIcon: (filtered) => (
-      <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
     onFilter: (value, record) =>
-      String(record[dataIndex])
+      record[dataIndex]
+        .toString()
         .toLowerCase()
-        .includes(String(value).toLowerCase()),
-    onFilterDropdownVisibleChange: (visible) => {
+        .includes((value ).toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
       if (visible) {
-        setTimeout(() => searchInput.current?.select(), 0);
+        setTimeout(() => searchInput.current?.select(), 100);
       }
     },
     render: (text) =>
@@ -312,73 +370,125 @@ const AdminDirector = () => {
         text
       )
   });
-
-  useEffect(() => {
-    getAllDirector();
-  }, []);
-
+  const listDirectorMap = listDirector.map((director, index) => ({
+    key: index + 1,
+    ...director
+  }));
   const columns = [
+    {
+      title: 'Id',
+      dataIndex: 'key',
+      width: 50
+    },
+    {
+      title: 'Ảnh đại diện',
+      dataIndex: 'imageUrl',
+      key: 'imageUrl',
+      width: 60,
+      render: (text, record) => {
+        console.log(record);
+        const fullURL = record?.imageUrl
+          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${
+              record?.imageUrl
+            }`
+          : null;
+        console.log(fullURL);
+        return fullURL ? (
+          <Image
+            width={70}
+            height={70}
+            src={fullURL}
+            alt="Ảnh đạo diễn"
+            style={{ borderRadius: '50%', objectFit: 'cover' }}
+          />
+        ) : null;
+      }
+    },
     {
       title: 'Tên đạo diễn',
       dataIndex: 'directorName',
       key: 'directorName',
-      ...getColumnSearchProps('directorName')
+      ...getColumnSearchProps('directorName'),
+      width: 50,
+      sorter: (a, b) => a.directorName.length - b.directorName.length,
+      sortDirections: ['descend', 'ascend'],
+      render: (director, record) => {
+        return (
+          <div
+          // className="hover:text-[#4096ff] cursor-pointer"
+          // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
+          >
+            {director} {/* Hiển thị tên quốc gia */}
+          </div>
+        );
+      }
     },
     {
       title: 'Ngày sinh',
       dataIndex: 'birthday',
-      key: 'birthday'
+      key: 'birthday',
+      // ...getColumnSearchProps("birthday"),
+      width: 50
     },
     {
       title: 'Mô tả',
       dataIndex: 'description',
-      key: 'description'
+      key: 'description',
+      // ...getColumnSearchProps("description"),
+      width: 100,
+      render: (description) => (
+        <div className="truncate-description">{description}</div>
+      )
     },
-    {
-      title: 'Hình ảnh',
-      dataIndex: 'imageUrl',
-      key: 'imageUrl',
-      render: (imageUrl) => <Image width={50} src={imageUrl} />
-    },
+
     {
       title: 'Hành động',
-      key: 'action',
-      render: (_, record) => (
-        <Space size="middle">
+      width: 50,
+      render: (record) => (
+        <div className="flex gap-4">
           <Popconfirm
-            title="Bạn có chắc chắn muốn xoá không?"
+            title="Xoá đạo diễn"
+            description="Bạn muốn xoá đạo diễn này?"
             onConfirm={() => confirm(record.uuid)}
+            okText={<>Có</>}
+            cancelText="Không"
           >
-            <a>
+            <Button danger>
               <DeleteOutlined />
-            </a>
+            </Button>
           </Popconfirm>
-          <a onClick={() => showModalUpdate(record.uuid)}>
+          <Button
+            type="text"
+            className="bg-blue-700 text-white"
+            onClick={() => showModalUpdate(record.uuid)}
+          >
             <EditOutlined />
-          </a>
-        </Space>
+          </Button>
+        </div>
       )
     }
   ];
-
+  useEffect(() => {
+    getAllDirector();
+  }, []);
   return (
-    <div>
-      <Button type="primary" onClick={showModal}>
-        Thêm mới
+    <>
+      <Button className="float-end mb-4" type="primary" onClick={showModal}>
+        Thêm mới đạo diễn
       </Button>
-      <Table columns={columns} dataSource={listDirector} rowKey="uuid" />
       <Modal
         title="Thêm mới đạo diễn"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
-        footer={null}
+        footer={<></>}
       >
         <Form
           form={form}
           name="basic"
-          labelCol={{ span: 6 }}
-          wrapperCol={{ span: 18 }}
+          labelCol={{ span: 8 }}
+          wrapperCol={{ span: 16 }}
+          style={{ maxWidth: 600 }}
           initialValues={{ remember: true }}
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
@@ -387,35 +497,58 @@ const AdminDirector = () => {
           <Form.Item
             label="Tên đạo diễn"
             name="directorName"
-            rules={[{ required: true, message: 'Vui lòng nhập tên đạo diễn!' }]}
+            rules={[{ required: true, message: 'Hãy nhập tên đạo diễn!' }]}
           >
             <Input />
           </Form.Item>
+
           <Form.Item
             label="Ngày sinh"
             name="birthday"
-            rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}
+            rules={[
+              {
+                required: true,
+                message: 'Hãy nhập ngày sinh của bạn!'
+              }
+            ]}
           >
-            <DatePicker />
+            <DatePicker
+              placeholder="Ngày sinh"
+              variant="filled"
+              className="w-full"
+            />
           </Form.Item>
-          <Form.Item
-            label="Mô tả"
-            name="description"
-            rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
-          >
-            <Input.TextArea />
+
+          <Form.Item label="Mô tả" name="description" rules={[]}>
+            <Input.TextArea
+              placeholder="Nhập mô tả...."
+              autoSize={{ minRows: 2, maxRows: 6 }}
+            />
           </Form.Item>
-          <Form.Item label="Hình ảnh">
+          <Form.Item label="Image" name="imageUrl" rules={[]}>
             <Upload
-              customRequest={dummyRequestCreateImageCast}
+              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+              listType="picture-circle"
               fileList={fileList}
-              onChange={handleChangeCreateImage}
               onPreview={handlePreviewCreateImage}
+              onChange={handleChangeCreateImage}
+              customRequest={dummyRequestCreateImageCast}
             >
-              {fileList.length >= 1 ? null : uploadButton}
+              {fileList.length >= 8 ? null : uploadButton}
             </Upload>
+            {previewImage && (
+              <Image
+                wrapperStyle={{ display: 'none' }}
+                preview={{
+                  visible: previewOpen,
+                  onVisibleChange: (visible) => setPreviewOpen(visible),
+                  afterOpenChange: (visible) => !visible && setPreviewImage('')
+                }}
+                src={previewImage}
+              />
+            )}
           </Form.Item>
-          <Form.Item wrapperCol={{ offset: 6, span: 18 }}>
+          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
               Thêm mới
             </Button>
@@ -425,55 +558,100 @@ const AdminDirector = () => {
       <Modal
         title="Cập nhật đạo diễn"
         open={isModalUpdateOpen}
-        onCancel={handleCancelUpdate}
-        footer={null}
+        onCancel={() => setIsModalUpdateOpen(false)}
+        footer={
+          <Button onClick={() => setIsModalUpdateOpen(false)}>Đóng</Button>
+        }
       >
         <Form
           form={formUpdate}
-          name="update"
-          labelCol={{ span: 6 }}
-          wrapperCol={{ span: 18 }}
+          name="basic"
+          labelCol={{ span: 8 }}
+          wrapperCol={{ span: 16 }}
+          style={{ maxWidth: 600 }}
           initialValues={{ remember: true }}
           onFinish={onFinishUpdateDirectorInfor}
+          onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
           <Form.Item
             label="Tên đạo diễn"
             name="directorName"
-            rules={[{ required: true, message: 'Vui lòng nhập tên đạo diễn!' }]}
+            rules={[{ required: true, message: 'Hãy nhập tên đạo diễn!' }]}
           >
             <Input />
           </Form.Item>
+
           <Form.Item
             label="Ngày sinh"
             name="birthday"
-            rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}
+            rules={[
+              {
+                required: true,
+                message: 'Hãy nhập ngày sinh của bạn!'
+              }
+            ]}
           >
-            <DatePicker />
+            <DatePicker
+              placeholder="Ngày sinh"
+              variant="filled"
+              className="w-full"
+            />
           </Form.Item>
-          <Form.Item
-            label="Mô tả"
-            name="description"
-            rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
-          >
-            <Input.TextArea />
+
+          <Form.Item label="Mô tả" name="description" rules={[]}>
+            <Input.TextArea
+              placeholder="Nhập mô tả...."
+              autoSize={{ minRows: 2, maxRows: 6 }}
+              onChange={(e) => {
+                // Optional: Handle text area change if needed
+              }}
+            />
           </Form.Item>
-          <Form.Item wrapperCol={{ offset: 6, span: 18 }}>
+          <Form.Item label="Image" name="imageUrl" rules={[]}>
+            <Upload
+              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+              listType="picture-circle"
+              fileList={fileList}
+              onPreview={handlePreviewCreateImage}
+              onChange={handleChangeCreateImage}
+              customRequest={dummyRequestCreateImageCast}
+            >
+              {fileList.length >= 8 ? null : uploadButton}
+            </Upload>
+            {previewImage && (
+              <Image
+                wrapperStyle={{ display: 'none' }}
+                preview={{
+                  visible: previewOpen,
+                  onVisibleChange: (visible) => setPreviewOpen(visible),
+                  afterOpenChange: (visible) => !visible && setPreviewImage('')
+                }}
+                src={previewImage}
+              />
+            )}
+          </Form.Item>
+          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
               Cập nhật
             </Button>
           </Form.Item>
         </Form>
       </Modal>
-      <Modal
-        open={previewOpen}
-        title="Preview Image"
-        footer={null}
-        onCancel={() => setPreviewOpen(false)}
-      >
-        <img alt="Preview" style={{ width: '100%' }} src={previewImage} />
-      </Modal>
-    </div>
+      <Table
+        columns={columns}
+        dataSource={listDirectorMap}
+        scroll={{ x: 1000, y: 500 }}
+        pagination={{
+          showTotal: (total, range) => {
+            return `${range[0]}-${range[1]} of ${total} items`;
+          },
+          defaultPageSize: 10,
+          showSizeChanger: true,
+          pageSizeOptions: ['5', '10', '20']
+        }}
+      />
+    </>
   );
 };
 
