@@ -1,12 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
-import type {
-  FormProps,
-  InputRef,
-  PopconfirmProps,
-  TableColumnsType,
-  TableColumnType,
-} from "antd";
+
 import {
   Button,
   Drawer,
@@ -18,7 +12,6 @@ import {
   Space,
   Table,
 } from "antd";
-import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
 import "../../../css/AdminGenre.css";
 import {
@@ -27,21 +20,9 @@ import {
   APIGetGenreDetail,
   APIDeleteGenre,
 } from "../../../services/service.api";
-interface DataType {
-  id: string;
-  uuid: string;
-  genreName: string;
-  timeCreated:string;
-  status: number;
-}
 
-type DataIndex = keyof DataType;
 
-type FieldType = {
-  genreName: string;
-};
-
-const AdminGenre: React.FC = () => {
+const AdminGenre = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
@@ -53,7 +34,7 @@ const AdminGenre: React.FC = () => {
   const [genreDetail, setGenreDetail] = useState<DataType | null>(null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
 
-  const showModalUpdate = async (uuid: string) => {
+  const showModalUpdate = async (uuid) => {
     try {
       const res = await APIGetGenreDetail({ uuid });
       if (res && res.status === 200) {
@@ -66,7 +47,7 @@ const AdminGenre: React.FC = () => {
       } else {
         message.error("Không tìm thấy thông tin chi tiết.");
       }
-    } catch (error: any) {
+    } catch (error) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
@@ -77,7 +58,7 @@ const AdminGenre: React.FC = () => {
       }
     }
   };
-  const onFinishUpdateGenreName: FormProps<FieldType>["onFinish"] = async (
+  const onFinishUpdateGenreName = async (
     values
   ) => {
     try {
@@ -92,7 +73,7 @@ const AdminGenre: React.FC = () => {
         handleCancelUpdate();
       }
       // console.log("Success:", values);
-    } catch (error: any) {
+    } catch (error) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
@@ -107,13 +88,13 @@ const AdminGenre: React.FC = () => {
       }
     }
   };
-  const getAllGenre = async (): Promise<void> => {
+  const getAllGenre = async () => {
     try {
       const res = await APIGetAllGenre({ pageSize: 10, page: 1 });
       console.log(res);
       if (res && res.data && res.data.data) {
         const filteredGenres = res.data?.data?.items.filter(
-          (genre: DataType) => genre.status !== 0
+          (genre) => genre.status !== 0
         );
         setListGenre(filteredGenres); // Cập nhật danh sách genre đã lọc
         form.resetFields();
@@ -124,7 +105,7 @@ const AdminGenre: React.FC = () => {
     }
   };
   
-  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+  const onFinish = async (values) => {
     try {
       const res = await APICreateGenre(values);
    
@@ -133,7 +114,7 @@ const AdminGenre: React.FC = () => {
         getAllGenre();
       }
  
-    } catch (error: any) {
+    } catch (error) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
@@ -149,7 +130,7 @@ const AdminGenre: React.FC = () => {
     }
   };
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+  const onFinishFailed= (
     errorInfo
   ) => {
     console.log("Failed:", errorInfo);
@@ -174,19 +155,19 @@ const AdminGenre: React.FC = () => {
     // setGenreDetail(null);
   };
   const handleSearch = (
-    selectedKeys: string[],
-    confirm: FilterDropdownProps["confirm"],
-    dataIndex: DataIndex
+    selectedKeys,
+    confirm,
+    dataIndex
   ) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
-  const handleReset = (clearFilters: () => void) => {
+  const handleReset = (clearFilters) => {
     clearFilters();
     setSearchText("");
   };
-  const confirm: PopconfirmProps["onConfirm"] = async (uuid: string): Promise<void> => {
+  const confirm = async (uuid) => {
     try {
       const res = await APIDeleteGenre({ uuid, status:0});
       if (res && res.status === 200) {
@@ -195,7 +176,7 @@ const AdminGenre: React.FC = () => {
       } else {
         message.error("Xoá thất bại.");
       }
-    } catch (error: any) {
+    } catch (error) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
@@ -217,8 +198,8 @@ const AdminGenre: React.FC = () => {
   // };
 
   const getColumnSearchProps = (
-    dataIndex: DataIndex
-  ): TableColumnType<DataType> => ({
+    dataIndex
+  ) => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
@@ -235,7 +216,7 @@ const AdminGenre: React.FC = () => {
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() =>
-            handleSearch(selectedKeys as string[], confirm, dataIndex)
+            handleSearch(selectedKeys , confirm, dataIndex)
           }
           style={{ marginBottom: 8, display: "block" }}
         />
@@ -243,7 +224,7 @@ const AdminGenre: React.FC = () => {
           <Button
             type="primary"
             onClick={() =>
-              handleSearch(selectedKeys as string[], confirm, dataIndex)
+              handleSearch(selectedKeys , confirm, dataIndex)
             }
             icon={<SearchOutlined />}
             size="small"
@@ -263,7 +244,7 @@ const AdminGenre: React.FC = () => {
             size="small"
             onClick={() => {
               confirm({ closeDropdown: false });
-              setSearchText((selectedKeys as string[])[0]);
+              setSearchText((selectedKeys )[0]);
               setSearchedColumn(dataIndex);
             }}
           >
@@ -281,14 +262,14 @@ const AdminGenre: React.FC = () => {
         </Space>
       </div>
     ),
-    filterIcon: (filtered: boolean) => (
+    filterIcon: (filtered) => (
       <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
     ),
     onFilter: (value, record) =>
       record[dataIndex]
         .toString()
         .toLowerCase()
-        .includes((value as string).toLowerCase()),
+        .includes((value).toLowerCase()),
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.current?.select(), 100);
@@ -310,7 +291,7 @@ const AdminGenre: React.FC = () => {
     key: index + 1,
     ...genre,
   }));
-  const columns: TableColumnsType<DataType> = [
+  const columns = [
     {
       title: "Id",
       dataIndex: "key",
@@ -326,7 +307,7 @@ const AdminGenre: React.FC = () => {
       width: 100,
       sorter: (a, b) => a.genreName.length - b.genreName.length,
       sortDirections: ["descend", "ascend"],
-      render: (genre: string, record: DataType) => {
+      render: (genre, record) => {
         return (
           <div
             // className="hover:text-[#4096ff] cursor-pointer"
@@ -390,7 +371,7 @@ const AdminGenre: React.FC = () => {
           onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
-          <Form.Item<FieldType>
+          <Form.Item
             label="Tên thể loại"
             name="genreName"
             rules={[
