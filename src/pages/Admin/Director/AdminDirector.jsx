@@ -43,14 +43,13 @@ const getBase64 = (file) =>
 const AdminDirector = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
-  const searchInput = useRef < InputRef > null;
+  const searchInput = useRef(null);
   const [listDirector, setListDirector] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
   const [formUpdate] = Form.useForm();
-  const [directorDetail, setDirectorDetail] =
-    (useState < DataType) | (null > null);
+  const [directorDetail, setDirectorDetail] =useState (null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');

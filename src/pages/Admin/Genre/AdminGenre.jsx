@@ -25,13 +25,13 @@ import {
 const AdminGenre = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
-  const searchInput = useRef<InputRef>(null);
+  const searchInput = useRef(null);
   const [listGenre, setListGenre] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
   const [formUpdate] = Form.useForm();
-  const [genreDetail, setGenreDetail] = useState<DataType | null>(null);
+  const [genreDetail, setGenreDetail] = useState(null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
 
   const showModalUpdate = async (uuid) => {

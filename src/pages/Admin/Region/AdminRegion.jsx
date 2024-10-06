@@ -29,13 +29,13 @@ import {
 const AdminRegion = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
-  const searchInput = useRef < InputRef > null;
+  const searchInput = useRef (null);
   const [listRegion, setListRegion] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
   const [formUpdate] = Form.useForm();
-  const [regionDetail, setRegionDetail] = (useState < DataType) | (null > null);
+  const [regionDetail, setRegionDetail] = useState (null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
 
   const showModalUpdate = async (uuid) => {
