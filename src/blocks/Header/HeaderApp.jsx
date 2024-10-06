@@ -1,21 +1,21 @@
-import { useState } from "react";
-import LoginPage from "../../pages/User/LoginPage";
-import RegisterPage from "../../pages/User/RegisterPage";
-import { DownOutlined } from "@ant-design/icons";
-import { Dropdown, Form, MenuProps } from "antd";
+import { useState } from 'react';
+import LoginPage from '../../pages/User/LoginPage';
+import RegisterPage from '../../pages/User/RegisterPage';
+import { DownOutlined } from '@ant-design/icons';
+import { Dropdown } from 'antd';
 
 const HeaderApp = () => {
   const [isModalLoginOpen, setIsModalLoginOpen] = useState(false);
   const [isModalRegisterOpen, setIsModalRegisterOpen] = useState(false);
   const items = [
     {
-      key: "1",
-      label: <div className="text-center font-semibold">Phim Đang Chiếu</div>,
+      key: '1',
+      label: <div className="text-center font-semibold">Phim Đang Chiếu</div>
     },
     {
-      key: "2",
-      label: <div className="text-center font-semibold">Phim Sắp Chiếu</div>,
-    },
+      key: '2',
+      label: <div className="text-center font-semibold">Phim Sắp Chiếu</div>
+    }
   ];
   const showModalLogin = () => {
     setIsModalLoginOpen(true);
