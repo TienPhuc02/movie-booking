@@ -1,12 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
-import { DeleteOutlined, EditOutlined, EditTwoTone, SearchOutlined } from "@ant-design/icons";
-import type {
-  FormProps,
-  InputRef,
-  PopconfirmProps,
-  TableColumnsType,
-  TableColumnType,
-} from "antd";
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EditTwoTone,
+  SearchOutlined
+} from '@ant-design/icons';
+
 import {
   Button,
   Drawer,
@@ -16,73 +15,58 @@ import {
   Modal,
   Popconfirm,
   Space,
-  Table,
-} from "antd";
-import type { FilterDropdownProps } from "antd/es/table/interface";
-import Highlighter from "react-highlight-words";
-import "../../../css/AdminGenre.css";
+  Table
+} from 'antd';
+import Highlighter from 'react-highlight-words';
+import '../../../css/AdminGenre.css';
 import {
-    APICreateRegion,
-    APIGetAllRegion,
-    APIGetRegionDetail,
-    APIDeleteRegion
-} from "../../../services/service.api";
-interface DataType {
-  id: string;
-  uuid: string;
-  regionName: string;
-  status: number;
-}
+  APICreateRegion,
+  APIGetAllRegion,
+  APIGetRegionDetail,
+  APIDeleteRegion
+} from '../../../services/service.api';
 
-type DataIndex = keyof DataType;
-
-type FieldType = {
-  regionName: string;
-};
-
-const AdminRegion: React.FC = () => {
-  const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const searchInput = useRef<InputRef>(null);
+const AdminRegion = () => {
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef < InputRef > null;
   const [listRegion, setListRegion] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
   const [formUpdate] = Form.useForm();
-  const [regionDetail, setRegionDetail] = useState<DataType | null>(null);
+  const [regionDetail, setRegionDetail] = (useState < DataType) | (null > null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
 
-  const showModalUpdate = async (uuid: string) => {
+  const showModalUpdate = async (uuid) => {
     try {
       const res = await APIGetRegionDetail({ uuid });
       if (res && res.status === 200) {
         const regionDetail = res.data.data;
         setRegionDetail(regionDetail);
         formUpdate.setFieldsValue({
-          regionName: regionDetail.regionName,
+          regionName: regionDetail.regionName
         });
         setIsModalUpdateOpen(true);
       } else {
-        message.error("Không tìm thấy thông tin chi tiết.");
+        message.error('Không tìm thấy thông tin chi tiết.');
       }
-    } catch (error: any) {
+    } catch (error) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
+          'Đã xảy ra lỗi khi lấy thông tin chi tiết.';
         message.error(errorMessage);
       } else {
-        message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
+        message.error('Đã xảy ra lỗi khi lấy thông tin chi tiết.');
       }
     }
   };
-  const onFinishUpdateRegionName: FormProps<FieldType>["onFinish"] = async (
-    values
-  ) => {
+  const onFinishUpdateRegionName = async (values) => {
     try {
       const res = await APICreateRegion({
         uuid: regionDetail.uuid,
-        regionName: values.regionName,
+        regionName: values.regionName
       });
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
@@ -91,68 +75,65 @@ const AdminRegion: React.FC = () => {
         handleCancelUpdate();
       }
       // console.log("Success:", values);
-    } catch (error: any) {
+    } catch (error) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi update.";
+          'Đã xảy ra lỗi khi update.';
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
-          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
         );
       } else {
-        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
   };
 
-  const getAllRegion = async (): Promise<void> => {
+  const getAllRegion = async () => {
     try {
       const res = await APIGetAllRegion({ pageSize: 10, page: 1 });
       if (res && res.data && res.data.data) {
         // Lọc các region có status khác "0"
         const filteredRegions = res.data?.data?.items.filter(
-          (region: DataType) => region.status !== 0
+          (region) => region.status !== 0
         );
         setListRegion(filteredRegions); // Cập nhật danh sách region đã lọc
         form.resetFields();
         handleCancel();
       }
     } catch (error) {
-      message.error("Đã xảy ra lỗi khi lấy danh sách quốc gia.");
+      message.error('Đã xảy ra lỗi khi lấy danh sách quốc gia.');
     }
   };
-  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    try{
-    const res = await APICreateRegion(values);
-    // console.log(res);
-    if (res && res.status === 200) {
-      message.success(res.data.error.errorMessage);
-      getAllRegion();
-    }
-    // console.log("Success:", values);
-    }catch(error:any){
+  const onFinish = async (values) => {
+    try {
+      const res = await APICreateRegion(values);
+      // console.log(res);
+      if (res && res.status === 200) {
+        message.success(res.data.error.errorMessage);
+        getAllRegion();
+      }
+      // console.log("Success:", values);
+    } catch (error) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi thêm mới.";
+          'Đã xảy ra lỗi khi thêm mới.';
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
-          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
         );
       } else {
-        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
-      
   };
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
-    errorInfo
-  ) => {
-    console.log("Failed:", errorInfo);
+  const onFinishFailed = (errorInfo) => {
+    console.log('Failed:', errorInfo);
   };
   const showModal = () => {
     setIsModalOpen(true);
@@ -192,60 +173,53 @@ const AdminRegion: React.FC = () => {
   //     }
   //   }
   // };
-  
 
   const onClose = () => {
     setOpen(false);
-    setIsModalUpdateOpen(false)
+    setIsModalUpdateOpen(false);
   };
-  const handleSearch = (
-    selectedKeys: string[],
-    confirm: FilterDropdownProps["confirm"],
-    dataIndex: DataIndex
-  ) => {
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
 
-  const handleReset = (clearFilters: () => void) => {
+  const handleReset = (clearFilters) => {
     clearFilters();
-    setSearchText("");
+    setSearchText('');
   };
-  const confirm: PopconfirmProps["onConfirm"] = async (uuid: string): Promise<void> => {
+  const confirm = async (uuid) => {
     try {
-      const res = await APIDeleteRegion({ uuid, status:0});
+      const res = await APIDeleteRegion({ uuid, status: 0 });
       if (res && res.status === 200) {
-        message.success("Đã xoá thành công.");
+        message.success('Đã xoá thành công.');
         getAllRegion(); // Cập nhật lại danh sách region sau khi xoá
       } else {
-        message.error("Xoá thất bại.");
+        message.error('Xoá thất bại.');
       }
-    } catch (error: any) {
+    } catch (error) {
       if (error.response) {
         const errorMessage =
           error.response.data?.error?.errorMessage ||
-          "Đã xảy ra lỗi khi cập nhật status.";
+          'Đã xảy ra lỗi khi cập nhật status.';
         message.error(errorMessage);
       } else if (error.request) {
         message.error(
-          "Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
         );
       } else {
-        message.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     }
   };
 
-  const getColumnSearchProps = (
-    dataIndex: DataIndex
-  ): TableColumnType<DataType> => ({
+  const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
       confirm,
       clearFilters,
-      close,
+      close
     }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
@@ -255,17 +229,13 @@ const AdminRegion: React.FC = () => {
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
-          onPressEnter={() =>
-            handleSearch(selectedKeys as string[], confirm, dataIndex)
-          }
-          style={{ marginBottom: 8, display: "block" }}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{ marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
             type="primary"
-            onClick={() =>
-              handleSearch(selectedKeys as string[], confirm, dataIndex)
-            }
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
             icon={<SearchOutlined />}
             size="small"
             style={{ width: 90 }}
@@ -284,7 +254,7 @@ const AdminRegion: React.FC = () => {
             size="small"
             onClick={() => {
               confirm({ closeDropdown: false });
-              setSearchText((selectedKeys as string[])[0]);
+              setSearchText(selectedKeys[0]);
               setSearchedColumn(dataIndex);
             }}
           >
@@ -302,14 +272,11 @@ const AdminRegion: React.FC = () => {
         </Space>
       </div>
     ),
-    filterIcon: (filtered: boolean) => (
-      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+    filterIcon: (filtered) => (
+      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
     onFilter: (value, record) =>
-      record[dataIndex]
-        .toString()
-        .toLowerCase()
-        .includes((value as string).toLowerCase()),
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.current?.select(), 100);
@@ -318,24 +285,24 @@ const AdminRegion: React.FC = () => {
     render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
           searchWords={[searchText]}
           autoEscape
-          textToHighlight={text ? text.toString() : ""}
+          textToHighlight={text ? text.toString() : ''}
         />
       ) : (
         text
-      ),
+      )
   });
   const listRegionMap = listRegion.map((region, index) => ({
     key: index + 1,
-    ...region,
+    ...region
   }));
-  const columns: TableColumnsType<DataType> = [
+  const columns = [
     {
-      title: "Id",
-      dataIndex: "key",
-      width:50,
+      title: 'Id',
+      dataIndex: 'key',
+      width: 50
     },
     // {
     //   title: "UUID",
@@ -353,18 +320,18 @@ const AdminRegion: React.FC = () => {
     //   },
     // },
     {
-      title: "Tên quốc gia",
-      dataIndex: "regionName",
-      key: "regionName",
-      ...getColumnSearchProps("regionName"),
+      title: 'Tên quốc gia',
+      dataIndex: 'regionName',
+      key: 'regionName',
+      ...getColumnSearchProps('regionName'),
       width: 100,
       sorter: (a, b) => a.regionName.length - b.regionName.length,
-      sortDirections: ["descend", "ascend"],
-      render: (region: string, record: DataType) => {
+      sortDirections: ['descend', 'ascend'],
+      render: (region, record) => {
         return (
           <div
-            // className="hover:text-[#4096ff] cursor-pointer"
-            // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
+          // className="hover:text-[#4096ff] cursor-pointer"
+          // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
           >
             {region} {/* Hiển thị tên quốc gia */}
           </div>
@@ -378,8 +345,8 @@ const AdminRegion: React.FC = () => {
     //   width:50,
     // },
     {
-      title: "Hành động",
-      width:50,
+      title: 'Hành động',
+      width: 50,
       render: (record) => (
         <div className="flex gap-4">
           <Popconfirm
@@ -389,19 +356,20 @@ const AdminRegion: React.FC = () => {
             okText={<>Có</>}
             cancelText="Không"
           >
-            <Button danger><DeleteOutlined /></Button>
+            <Button danger>
+              <DeleteOutlined />
+            </Button>
           </Popconfirm>
-          <Button 
-          type="text" 
-          className="bg-blue-700 text-white"
-          
-          onClick={() => showModalUpdate(record.uuid)}>
-
+          <Button
+            type="text"
+            className="bg-blue-700 text-white"
+            onClick={() => showModalUpdate(record.uuid)}
+          >
             <EditOutlined />
           </Button>
         </div>
-      ),
-    },
+      )
+    }
   ];
   useEffect(() => {
     getAllRegion();
@@ -411,7 +379,7 @@ const AdminRegion: React.FC = () => {
       <Button className="float-end mb-4" type="primary" onClick={showModal}>
         Thêm mới quốc gia
       </Button>
-       {/* <Drawer
+      {/* <Drawer
         title="Chi tiết quốc gia"
         placement="right"
         onClose={onClose}
@@ -447,19 +415,17 @@ const AdminRegion: React.FC = () => {
           onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
-          <Form.Item<FieldType>
+          <Form.Item
             label="Tên quốc gia"
             name="regionName"
-            rules={[
-              { required: true, message: "Nhập tên quốc gia!" },
-            ]}
+            rules={[{ required: true, message: 'Nhập tên quốc gia!' }]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
-              Thêm mới 
+              Thêm mới
             </Button>
           </Form.Item>
         </Form>
@@ -468,10 +434,8 @@ const AdminRegion: React.FC = () => {
         title="Cập nhật quốc gia"
         open={isModalUpdateOpen}
         onCancel={() => setIsModalUpdateOpen(false)}
-        footer ={
-          <Button onClick={() => setIsModalUpdateOpen(false)}>
-             Đóng
-          </Button>
+        footer={
+          <Button onClick={() => setIsModalUpdateOpen(false)}>Đóng</Button>
         }
       >
         <Form
@@ -484,12 +448,11 @@ const AdminRegion: React.FC = () => {
           onFinish={onFinishUpdateRegionName}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
-          
         >
           <Form.Item
             label="Tên quốc gia"
             name="regionName"
-            rules={[{ required: true, message: "Nhập tên quốc gia!" }]}
+            rules={[{ required: true, message: 'Nhập tên quốc gia!' }]}
           >
             <Input />
           </Form.Item>
@@ -502,7 +465,6 @@ const AdminRegion: React.FC = () => {
         </Form>
       </Modal>
       <Table
-
         columns={columns}
         dataSource={listRegionMap}
         scroll={{ x: 1000, y: 500 }}
@@ -512,7 +474,7 @@ const AdminRegion: React.FC = () => {
           },
           defaultPageSize: 10,
           showSizeChanger: true,
-          pageSizeOptions: ["5", "10", "20"],
+          pageSizeOptions: ['5', '10', '20']
         }}
       />
     </>

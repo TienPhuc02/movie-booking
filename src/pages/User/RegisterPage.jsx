@@ -1,39 +1,24 @@
 import { Col, DatePicker, message, Modal, Radio, Row } from "antd";
-import type { FormProps, RadioChangeEvent } from "antd";
 import { Button, Form, Input } from "antd";
 import { useState } from "react";
 import { APIRegister } from "../../services/service.api";
 
-type PropRegisterPage = {
-  isModalRegisterOpen: boolean;
-  handleModalRegisterCancel: () => void;
-  showModalLogin: () => void;
-};
 
-type FieldType = {
-  email: string;
-  fullname: string;
-  gender: number;
-  birthday: string;
-  phoneNumber: string;
-  password: string;
-  password2: string;
-};
 
 const RegisterPage = ({
   isModalRegisterOpen,
   handleModalRegisterCancel,
   showModalLogin,
-}: PropRegisterPage) => {
+}) => {
   const [value, setValue] = useState(1);
   const [form] = Form.useForm();
 
-  const onChange = (e: RadioChangeEvent) => {
+  const onChange = (e) => {
     console.log("radio checked", e.target.value);
     setValue(e.target.value);
   };
 
-  const handleFullnameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFullnameChange = (e) => {
     const inputValue = e.target.value;
     
     // Chỉ xử lý khi người dùng dừng nhập
@@ -42,12 +27,12 @@ const RegisterPage = ({
     form.setFieldsValue({ fullname: formattedValue });
   };
 
-  const onFinish = async (values: FieldType) => {
+  const onFinish = async (values) => {
     const { birthday, ...restValues } = values;
 
     const birthdayObj = new Date(birthday);
 
-    const formatToDateString = (dateObj: Date) => {
+    const formatToDateString = (dateObj) => {
       const year = dateObj.getFullYear();
       const month = String(dateObj.getMonth() + 1).padStart(2, "0");
       const day = String(dateObj.getDate()).padStart(2, "0");
@@ -69,7 +54,7 @@ const RegisterPage = ({
         handleModalRegisterCancel();
         form.resetFields();
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed:", error);
 
       if (error.response) {
@@ -87,7 +72,7 @@ const RegisterPage = ({
     }
   };
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+  const onFinishFailed = (
     errorInfo
   ) => {
     console.log("Failed:", errorInfo);
@@ -127,7 +112,7 @@ const RegisterPage = ({
             >
               <Row gutter={[16, 16]}>
                 <Col span={12}>
-                  <Form.Item<FieldType>
+                  <Form.Item
                     label={<div className="font-semibold">Email</div>}
                     name="email"
                     rules={[
@@ -145,7 +130,7 @@ const RegisterPage = ({
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item<FieldType>
+                  <Form.Item
                     label={<div className="font-semibold">Họ Tên</div>}
                     name="fullname"
                     rules={[
@@ -168,7 +153,7 @@ const RegisterPage = ({
               </Row>
               <Row gutter={[16, 16]}>
                 <Col span={12}>
-                  <Form.Item<FieldType>
+                  <Form.Item
                     label={<div className="font-semibold">Số điện thoại</div>}
                     name="phoneNumber"
                     rules={[
@@ -188,7 +173,7 @@ const RegisterPage = ({
                 </Col>
 
                 <Col span={12}>
-                  <Form.Item<FieldType>
+                  <Form.Item
                     label={<div className="font-semibold">Ngày sinh</div>}
                     name="birthday"
                     rules={[
@@ -208,7 +193,7 @@ const RegisterPage = ({
               </Row>
               <Row gutter={[16, 16]}>
                 <Col span={12}>
-                  <Form.Item<FieldType>
+                  <Form.Item
                     label={<div className="font-semibold">Mật khẩu</div>}
                     name="password"
                     rules={[
@@ -222,7 +207,7 @@ const RegisterPage = ({
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item<FieldType>
+                  <Form.Item
                     label={
                       <div className="font-semibold">Xác nhận mật khẩu </div>
                     }
@@ -238,7 +223,7 @@ const RegisterPage = ({
                   </Form.Item>
                 </Col>
               </Row>
-              <Form.Item<FieldType>
+              <Form.Item
                 label={<div className="font-semibold">Giới tính</div>}
                 name="gender"
                 rules={[

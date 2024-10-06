@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Result } from "antd";
 import { useNavigate } from "react-router-dom";
 
-const NotPermission: React.FC = () => {
+const NotPermission = () => {
   const navigate = useNavigate();
   return (
     <Result

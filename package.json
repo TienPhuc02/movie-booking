@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.4.0",
+    "@vitejs/plugin-react": "^4.3.2",
     "antd": "^5.20.2",
     "axios": "^1.7.5",
     "localforage": "^1.10.0",
@@ -27,8 +28,6 @@
     "@eslint/js": "^9.9.0",
     "@types/axios": "^0.9.36",
     "@types/node": "^22.5.4",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
     "@types/react-highlight-words": "^0.20.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.20",
@@ -38,7 +37,6 @@
     "globals": "^15.9.0",
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
-    "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"
   }

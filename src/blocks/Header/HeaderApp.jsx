@@ -7,7 +7,7 @@ import { Dropdown, Form, MenuProps } from "antd";
 const HeaderApp = () => {
   const [isModalLoginOpen, setIsModalLoginOpen] = useState(false);
   const [isModalRegisterOpen, setIsModalRegisterOpen] = useState(false);
-  const items: MenuProps["items"] = [
+  const items = [
     {
       key: "1",
       label: <div className="text-center font-semibold">Phim Đang Chiếu</div>,

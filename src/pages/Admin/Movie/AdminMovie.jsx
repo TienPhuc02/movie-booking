@@ -4,13 +4,7 @@ import {
   EditOutlined,
   SearchOutlined
 } from '@ant-design/icons';
-import type {
-  FormProps,
-  InputRef,
-  PopconfirmProps,
-  TableColumnsType,
-  TableColumnType
-} from 'antd';
+
 import {
   Button,
   DatePicker,
@@ -23,7 +17,6 @@ import {
   Table
 } from 'antd';
 
-import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import '../../../css/AdminGenre.css';
 import {
@@ -36,66 +29,47 @@ import {
 
 import { PlusOutlined } from '@ant-design/icons';
 import { Image, Upload } from 'antd';
-import type { GetProp, UploadFile, UploadProps } from 'antd';
 
 import moment from 'moment';
-type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
-const getBase64 = (file: FileType): Promise<string> =>
+const getBase64 = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
+    reader.onload = () => resolve(reader.result );
     reader.onerror = (error) => reject(error);
   });
 
-interface DataType {
-  id: string;
-  uuid: string;
-  moviesName: string;
-  birthday: string;
-  description: string;
-  status: number;
-  imageUrl: string;
-}
 
-type DataIndex = keyof DataType;
 
-type FieldType = {
-  moviesName: string;
-  birthday: string;
-  imageUrl: string;
-  description: string;
-};
-
-const AdminMovies: React.FC = () => {
+const AdminMovies= () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
-  const searchInput = useRef<InputRef>(null);
+  const searchInput = useRef(null);
   const [listMovies, setListMovies] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
   const [formUpdate] = Form.useForm();
-  const [moviesDetail, setMoviesDetail] = useState<DataType | null>(null);
+  const [moviesDetail, setMoviesDetail] = useState(null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [fileList, setFileList] = useState([]);
   const [imagesUuid, setImagesUuid] = useState('');
   const [directorNames, setDirectorNames] = useState({});
 
   // const baseURL = import.meta.env.VITE_BASE_URL; // Lấy base URL từ biến môi trường
-  const handlePreviewCreateImage = async (file: UploadFile) => {
+  const handlePreviewCreateImage = async (file) => {
     if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj as FileType);
+      file.preview = await getBase64(file.originFileObj );
     }
 
-    setPreviewImage(file.url || (file.preview as string));
+    setPreviewImage(file.url || (file.preview ));
     setPreviewOpen(true);
   };
   // console.log('fileList,', fileList);
-  const dummyRequestCreateImageCast = async ({ file, onSuccess }: any) => {
+  const dummyRequestCreateImageCast = async ({ file, onSuccess }) => {
     console.log('Đây là file gì ' + file);
     const res = await APIUploadImage(file, '3');
     console.log('Check var' + res);
@@ -107,7 +81,7 @@ const AdminMovies: React.FC = () => {
     // setAvatar(file as string);
     onSuccess('ok');
   };
-  const handleChangeCreateImage: UploadProps['onChange'] = ({
+  const handleChangeCreateImage = ({
     fileList: newFileList
   }) => setFileList(newFileList);
 
@@ -149,7 +123,7 @@ const AdminMovies: React.FC = () => {
   //   }
   // };
 
-  const formatToDateString = (dateObj: Date) => {
+  const formatToDateString = (dateObj) => {
     const year = dateObj.getFullYear();
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
     const day = String(dateObj.getDate()).padStart(2, '0');
@@ -195,14 +169,14 @@ const AdminMovies: React.FC = () => {
   //   }
   // };
 
-  const getAllMovies = async (): Promise<void> => {
+  const getAllMovies = async ()=> {
     try {
       const res = await APIGetAllMovies({ pageSize: 10, page: 1 });
       console.log(res.data.data);
       if (res && res.data && res.data.data) {
         // Lọc các region có status khác "0"
         const filteredMovies = res.data?.data?.items.filter(
-          (movies: DataType) => movies.status !== 0
+          (movies) => movies.status !== 0
         );
         setListMovies(filteredMovies); // Cập nhật danh sách movies đã lọc
         form.resetFields();
@@ -245,7 +219,7 @@ const AdminMovies: React.FC = () => {
   //     }
   //   }
   // };
-  const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (
+  const onFinishFailed = (
     errorInfo
   ) => {
     console.log('Failed:', errorInfo);
@@ -273,16 +247,16 @@ const AdminMovies: React.FC = () => {
     setIsModalUpdateOpen(false);
   };
   const handleSearch = (
-    selectedKeys: string[],
-    confirm: FilterDropdownProps['confirm'],
-    dataIndex: DataIndex
+    selectedKeys,
+    confirm,
+    dataIndex
   ) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
 
-  const handleReset = (clearFilters: () => void) => {
+  const handleReset = (clearFilters) => {
     clearFilters();
     setSearchText('');
   };
@@ -314,8 +288,8 @@ const AdminMovies: React.FC = () => {
   // };
 
   const getColumnSearchProps = (
-    dataIndex: DataIndex
-  ): TableColumnType<DataType> => ({
+    dataIndex
+  ) => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
@@ -332,7 +306,7 @@ const AdminMovies: React.FC = () => {
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() =>
-            handleSearch(selectedKeys as string[], confirm, dataIndex)
+            handleSearch(selectedKeys , confirm, dataIndex)
           }
           style={{ marginBottom: 8, display: 'block' }}
         />
@@ -340,7 +314,7 @@ const AdminMovies: React.FC = () => {
           <Button
             type="primary"
             onClick={() =>
-              handleSearch(selectedKeys as string[], confirm, dataIndex)
+              handleSearch(selectedKeys , confirm, dataIndex)
             }
             icon={<SearchOutlined />}
             size="small"
@@ -360,7 +334,7 @@ const AdminMovies: React.FC = () => {
             size="small"
             onClick={() => {
               confirm({ closeDropdown: false });
-              setSearchText((selectedKeys as string[])[0]);
+              setSearchText((selectedKeys )[0]);
               setSearchedColumn(dataIndex);
             }}
           >
@@ -378,14 +352,14 @@ const AdminMovies: React.FC = () => {
         </Space>
       </div>
     ),
-    filterIcon: (filtered: boolean) => (
+    filterIcon: (filtered) => (
       <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
     onFilter: (value, record) =>
       record[dataIndex]
         .toString()
         .toLowerCase()
-        .includes((value as string).toLowerCase()),
+        .includes((value ).toLowerCase()),
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.current?.select(), 100);
@@ -407,7 +381,7 @@ const AdminMovies: React.FC = () => {
     key: index + 1,
     ...movies
   }));
-  const columns: TableColumnsType<DataType> = [
+  const columns = [
     {
       title: 'Id',
       dataIndex: 'key'
@@ -445,7 +419,7 @@ const AdminMovies: React.FC = () => {
       // width: 50,
       sorter: (a, b) => a.moviesName.length - b.moviesName.length,
       sortDirections: ['descend', 'ascend'],
-      render: (movies: string, record: DataType) => {
+      render: (movies, record) => {
         return <div>{movies}</div>;
       }
     },
@@ -462,7 +436,7 @@ const AdminMovies: React.FC = () => {
       key: 'trailer',
       // ...getColumnSearchProps("description"),
       // width: 50,
-      render: (trailer: string) => (
+      render: (trailer) => (
         <div className="truncate-description">{trailer}</div>
       )
     },
@@ -472,7 +446,7 @@ const AdminMovies: React.FC = () => {
       key: 'description',
       // ...getColumnSearchProps("description"),
       // width: 80,
-      render: (description: string) => (
+      render: (description) => (
         <div className="truncate-description">{description}</div>
       )
     },
@@ -482,7 +456,7 @@ const AdminMovies: React.FC = () => {
       key: 'duration',
       // ...getColumnSearchProps("description"),
       // width: 70,
-      render: (duration: string) => (
+      render: (duration) => (
         <div className="truncate-description">{duration}</div>
       )
     },
@@ -492,7 +466,7 @@ const AdminMovies: React.FC = () => {
       key: 'rated',
       // ...getColumnSearchProps("description"),
       // width: 60,
-      render: (rated: string) => (
+      render: (rated) => (
         <div className="truncate-description">{rated}</div>
       )
     },
@@ -517,7 +491,7 @@ const AdminMovies: React.FC = () => {
       key: 'status',
       // ...getColumnSearchProps("description"),
       // width: 100,
-      render: (status: string) => (
+      render: (status) => (
         <div className="truncate-description">{status}</div>
       )
     },
@@ -575,7 +549,7 @@ const AdminMovies: React.FC = () => {
           onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
-          <Form.Item<FieldType>
+          <Form.Item
             label="Tên phim"
             name="moviesName"
             rules={[{ required: true, message: 'Hãy nhập tên phim!' }]}
@@ -583,7 +557,7 @@ const AdminMovies: React.FC = () => {
             <Input />
           </Form.Item>
 
-          <Form.Item<FieldType>
+          <Form.Item
             label="Ngày sinh"
             name="birthday"
             rules={[
@@ -600,13 +574,13 @@ const AdminMovies: React.FC = () => {
             />
           </Form.Item>
 
-          <Form.Item<FieldType> label="Mô tả" name="description" rules={[]}>
+          <Form.Item label="Mô tả" name="description" rules={[]}>
             <Input.TextArea
               placeholder="Nhập mô tả...."
               autoSize={{ minRows: 2, maxRows: 6 }}
             />
           </Form.Item>
-          <Form.Item<FieldType> label="Image" name="imageUrl" rules={[]}>
+          <Form.Item label="Image" name="imageUrl" rules={[]}>
             <Upload
               action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               listType="picture-circle"
@@ -663,7 +637,7 @@ const AdminMovies: React.FC = () => {
             <Input />
           </Form.Item>
 
-          <Form.Item<FieldType>
+          <Form.Item
             label="Ngày sinh"
             name="birthday"
             rules={[
@@ -680,7 +654,7 @@ const AdminMovies: React.FC = () => {
             />
           </Form.Item>
 
-          <Form.Item<FieldType> label="Mô tả" name="description" rules={[]}>
+          <Form.Item label="Mô tả" name="description" rules={[]}>
             <Input.TextArea
               placeholder="Nhập mô tả...."
               autoSize={{ minRows: 2, maxRows: 6 }}
@@ -689,7 +663,7 @@ const AdminMovies: React.FC = () => {
               }}
             />
           </Form.Item>
-          <Form.Item<FieldType> label="Image" name="imageUrl" rules={[]}>
+          <Form.Item label="Image" name="imageUrl" rules={[]}>
             <Upload
               action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               listType="picture-circle"

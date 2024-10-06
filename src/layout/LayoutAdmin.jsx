@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   GlobalOutlined,
   IdcardOutlined,
@@ -7,81 +7,78 @@ import {
   UserOutlined,
   UserSwitchOutlined,
   VideoCameraAddOutlined,
-  VideoCameraOutlined,
-} from "@ant-design/icons";
-import type { MenuProps } from "antd";
-import { Button, Layout, Menu, theme } from "antd";
-import { Link, Outlet } from "react-router-dom";
+  VideoCameraOutlined
+} from '@ant-design/icons';
+import { Button, Layout, Menu, theme } from 'antd';
+import { Link, Outlet } from 'react-router-dom';
 
 const { Header, Content, Footer, Sider } = Layout;
 
-type MenuItem = Required<MenuProps>["items"][number];
-
-const items: MenuItem[] = [
+const items = [
   {
-    key: "1",
+    key: '1',
     icon: (
-      <Link to={"/admin/user"}>
+      <Link to={'/admin/user'}>
         <UserOutlined />
       </Link>
     ),
-    label: "User",
+    label: 'User'
   },
   {
-    key: "2",
+    key: '2',
     icon: (
-      <Link to={"/admin/movie"}>
+      <Link to={'/admin/movie'}>
         <VideoCameraOutlined />
       </Link>
     ),
-    label: "Movie",
+    label: 'Movie'
   },
   {
-    key: "3",
+    key: '3',
     icon: (
-      <Link to={"/admin/genre"}>
+      <Link to={'/admin/genre'}>
         <VideoCameraAddOutlined />
       </Link>
     ),
-    label: "Quản lý thể loại",
+    label: 'Quản lý thể loại'
   },
   {
-    key: "4",
+    key: '4',
     icon: (
-      <Link to={"/admin/region"}>
-        <GlobalOutlined  />
+      <Link to={'/admin/region'}>
+        <GlobalOutlined />
       </Link>
     ),
-    label: "Quản lý quốc gia",
+    label: 'Quản lý quốc gia'
   },
   {
-    key: "5",
+    key: '5',
     icon: (
-      <Link to={"/admin/director"}>
+      <Link to={'/admin/director'}>
         <IdcardOutlined />
       </Link>
     ),
-    label: "Quản lý đạo diễn",
+    label: 'Quản lý đạo diễn'
   },
   {
-    key: "6",
+    key: '6',
     icon: (
-      <Link to={"/admin/cast"}>
-          <UserSwitchOutlined />
+      <Link to={'/admin/cast'}>
+        <UserSwitchOutlined />
       </Link>
     ),
-    label: "Quản lý diễn viên",
-  },
+    label: 'Quản lý diễn viên'
+  }
 ];
 
-const LayoutAdmin: React.FC = () => {
+const LayoutAdmin = () => {
   const [collapsed, setCollapsed] = useState(false);
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { colorBgContainer, borderRadiusLG }
   } = theme.useToken();
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
+    <Layout style={{ minHeight: '100vh' }}>
       <Sider
         collapsible
         theme="light"
@@ -94,7 +91,7 @@ const LayoutAdmin: React.FC = () => {
         <Menu
           theme="light"
           className="h-full"
-          defaultSelectedKeys={["1"]}
+          defaultSelectedKeys={['1']}
           mode="inline"
           items={items}
         />
@@ -106,25 +103,25 @@ const LayoutAdmin: React.FC = () => {
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
             style={{
-              fontSize: "16px",
+              fontSize: '16px',
               width: 64,
-              height: 64,
+              height: 64
             }}
           />
         </Header>
-        <Content style={{ margin: "16px" }}>
+        <Content style={{ margin: '16px' }}>
           <div
             style={{
               padding: 24,
-              minHeight: "75vh",
+              minHeight: '75vh',
               background: colorBgContainer,
-              borderRadius: borderRadiusLG,
+              borderRadius: borderRadiusLG
             }}
           >
             <Outlet />
           </div>
         </Content>
-        <Footer style={{ textAlign: "center" }}>
+        <Footer style={{ textAlign: 'center' }}>
           Ant Design ©{new Date().getFullYear()} Created by Ant UED
         </Footer>
       </Layout>

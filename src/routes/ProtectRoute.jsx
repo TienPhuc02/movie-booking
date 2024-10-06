@@ -1,9 +1,7 @@
-import NotPermission from "../pages/NotFound/NotPermission";
+import NotPermission from '../pages/NotFound/NotPermission';
 
-type Props = {};
-
-const ProtectRoute = ({ children }: any) => {
-  const role = localStorage.getItem("role");
+const ProtectRoute = ({ children }) => {
+  const role = localStorage.getItem('role');
   console.log(role);
   return (
     <>

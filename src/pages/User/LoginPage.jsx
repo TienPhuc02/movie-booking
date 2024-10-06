@@ -1,30 +1,20 @@
-import type { FormProps } from "antd";
 import { Button, Form, Input, message, Modal } from "antd";
 import "../../css/Button.css";
 import "../../css/Input.css";
 import { APILogin } from "../../services/service.api";
 
-type FieldType = {
-  email: string;
-  password: string;
-};
 
-type PropLoginPage = {
-  showModalRegister: () => void;
-  handleModalLoginCancel: () => void;
-  isModalLoginOpen: boolean;
-};
 
 const LoginPage = ({
   showModalRegister,
   handleModalLoginCancel,
   isModalLoginOpen,
-}: PropLoginPage) => {
+}) => {
   const [form] = Form.useForm();
-  const onFinish = async (values: FieldType) => {
+  const onFinish = async (values) => {
     console.log(values);
     try {
-      const res = (await APILogin(values)) as any;
+      const res = (await APILogin(values)) ;
       console.log(res.data.data.role);
       if (res && res?.data?.data !== null) {
         message.success("Đăng Nhập Thành Công!!");
@@ -40,7 +30,7 @@ const LoginPage = ({
     }
   };
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+  const onFinishFailed = (
     errorInfo
   ) => {
     console.log("Failed:", errorInfo);
@@ -77,7 +67,7 @@ const LoginPage = ({
             onFinishFailed={onFinishFailed}
             autoComplete="off"
           >
-            <Form.Item<FieldType>
+            <Form.Item
               label={<div className="font-semibold">Email</div>}
               name="email"
               rules={[
@@ -91,7 +81,7 @@ const LoginPage = ({
               <Input placeholder="Enter Email...." />
             </Form.Item>
 
-            <Form.Item<FieldType>
+            <Form.Item
               label={<div className="font-semibold">Mật khẩu</div>}
               name="password"
               rules={[
