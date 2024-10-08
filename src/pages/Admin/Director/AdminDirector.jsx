@@ -45,7 +45,7 @@ const AdminDirector = () => {
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
   const [formUpdate] = Form.useForm();
-  const [directorDetail, setDirectorDetail] = useState (null);
+  const [directorDetail, setDirectorDetail] = useState(null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
@@ -54,7 +54,7 @@ const AdminDirector = () => {
   // const baseURL = import.meta.env.VITE_BASE_URL; // Lấy base URL từ biến môi trường
   const handlePreviewCreateImage = async (file) => {
     if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj );
+      file.preview = await getBase64(file.originFileObj);
     }
 
     setPreviewImage(file.url || (file.preview));
@@ -91,15 +91,19 @@ const AdminDirector = () => {
       if (res && res.status === 200) {
         const directorDetail = res.data.data;
         setDirectorDetail(directorDetail);
-        // console.log(directorDetail.birthday);
+        //  console.log("Lam gi thi lam ",directorDetail.imageUrl);
+        const imageUrl = `${import.meta.env.VITE_BACKEND_URL}/resources/images/${directorDetail.imageUrl}`;
+        console.log("Day co phai la anh khong ",imageUrl);
         formUpdate.setFieldsValue({
           directorName: directorDetail.directorName,
           birthday: moment(directorDetail.birthday, 'YYYY-MM-DD'),
-          description: directorDetail.description
+          description: directorDetail.description,
+          imageUrl: directorDetail.imageUrl
         });
+        setFileList([{url: imageUrl}]);
         setIsModalUpdateOpen(true);
         // setFileList([]);
-        // setPreviewImage('');
+        setPreviewImage('');
       } else {
         message.error('Không tìm thấy thông tin chi tiết.');
       }
@@ -121,28 +125,28 @@ const AdminDirector = () => {
     const day = String(dateObj.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
-  console.log("Nhanh lên còn đi ngủ",fileList)
   const onFinishUpdateDirectorInfor = async (values) => {
-    console.log("Nhanh lên đi trời", values)
     const { birthday, ...restValues } = values;
     const birthdayObj = new Date(birthday);
     const birthdayFormat = formatToDateString(birthdayObj);
+    console.log("Click vào button Cập nhật",restValues)
     try {
       const res = await APICreateDirector({
         uuid: directorDetail.uuid, // UUID của đạo diễn cần cập nhật
         directorName: restValues.directorName,
         birthday: birthdayFormat,
         description: restValues.description,
-        imageUrl: imagesUuid, // Gửi URL của ảnh nếu có
+        imagesUuid // Gửi URL của ảnh nếu có
       });
-      
+
       console.log('Response:', res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
-        form.resetFields(); 
-        setFileList([]);    
-        setImagesUuid(''); 
-        getAllDirector();  
+        form.resetFields();
+        setFileList([]);
+        setImagesUuid('');
+        getAllDirector();
+        handleCancelUpdate();
       }
     } catch (error) {
       if (error.response) {
@@ -159,7 +163,7 @@ const AdminDirector = () => {
       }
     }
   };
-  
+
 
   const getAllDirector = async () => {
     try {
@@ -327,7 +331,7 @@ const AdminDirector = () => {
             size="small"
             onClick={() => {
               confirm({ closeDropdown: false });
-              setSearchText((selectedKeys )[0]);
+              setSearchText((selectedKeys)[0]);
               setSearchedColumn(dataIndex);
             }}
           >
@@ -352,7 +356,7 @@ const AdminDirector = () => {
       record[dataIndex]
         .toString()
         .toLowerCase()
-        .includes((value ).toLowerCase()),
+        .includes((value).toLowerCase()),
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.current?.select(), 100);
@@ -388,11 +392,10 @@ const AdminDirector = () => {
       render: (text, record) => {
         console.log(record);
         const fullURL = record?.imageUrl
-          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${
-              record?.imageUrl
-            }`
+          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${record?.imageUrl
+          }`
           : null;
-        console.log(fullURL);
+        // console.log(fullURL);
         return fullURL ? (
           <Image
             width={70}
@@ -414,10 +417,7 @@ const AdminDirector = () => {
       sortDirections: ['descend', 'ascend'],
       render: (director, record) => {
         return (
-          <div
-          // className="hover:text-[#4096ff] cursor-pointer"
-          // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
-          >
+          <div>
             {director} {/* Hiển thị tên quốc gia */}
           </div>
         );
@@ -427,14 +427,12 @@ const AdminDirector = () => {
       title: 'Ngày sinh',
       dataIndex: 'birthday',
       key: 'birthday',
-      // ...getColumnSearchProps("birthday"),
       width: 50
     },
     {
       title: 'Mô tả',
       dataIndex: 'description',
       key: 'description',
-      // ...getColumnSearchProps("description"),
       width: 100,
       render: (description) => (
         <div className="truncate-description">{description}</div>
@@ -534,7 +532,7 @@ const AdminDirector = () => {
               onChange={handleChangeCreateImage}
               customRequest={dummyRequestCreateImageCast}
             >
-              {fileList.length >= 8 ? null : uploadButton}
+              {fileList.length >= 1 ? null : uploadButton}
             </Upload>
             {previewImage && (
               <Image
@@ -617,7 +615,7 @@ const AdminDirector = () => {
               onChange={handleChangeCreateImage}
               customRequest={dummyRequestCreateImageCast}
             >
-              {fileList.length >= 8 ? null : uploadButton}
+              {fileList.length >= 1 ? null : uploadButton}
             </Upload>
             {previewImage && (
               <Image
@@ -625,7 +623,7 @@ const AdminDirector = () => {
                 preview={{
                   visible: previewOpen,
                   onVisibleChange: (visible) => setPreviewOpen(visible),
-                  afterOpenChange: (visible) => !visible && setPreviewImage('')
+                  afterOpenChange: (visible) => !visible && setPreviewImage(''),
                 }}
                 src={previewImage}
               />
