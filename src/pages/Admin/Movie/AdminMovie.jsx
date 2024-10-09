@@ -7,12 +7,16 @@ import {
 
 import {
   Button,
+  Col,
   DatePicker,
   Form,
   Input,
+  InputNumber,
   message,
   Modal,
   Popconfirm,
+  Row,
+  Select,
   Space,
   Table
 } from 'antd';
@@ -21,6 +25,7 @@ import Highlighter from 'react-highlight-words';
 import '../../../css/AdminGenre.css';
 import {
   APICreateMovies,
+  APIGetAllDirector,
   APIGetAllMovies,
   APIGetDirectorDetail,
   APIGetMoviesDetail,
@@ -36,13 +41,11 @@ const getBase64 = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result );
+    reader.onload = () => resolve(reader.result);
     reader.onerror = (error) => reject(error);
   });
 
-
-
-const AdminMovies= () => {
+const AdminMovies = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
@@ -57,21 +60,26 @@ const AdminMovies= () => {
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState([]);
   const [imagesUuid, setImagesUuid] = useState('');
-  const [directorNames, setDirectorNames] = useState({});
-
+  const [listDirector, setListDirector] = useState([]);
+  const handleChangeStatus = (value) => {
+    console.log(`selected ${value}`);
+  };
+  const handleChangeDirector = (value) => {
+    console.log(`selected ${value}`);
+  };
   // const baseURL = import.meta.env.VITE_BASE_URL; // Lấy base URL từ biến môi trường
   const handlePreviewCreateImage = async (file) => {
     if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj );
+      file.preview = await getBase64(file.originFileObj);
     }
 
-    setPreviewImage(file.url || (file.preview ));
+    setPreviewImage(file.url || file.preview);
     setPreviewOpen(true);
   };
   // console.log('fileList,', fileList);
   const dummyRequestCreateImageCast = async ({ file, onSuccess }) => {
     console.log('Đây là file gì ' + file);
-    const res = await APIUploadImage(file, '3');
+    const res = await APIUploadImage(file, '2');
     console.log('Check var' + res);
     if (res && res.status === 200) {
       console.log('UUID của ảnh:', res.data.data);
@@ -81,9 +89,8 @@ const AdminMovies= () => {
     // setAvatar(file as string);
     onSuccess('ok');
   };
-  const handleChangeCreateImage = ({
-    fileList: newFileList
-  }) => setFileList(newFileList);
+  const handleChangeCreateImage = ({ fileList: newFileList }) =>
+    setFileList(newFileList);
 
   const uploadButton = (
     <button style={{ border: 0, background: 'none' }} type="button">
@@ -169,7 +176,7 @@ const AdminMovies= () => {
   //   }
   // };
 
-  const getAllMovies = async ()=> {
+  const getAllMovies = async () => {
     try {
       const res = await APIGetAllMovies({ pageSize: 10, page: 1 });
       console.log(res.data.data);
@@ -178,7 +185,7 @@ const AdminMovies= () => {
         const filteredMovies = res.data?.data?.items.filter(
           (movies) => movies.status !== 0
         );
-        setListMovies(filteredMovies); // Cập nhật danh sách movies đã lọc
+        setListMovies(filteredMovies);
         form.resetFields();
         handleCancel();
       }
@@ -188,40 +195,33 @@ const AdminMovies= () => {
     }
   };
   console.log('imagesUuid', imagesUuid);
-  // const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
-  //   const { birthday, ...restValues } = values;
-  //   const birthdayFormat = formatToDateString(new Date(birthday));
-  //   const dataMovies = {
-  //     ...restValues,
-  //     birthday: birthdayFormat,
-  //     imagesUuid
-  //   };
-  //   try {
-  //     const res = await APICreateMovies(dataMovies);
-  //     console.log(res);
-  //     if (res && res.status === 200) {
-  //       message.success(res.data.error.errorMessage);
-  //       getAllMovies();
-  //     }
-  //     // console.log("Success:", values);
-  //   } catch (error: any) {
-  //     if (error.response) {
-  //       const errorMessage =
-  //         error.response.data?.error?.errorMessage ||
-  //         'Đã xảy ra lỗi khi thêm mới.';
-  //       message.error(errorMessage);
-  //     } else if (error.request) {
-  //       message.error(
-  //         'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
-  //       );
-  //     } else {
-  //       message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
-  //     }
-  //   }
-  // };
-  const onFinishFailed = (
-    errorInfo
-  ) => {
+  const onFinish = async (values) => {
+    console.log('values', values);
+
+    try {
+      const res = await APICreateMovies({ ...values, imagesUuid });
+      console.log(res);
+      if (res && res.status === 200) {
+        message.success(res.data.error.errorMessage);
+        getAllMovies();
+      }
+      // console.log("Success:", values);
+    } catch (error) {
+      if (error.response) {
+        const errorMessage =
+          error.response.data?.error?.errorMessage ||
+          'Đã xảy ra lỗi khi thêm mới.';
+        message.error(errorMessage);
+      } else if (error.request) {
+        message.error(
+          'Không nhận được phản hồi từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.'
+        );
+      } else {
+        message.error('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+      }
+    }
+  };
+  const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
   const showModal = () => {
@@ -246,11 +246,7 @@ const AdminMovies= () => {
     setOpen(false);
     setIsModalUpdateOpen(false);
   };
-  const handleSearch = (
-    selectedKeys,
-    confirm,
-    dataIndex
-  ) => {
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
@@ -286,10 +282,38 @@ const AdminMovies= () => {
   //     }
   //   }
   // };
+  const getAllDirector = async () => {
+    try {
+      const res = await APIGetAllDirector({ pageSize: 10, page: 1 });
+      console.log('API Response:', res); // In toàn bộ response để xem cấu trúc
 
-  const getColumnSearchProps = (
-    dataIndex
-  ) => ({
+      // Kiểm tra và in ra từng phần của res để debug
+      console.log('res.data:', res.data);
+      console.log('res.data.data:', res.data.data);
+
+      // Kiểm tra xem res.data.data có phải là mảng hợp lệ hay không
+      if (res && res.data && Array.isArray(res.data.data.items)) {
+        const directors = res.data.data.items;
+
+        // Tạo mảng mới với value là uuid và label là tên
+        const directorOptions = directors.map((director) => ({
+          value: director.uuid,
+          label: director.directorName
+        }));
+
+        setListDirector(directorOptions); // Cập nhật state
+        console.log('directorOptions', directorOptions); // Kiểm tra dữ liệu sau khi map
+      } else {
+        console.error('Dữ liệu không hợp lệ:', res.data);
+        message.error('Không có dữ liệu đạo diễn hợp lệ.');
+      }
+    } catch (error) {
+      message.error('Đã xảy ra lỗi khi lấy danh sách đạo diễn.');
+      console.error('API Error:', error); // In ra lỗi cụ thể
+    }
+  };
+
+  const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
@@ -305,17 +329,13 @@ const AdminMovies= () => {
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
-          onPressEnter={() =>
-            handleSearch(selectedKeys , confirm, dataIndex)
-          }
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
           style={{ marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
             type="primary"
-            onClick={() =>
-              handleSearch(selectedKeys , confirm, dataIndex)
-            }
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
             icon={<SearchOutlined />}
             size="small"
             style={{ width: 90 }}
@@ -334,7 +354,7 @@ const AdminMovies= () => {
             size="small"
             onClick={() => {
               confirm({ closeDropdown: false });
-              setSearchText((selectedKeys )[0]);
+              setSearchText(selectedKeys[0]);
               setSearchedColumn(dataIndex);
             }}
           >
@@ -356,10 +376,7 @@ const AdminMovies= () => {
       <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
     onFilter: (value, record) =>
-      record[dataIndex]
-        .toString()
-        .toLowerCase()
-        .includes((value ).toLowerCase()),
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.current?.select(), 100);
@@ -436,9 +453,7 @@ const AdminMovies= () => {
       key: 'trailer',
       // ...getColumnSearchProps("description"),
       // width: 50,
-      render: (trailer) => (
-        <div className="truncate-description">{trailer}</div>
-      )
+      render: (trailer) => <div className="truncate-description">{trailer}</div>
     },
     {
       title: 'Description',
@@ -466,9 +481,7 @@ const AdminMovies= () => {
       key: 'rated',
       // ...getColumnSearchProps("description"),
       // width: 60,
-      render: (rated) => (
-        <div className="truncate-description">{rated}</div>
-      )
+      render: (rated) => <div className="truncate-description">{rated}</div>
     },
     {
       title: 'Đánh giá phim',
@@ -491,9 +504,7 @@ const AdminMovies= () => {
       key: 'status',
       // ...getColumnSearchProps("description"),
       // width: 100,
-      render: (status) => (
-        <div className="truncate-description">{status}</div>
-      )
+      render: (status) => <div className="truncate-description">{status}</div>
     },
 
     {
@@ -526,6 +537,9 @@ const AdminMovies= () => {
   useEffect(() => {
     getAllMovies();
   }, []);
+  useEffect(() => {
+    getAllDirector();
+  }, []);
   return (
     <>
       <Button className="float-end mb-4" type="primary" onClick={showModal}>
@@ -536,72 +550,185 @@ const AdminMovies= () => {
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
+        width={1000}
         footer={<></>}
       >
         <Form
           form={form}
           name="basic"
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 600 }}
+          // labelCol={{ span: 8 }}
+          // wrapperCol={{ span: 24 }}
           initialValues={{ remember: true }}
-          // onFinish={onFinish}
+          onFinish={onFinish}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
+          <Row gutter={16}>
+            <Col className="gutter-row" span={12}>
+              <Form.Item
+                label="Tên phim"
+                name="title"
+                rules={[{ required: true, message: 'Hãy nhập tên phim!' }]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col className="gutter-row" span={12}>
+              <Form.Item
+                label="Tên Phim (Eng)"
+                name="engTitle"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Hãy nhập tên phim của bạn!'
+                  }
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col className="gutter-row" span={12}>
+              <Form.Item
+                label="Trailer"
+                name="trailer"
+                rules={[{ required: true, message: 'Hãy nhập tên Trailer!' }]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col className="gutter-row" span={12}>
+              <Form.Item
+                label="Thời lượng"
+                name="duration"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Hãy nhập thời lượng phim của bạn!'
+                  }
+                ]}
+              >
+                <InputNumber className="w-full" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col className="gutter-row" span={12}>
+              <Form.Item
+                label="Đánh giá"
+                name="rated"
+                rules={[{ required: true, message: 'Hãy nhập đánh giá!' }]}
+              >
+                <InputNumber className="w-full" />
+              </Form.Item>
+            </Col>
+            <Col className="gutter-row" span={12}>
+              <Form.Item
+                label="Đánh giá trung bình"
+                name="averageReview"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Hãy nhập đánh giá trung bình!'
+                  }
+                ]}
+              >
+                <InputNumber className="w-full" placeholder="" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col className="gutter-row" span={12}>
+              <Form.Item
+                label="Tên phim"
+                name="moviesName"
+                rules={[{ required: true, message: 'Hãy nhập tên phim!' }]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col className="gutter-row" span={12}>
+              <Form.Item
+                label="Trạng Thái"
+                name="status"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Hãy nhập trạng thái phim của bạn!'
+                  }
+                ]}
+              >
+                <Select
+                  defaultValue=""
+                  onChange={handleChangeStatus}
+                  options={[
+                    { value: 0, label: 'Không còn' },
+                    { value: 1, label: 'Đang chiếu' },
+                    { value: 2, label: 'Sắp chiếu' },
+                    { value: 3, label: 'Chiếu sớm' }
+                  ]}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col className="gutter-row" span={12}>
+              <Form.Item label="Image" name="imageUrl" rules={[]}>
+                <Upload
+                  action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+                  listType="picture-card"
+                  fileList={fileList}
+                  onPreview={handlePreviewCreateImage}
+                  onChange={handleChangeCreateImage}
+                  customRequest={dummyRequestCreateImageCast}
+                >
+                  {fileList.length >= 8 ? null : uploadButton}
+                </Upload>
+                {previewImage && (
+                  <Image
+                    wrapperStyle={{ display: 'none' }}
+                    preview={{
+                      visible: previewOpen,
+                      onVisibleChange: (visible) => setPreviewOpen(visible),
+                      afterOpenChange: (visible) =>
+                        !visible && setPreviewImage('')
+                    }}
+                    src={previewImage}
+                  />
+                )}
+              </Form.Item>
+            </Col>
+            <Col className="gutter-row" span={12}>
+              <Form.Item
+                label="Đạo diễn"
+                name="directorUuid"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Hãy nhập đạo diễn phim của bạn!'
+                  }
+                ]}
+              >
+                <Select
+                  defaultValue=""
+                  onChange={handleChangeDirector}
+                  options={listDirector}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
           <Form.Item
-            label="Tên phim"
-            name="moviesName"
-            rules={[{ required: true, message: 'Hãy nhập tên phim!' }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            label="Ngày sinh"
-            name="birthday"
+            label="Mô Tả"
+            name="description"
             rules={[
               {
                 required: true,
-                message: 'Hãy nhập ngày sinh của bạn!'
+                message: 'Hãy nhập mô tả phim của bạn!'
               }
             ]}
           >
-            <DatePicker
-              placeholder="Ngày sinh"
-              variant="filled"
-              className="w-full"
-            />
-          </Form.Item>
-
-          <Form.Item label="Mô tả" name="description" rules={[]}>
-            <Input.TextArea
-              placeholder="Nhập mô tả...."
-              autoSize={{ minRows: 2, maxRows: 6 }}
-            />
-          </Form.Item>
-          <Form.Item label="Image" name="imageUrl" rules={[]}>
-            <Upload
-              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
-              listType="picture-circle"
-              fileList={fileList}
-              onPreview={handlePreviewCreateImage}
-              onChange={handleChangeCreateImage}
-              customRequest={dummyRequestCreateImageCast}
-            >
-              {fileList.length >= 8 ? null : uploadButton}
-            </Upload>
-            {previewImage && (
-              <Image
-                wrapperStyle={{ display: 'none' }}
-                preview={{
-                  visible: previewOpen,
-                  onVisibleChange: (visible) => setPreviewOpen(visible),
-                  afterOpenChange: (visible) => !visible && setPreviewImage('')
-                }}
-                src={previewImage}
-              />
-            )}
+            <Input />
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">

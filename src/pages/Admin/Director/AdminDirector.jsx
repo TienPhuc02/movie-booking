@@ -51,13 +51,13 @@ const AdminDirector = () => {
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState([]);
   const [imagesUuid, setImagesUuid] = useState('');
-  // const baseURL = import.meta.env.VITE_BASE_URL; // Lấy base URL từ biến môi trường
+
   const handlePreviewCreateImage = async (file) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
     }
 
-    setPreviewImage(file.url || (file.preview));
+    setPreviewImage(file.url || file.preview);
     setPreviewOpen(true);
   };
   // console.log('fileList,', fileList);
@@ -69,13 +69,10 @@ const AdminDirector = () => {
       console.log('UUID của ảnh:', res.data.data);
       setImagesUuid(res.data.data);
     }
-    // form.setFieldsValue({ avatar: file as string });
-    // setAvatar(file as string);
     onSuccess('ok');
   };
-  const handleChangeCreateImage = ({
-    fileList: newFileList
-  }) => setFileList(newFileList);
+  const handleChangeCreateImage = ({ fileList: newFileList }) =>
+    setFileList(newFileList);
 
   const uploadButton = (
     <button style={{ border: 0, background: 'none' }} type="button">
@@ -92,15 +89,17 @@ const AdminDirector = () => {
         const directorDetail = res.data.data;
         setDirectorDetail(directorDetail);
         //  console.log("Lam gi thi lam ",directorDetail.imageUrl);
-        const imageUrl = `${import.meta.env.VITE_BACKEND_URL}/resources/images/${directorDetail.imageUrl}`;
-        console.log("Day co phai la anh khong ",imageUrl);
+        const imageUrl = `${
+          import.meta.env.VITE_BACKEND_URL
+        }/resources/images/${directorDetail.imageUrl}`;
+        console.log('Day co phai la anh khong ', imageUrl);
         formUpdate.setFieldsValue({
           directorName: directorDetail.directorName,
           birthday: moment(directorDetail.birthday, 'YYYY-MM-DD'),
           description: directorDetail.description,
           imageUrl: directorDetail.imageUrl
         });
-        setFileList([{url: imageUrl}]);
+        setFileList([{ url: imageUrl }]);
         setIsModalUpdateOpen(true);
         // setFileList([]);
         setPreviewImage('');
@@ -129,10 +128,10 @@ const AdminDirector = () => {
     const { birthday, ...restValues } = values;
     const birthdayObj = new Date(birthday);
     const birthdayFormat = formatToDateString(birthdayObj);
-    console.log("Click vào button Cập nhật",restValues)
+    console.log('Click vào button Cập nhật', restValues);
     try {
       const res = await APICreateDirector({
-        uuid: directorDetail.uuid, // UUID của đạo diễn cần cập nhật
+        uuid: directorDetail.uuid,
         directorName: restValues.directorName,
         birthday: birthdayFormat,
         description: restValues.description,
@@ -163,7 +162,6 @@ const AdminDirector = () => {
       }
     }
   };
-
 
   const getAllDirector = async () => {
     try {
@@ -216,13 +214,12 @@ const AdminDirector = () => {
       }
     }
   };
-  const onFinishFailed = (
-    errorInfo
-  ) => {
+  const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
   const showModal = () => {
     setIsModalOpen(true);
+    setFileList([]);
   };
 
   const handleOk = () => {
@@ -237,17 +234,14 @@ const AdminDirector = () => {
 
   const handleCancelUpdate = () => {
     setIsModalUpdateOpen(false);
+    setFileList([]);
   };
 
   const onClose = () => {
     setOpen(false);
     setIsModalUpdateOpen(false);
   };
-  const handleSearch = (
-    selectedKeys,
-    confirm,
-    dataIndex
-  ) => {
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
@@ -257,9 +251,7 @@ const AdminDirector = () => {
     clearFilters();
     setSearchText('');
   };
-  const confirm = async (
-    uuid
-  ) => {
+  const confirm = async (uuid) => {
     try {
       const res = await APIDeleteDirector({ uuid, status: 0 });
       if (res && res.status === 200) {
@@ -284,9 +276,7 @@ const AdminDirector = () => {
     }
   };
 
-  const getColumnSearchProps = (
-    dataIndex
-  ) => ({
+  const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
@@ -302,17 +292,13 @@ const AdminDirector = () => {
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
-          onPressEnter={() =>
-            handleSearch(selectedKeys, confirm, dataIndex)
-          }
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
           style={{ marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
             type="primary"
-            onClick={() =>
-              handleSearch(selectedKeys, confirm, dataIndex)
-            }
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
             icon={<SearchOutlined />}
             size="small"
             style={{ width: 90 }}
@@ -331,7 +317,7 @@ const AdminDirector = () => {
             size="small"
             onClick={() => {
               confirm({ closeDropdown: false });
-              setSearchText((selectedKeys)[0]);
+              setSearchText(selectedKeys[0]);
               setSearchedColumn(dataIndex);
             }}
           >
@@ -353,10 +339,7 @@ const AdminDirector = () => {
       <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
     onFilter: (value, record) =>
-      record[dataIndex]
-        .toString()
-        .toLowerCase()
-        .includes((value).toLowerCase()),
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.current?.select(), 100);
@@ -392,8 +375,9 @@ const AdminDirector = () => {
       render: (text, record) => {
         console.log(record);
         const fullURL = record?.imageUrl
-          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${record?.imageUrl
-          }`
+          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${
+              record?.imageUrl
+            }`
           : null;
         // console.log(fullURL);
         return fullURL ? (
@@ -623,7 +607,7 @@ const AdminDirector = () => {
                 preview={{
                   visible: previewOpen,
                   onVisibleChange: (visible) => setPreviewOpen(visible),
-                  afterOpenChange: (visible) => !visible && setPreviewImage(''),
+                  afterOpenChange: (visible) => !visible && setPreviewImage('')
                 }}
                 src={previewImage}
               />
