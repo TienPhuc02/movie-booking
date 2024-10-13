@@ -10,6 +10,7 @@ import AdminDirector from "../pages/Admin/Director/AdminDirector";
 import AdminCast from "../pages/Admin/Cast/AdminCast";
 import ProtectRoute from "./ProtectRoute";
 import LoginAdminPage from "../pages/Admin/LoginAdminPage";
+import AdminCinemas from "../pages/Admin/Cinema/AdminCinema";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: "movie",
         element: <AdminMovie />,
+      },
+      {
+        path: "cinemas",
+        element: <AdminCinemas />,
       },
       {
         path: "genre",

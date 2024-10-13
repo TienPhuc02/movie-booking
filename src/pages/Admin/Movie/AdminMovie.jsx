@@ -26,6 +26,7 @@ import '../../../css/AdminGenre.css';
 import {
   APICreateMovies,
   APIGetAllDirector,
+  APIGetAllGenre,
   APIGetAllMovies,
   APIGetDirectorDetail,
   APIGetMoviesDetail,
@@ -61,10 +62,14 @@ const AdminMovies = () => {
   const [fileList, setFileList] = useState([]);
   const [imagesUuid, setImagesUuid] = useState('');
   const [listDirector, setListDirector] = useState([]);
+  const [listGenre, setListGenre] = useState([]);
   const handleChangeStatus = (value) => {
     console.log(`selected ${value}`);
   };
   const handleChangeDirector = (value) => {
+    console.log(`selected ${value}`);
+  };
+  const handleChangeGenre = (value) => {
     console.log(`selected ${value}`);
   };
   // const baseURL = import.meta.env.VITE_BASE_URL; // Lấy base URL từ biến môi trường
@@ -285,31 +290,39 @@ const AdminMovies = () => {
   const getAllDirector = async () => {
     try {
       const res = await APIGetAllDirector({ pageSize: 10, page: 1 });
-      console.log('API Response:', res); // In toàn bộ response để xem cấu trúc
-
-      // Kiểm tra và in ra từng phần của res để debug
-      console.log('res.data:', res.data);
-      console.log('res.data.data:', res.data.data);
-
-      // Kiểm tra xem res.data.data có phải là mảng hợp lệ hay không
+      console.log('API Response:', res);
       if (res && res.data && Array.isArray(res.data.data.items)) {
         const directors = res.data.data.items;
-
-        // Tạo mảng mới với value là uuid và label là tên
         const directorOptions = directors.map((director) => ({
           value: director.uuid,
           label: director.directorName
         }));
 
         setListDirector(directorOptions); // Cập nhật state
-        console.log('directorOptions', directorOptions); // Kiểm tra dữ liệu sau khi map
       } else {
-        console.error('Dữ liệu không hợp lệ:', res.data);
         message.error('Không có dữ liệu đạo diễn hợp lệ.');
       }
     } catch (error) {
       message.error('Đã xảy ra lỗi khi lấy danh sách đạo diễn.');
-      console.error('API Error:', error); // In ra lỗi cụ thể
+    }
+  };
+  const getAllGenre = async () => {
+    try {
+      const res = await APIGetAllGenre({ pageSize: 10, page: 1 });
+      console.log('API Response:', res);
+      if (res && res.data && Array.isArray(res.data.data.items)) {
+        const genres = res.data.data.items;
+        const genresOptions = genres.map((genre) => ({
+          value: genre.uuid,
+          label: genre.genreName
+        }));
+
+        setListGenre(genresOptions); // Cập nhật state
+      } else {
+        message.error('Không có dữ liệu đạo diễn hợp lệ.');
+      }
+    } catch (error) {
+      message.error('Đã xảy ra lỗi khi lấy danh sách đạo diễn.');
     }
   };
 
@@ -539,6 +552,7 @@ const AdminMovies = () => {
   }, []);
   useEffect(() => {
     getAllDirector();
+    getAllGenre();
   }, []);
   return (
     <>
@@ -550,7 +564,7 @@ const AdminMovies = () => {
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
-        width={1000}
+        width={1200}
         footer={<></>}
       >
         <Form
@@ -575,7 +589,7 @@ const AdminMovies = () => {
             </Col>
             <Col className="gutter-row" span={12}>
               <Form.Item
-                label="Tên Phim (Eng)"
+                label="Tên Phim (Tiếng Anh)"
                 name="engTitle"
                 rules={[
                   {
@@ -600,7 +614,7 @@ const AdminMovies = () => {
             </Col>
             <Col className="gutter-row" span={12}>
               <Form.Item
-                label="Thời lượng"
+                label="Thời lượng phim"
                 name="duration"
                 rules={[
                   {
@@ -641,11 +655,20 @@ const AdminMovies = () => {
           <Row gutter={16}>
             <Col className="gutter-row" span={12}>
               <Form.Item
-                label="Tên phim"
-                name="moviesName"
-                rules={[{ required: true, message: 'Hãy nhập tên phim!' }]}
+                label="Thể loại phim"
+                name="genreUuid"
+                rules={[{ required: true, message: 'Hãy chọn thể loại phim!' }]}
               >
-                <Input />
+                <Select
+                  showSearch
+                  onChange={handleChangeGenre}
+                  options={listGenre}
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  allowClear
+                  mode="tags"
+                />
               </Form.Item>
             </Col>
             <Col className="gutter-row" span={12}>
@@ -683,7 +706,7 @@ const AdminMovies = () => {
                   onChange={handleChangeCreateImage}
                   customRequest={dummyRequestCreateImageCast}
                 >
-                  {fileList.length >= 8 ? null : uploadButton}
+                  {fileList.length >= 1 ? null : uploadButton}
                 </Upload>
                 {previewImage && (
                   <Image
@@ -706,14 +729,19 @@ const AdminMovies = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Hãy nhập đạo diễn phim của bạn!'
+                    message: 'Hãy chọn đạo diễn phim của bạn!'
                   }
                 ]}
               >
                 <Select
+                  showSearch
                   defaultValue=""
                   onChange={handleChangeDirector}
                   options={listDirector}
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  allowClear
                 />
               </Form.Item>
             </Col>
@@ -727,8 +755,13 @@ const AdminMovies = () => {
                 message: 'Hãy nhập mô tả phim của bạn!'
               }
             ]}
+            
           >
-            <Input />
+            <Input.TextArea
+            placeholder="Nhập mô tả...."
+            autoSize={{ minRows: 3, maxRows: 8 }}
+            width={300}
+            />
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">

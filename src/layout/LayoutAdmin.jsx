@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  EnvironmentOutlined,
   GlobalOutlined,
   IdcardOutlined,
   MenuFoldOutlined,
@@ -31,10 +32,19 @@ const items = [
         <VideoCameraOutlined />
       </Link>
     ),
-    label: 'Movie'
+    label: 'Quản lý phim'
   },
   {
     key: '3',
+    icon: (
+      <Link to={'/admin/cinemas'}>
+        <EnvironmentOutlined />
+      </Link>
+    ),
+    label: 'Quản lý rạp phim'
+  },
+  {
+    key: '4',
     icon: (
       <Link to={'/admin/genre'}>
         <VideoCameraAddOutlined />
@@ -43,7 +53,7 @@ const items = [
     label: 'Quản lý thể loại'
   },
   {
-    key: '4',
+    key: '5',
     icon: (
       <Link to={'/admin/region'}>
         <GlobalOutlined />
@@ -52,7 +62,7 @@ const items = [
     label: 'Quản lý quốc gia'
   },
   {
-    key: '5',
+    key: '6',
     icon: (
       <Link to={'/admin/director'}>
         <IdcardOutlined />
@@ -61,7 +71,7 @@ const items = [
     label: 'Quản lý đạo diễn'
   },
   {
-    key: '6',
+    key: '7',
     icon: (
       <Link to={'/admin/cast'}>
         <UserSwitchOutlined />

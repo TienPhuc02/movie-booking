@@ -81,6 +81,21 @@ export const APIGetMoviesDetail = (data) => {
   return instance.post('/api/v1/Movies/movies_detail', data);
 };
 
+//Cinema
+export const APICreateCinemas = (data) => {
+  return instance.post('/api/v1/Cinemas/upsert_cinema', data);
+};
+export const APIGetAllCinemas = (data) => {
+  return instance.post('/api/v1/Cinemas/page_list_cinema', data);
+};
+export const APIGetCinemasDetail = (data) => {
+  return instance.post('/api/v1/Cinemas/cinema_detail', data);
+};
+
+export const APIDeleteCinemas = (data) => {
+  return instance.post('/api/v1/Cinemas/update_cinema_status', data);
+};
+
 //Upload Image
 
 export const APIUploadImage = (FileData, Type) => {

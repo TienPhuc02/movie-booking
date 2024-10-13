@@ -27,9 +27,7 @@ import {
 } from '../../../services/service.api';
 import { PlusOutlined } from '@ant-design/icons';
 import { Image, Upload } from 'antd';
-
 import moment from 'moment';
-
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -61,7 +59,7 @@ const AdminCast = () => {
     setPreviewImage(file.url || file.preview);
     setPreviewOpen(true);
   };
-  console.log('fileList,', fileList);
+  // console.log('fileList,', fileList);
   const dummyRequestCreateImageCast = async ({ file, onSuccess }) => {
     console.log(file);
     const res = await APIUploadImage(file, '3');
@@ -69,8 +67,6 @@ const AdminCast = () => {
     if (res && res.status === 200) {
       setImagesUuid(res.data.data);
     }
-    // form.setFieldsValue({ avatar: file as string });
-    // setAvatar(file as string);
     onSuccess('ok');
   };
   const handleChangeCreateImage = ({ fileList: newFileList }) =>
@@ -89,15 +85,20 @@ const AdminCast = () => {
         const castDetail = res.data.data;
         setCastDetail(castDetail);
         const birthdayFormat = 'YYYY-MM-DD';
-        console.log(moment(castDetail.birthday, birthdayFormat));
+        const imageUrl = `${
+          import.meta.env.VITE_BACKEND_URL
+        }/resources/images/${castDetail.imageUrl}`;
         formUpdate.setFieldsValue({
           castName: castDetail.castName,
           birthday: castDetail.birthday
             ? moment(castDetail.birthday, birthdayFormat)
             : null,
-          description: castDetail.description
+          description: castDetail.description,
+          imageUrl: castDetail.imageUrl
         });
+        setFileList([{ url: imageUrl }]);
         setIsModalUpdateOpen(true);
+        setPreviewImage('');
       } else {
         message.error('Không tìm thấy thông tin chi tiết.');
       }
@@ -121,22 +122,24 @@ const AdminCast = () => {
   };
 
   const onFinishUpdateCastInfor = async (values) => {
-    const { birthday } = values;
+    const { birthday, ...restValues } = values;
     const birthdayObj = new Date(birthday);
     const birthdayFormat = formatToDateString(birthdayObj);
     // console.log(birthdayFormat);
     try {
       const res = await APICreateCast({
         uuid: castDetail?.uuid,
-        castName: values.castName,
+        castName: restValues.castName,
         birthday: birthdayFormat,
-        description: values.description
+        description: restValues.description,
+        imagesUuid
       });
-      console.log('adasdasd', res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
+        form.resetFields();
+        setFileList([]);
+        setImagesUuid('');
         getAllCast();
-        formUpdate.resetFields();
         handleCancelUpdate();
       }
       // console.log("Success:", values);
@@ -173,21 +176,21 @@ const AdminCast = () => {
       message.error('Đã xảy ra lỗi khi lấy danh sách diễn viên.');
     }
   };
-  console.log('imagesUuid', imagesUuid);
   const onFinish = async (values) => {
     const { birthday, ...restValues } = values;
     const birthdayFormat = formatToDateString(new Date(birthday));
     const dataCast = {
       ...restValues,
       birthday: birthdayFormat,
-      imagesUuid: imagesUuid
+      imagesUuid
     };
     try {
       const res = await APICreateCast(dataCast);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
-        getAllCast();
         form.resetFields();
+        setFileList([]);
+        getAllCast();
       }
       // console.log("Success:", values);
     } catch (error) {
@@ -211,6 +214,7 @@ const AdminCast = () => {
   };
   const showModal = () => {
     setIsModalOpen(true);
+    setFileList([]);
   };
 
   const handleOk = () => {
@@ -220,12 +224,12 @@ const AdminCast = () => {
 
   const handleCancel = () => {
     setIsModalOpen(false);
-    setFileList([]);
     form.resetFields();
   };
 
   const handleCancelUpdate = () => {
     setIsModalUpdateOpen(false);
+    setFileList([]);
   };
 
   const onClose = () => {
@@ -359,6 +363,30 @@ const AdminCast = () => {
       width: 50
     },
     {
+      title: 'Ảnh đại diện',
+      dataIndex: 'imageUrl',
+      key: 'imageUrl',
+      width: 60,
+      render: (text, record) => {
+        console.log(record);
+        const fullURL = record?.imageUrl
+          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${
+              record?.imageUrl
+            }`
+          : null;
+        // console.log(fullURL);
+        return fullURL ? (
+          <Image
+            width={70}
+            height={70}
+            src={fullURL}
+            alt="Ảnh diễn viên"
+            style={{ borderRadius: '50%', objectFit: 'cover' }}
+          />
+        ) : null;
+      }
+    },
+    {
       title: 'Tên diễn viên',
       dataIndex: 'castName',
       key: 'castName',
@@ -489,7 +517,7 @@ const AdminCast = () => {
               onChange={handleChangeCreateImage}
               customRequest={dummyRequestCreateImageCast}
             >
-              {fileList.length >= 8 ? null : uploadButton}
+              {fileList.length >= 1 ? null : uploadButton}
             </Upload>
             {previewImage && (
               <Image
@@ -563,16 +591,16 @@ const AdminCast = () => {
               // }}
             />
           </Form.Item>
-          {/* <Form.Item<FieldType> label="Image" name="imagesUuid" rules={[]}>
+          <Form.Item label="Image" name="imagesUuid" rules={[]}>
             <Upload
               action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               listType="picture-circle"
               fileList={fileList}
-              onPreview={handlePreview}
-              onChange={handleChange}
-              // customRequest={dummyRequestUpdateCast}
+              onPreview={handlePreviewCreateImage}
+              onChange={handleChangeCreateImage}
+              customRequest={dummyRequestCreateImageCast}
             >
-              {fileList.length >= 8 ? null : uploadButton}
+              {fileList.length >= 1 ? null : uploadButton}
             </Upload>
             {previewImage && (
               <Image
@@ -585,7 +613,7 @@ const AdminCast = () => {
                 src={previewImage}
               />
             )}
-          </Form.Item> */}
+          </Form.Item>
 
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">

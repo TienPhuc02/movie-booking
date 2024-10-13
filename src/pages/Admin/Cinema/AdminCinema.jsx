@@ -19,86 +19,45 @@ import {
 import Highlighter from 'react-highlight-words';
 import '../../../css/AdminGenre.css';
 import {
-  APICreateDirector,
-  APIGetAllDirector,
-  APIGetDirectorDetail,
-  APIDeleteDirector,
-  APIUploadImage
+  APICreateCinemas,
+  APIGetAllCinemas,
+  APIGetCinemasDetail,
+  APIDeleteCinemas,
 } from '../../../services/service.api';
 import { PlusOutlined } from '@ant-design/icons';
-import { Image, Upload } from 'antd';
 import moment from 'moment';
-const getBase64 = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-  });
+import MapPicker from './MapPicker';
 
-const AdminDirector = () => {
+const AdminCinemas = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
-  const [listDirector, setListDirector] = useState([]);
+  const [listCinemas, setListCinemas] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
   const [formUpdate] = Form.useForm();
-  const [directorDetail, setDirectorDetail] = useState(null);
+  const [cinemaDetail, setCinemasDetail] = useState(null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState('');
-  const [fileList, setFileList] = useState([]);
-  const [imagesUuid, setImagesUuid] = useState('');
+  const [location, setLocation] = useState(null);
 
-  const handlePreviewCreateImage = async (file) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
-    }
-
-    setPreviewImage(file.url || file.preview);
-    setPreviewOpen(true);
+  const handleLocationSelect = (loc) => {
+    setLocation(loc); // Lưu tọa độ vào state
   };
-  // console.log('fileList,', fileList);
-  const dummyRequestCreateImageCast = async ({ file, onSuccess }) => {
-    console.log('Đây là file gì ' + file);
-    const res = await APIUploadImage(file, '3');
-    console.log('Check var' + res);
-    if (res && res.status === 200) {
-      console.log('UUID của ảnh:', res.data.data);
-      setImagesUuid(res.data.data);
-    }
-    onSuccess('ok');
-  };
-  const handleChangeCreateImage = ({ fileList: newFileList }) =>
-    setFileList(newFileList);
-
-  const uploadButton = (
-    <button style={{ border: 0, background: 'none' }} type="button">
-      <PlusOutlined />
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </button>
-  );
 
   const showModalUpdate = async (uuid) => {
     try {
-      const res = await APIGetDirectorDetail({ uuid });
+      const res = await APIGetCinemasDetail({ uuid });
       console.log('update', res);
       if (res && res.status === 200) {
-        const directorDetail = res.data.data;
-        setDirectorDetail(directorDetail);
-        //  console.log("Lam gi thi lam ",directorDetail.imageUrl);
-        const imageUrl = `${
-          import.meta.env.VITE_BACKEND_URL
-        }/resources/images/${directorDetail.imageUrl}`;
+        const cinemaDetail = res.data.data;
+        setCinemasDetail(cinemaDetail);
+        //  console.log("Lam gi thi lam ",cinemaDetail.imageUrl);
         formUpdate.setFieldsValue({
-          directorName: directorDetail.directorName,
-          birthday: moment(directorDetail.birthday, 'YYYY-MM-DD'),
-          description: directorDetail.description,
-          imageUrl: directorDetail.imageUrl
+          cinemaName: cinemaDetail.cinemaName,
+          address: cinemaDetail.address,
+          location: cinemaDetail.location,
         });
-        setFileList([{ url: imageUrl }]);
         setIsModalUpdateOpen(true);
         // setFileList([]);
         setPreviewImage('');
@@ -117,30 +76,20 @@ const AdminDirector = () => {
     }
   };
 
-  const formatToDateString = (dateObj) => {
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-  const onFinishUpdateDirectorInfor = async (values) => {
-    const { birthday, ...restValues } = values;
-    const birthdayObj = new Date(birthday);
-    const birthdayFormat = formatToDateString(birthdayObj);
+  const onFinishUpdateCinemasInfor = async (values) => {
     try {
-      const res = await APICreateDirector({
-        uuid: directorDetail.uuid,
-        directorName: restValues.directorName,
-        birthday: birthdayFormat,
-        description: restValues.description,
-        imagesUuid // Gửi URL của ảnh nếu có
+      const res = await APICreateCinemas({
+        uuid: values.uuid,
+        cinemaName: values.cinemaName,
+        address: values.address,
+        location: values.location,
       });
+
+      console.log('Response:', res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
         form.resetFields();
-        setFileList([]);
-        setImagesUuid('');
-        getAllDirector();
+        getAllCinemas();
         handleCancelUpdate();
       }
     } catch (error) {
@@ -159,39 +108,32 @@ const AdminDirector = () => {
     }
   };
 
-  const getAllDirector = async () => {
+  const getAllCinemas = async () => {
     try {
-      const res = await APIGetAllDirector({ pageSize: 10, page: 1 });
+      const res = await APIGetAllCinemas({ pageSize: 10, page: 1 });
       console.log(res.data.data);
       if (res && res.data && res.data.data) {
         // Lọc các region có status khác "0"
-        const filteredDirectors = res.data?.data?.items.filter(
-          (director) => director.status !== 0
+        const filteredCinemas = res.data?.data?.items.filter(
+          (cinema) => cinema.status !== 0
         );
-        setListDirector(filteredDirectors); // Cập nhật danh sách director đã lọc
+        setListCinemas(filteredCinemas); // Cập nhật danh sách cinema đã lọc
         form.resetFields();
         handleCancel();
       }
     } catch (error) {
-      message.error('Đã xảy ra lỗi khi lấy danh sách đạo diễn.');
+      message.error('Đã xảy ra lỗi khi lấy danh sách rạp phim.');
     }
   };
   const onFinish = async (values) => {
-    const { birthday, ...restValues } = values;
-    const birthdayFormat = formatToDateString(new Date(birthday));
-    const dataDirector = {
-      ...restValues,
-      birthday: birthdayFormat,
-      imagesUuid
-    };
+    const dataCinemas = { ...values, location };
     try {
-      const res = await APICreateDirector(dataDirector);
+      const res = await APICreateCinemas(dataCinemas);
       console.log(res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
         form.resetFields();
-        setFileList([]);
-        getAllDirector();
+        getAllCinemas();
       }
       // console.log("Success:", values);
     } catch (error) {
@@ -214,7 +156,6 @@ const AdminDirector = () => {
   };
   const showModal = () => {
     setIsModalOpen(true);
-    setFileList([]);
   };
 
   const handleOk = () => {
@@ -229,7 +170,6 @@ const AdminDirector = () => {
 
   const handleCancelUpdate = () => {
     setIsModalUpdateOpen(false);
-    setFileList([]);
   };
 
   const onClose = () => {
@@ -248,10 +188,10 @@ const AdminDirector = () => {
   };
   const confirm = async (uuid) => {
     try {
-      const res = await APIDeleteDirector({ uuid, status: 0 });
+      const res = await APIDeleteCinemas({ uuid, status: 0 });
       if (res && res.status === 200) {
         message.success('Đã xoá thành công.');
-        getAllDirector(); // Cập nhật lại danh sách director sau khi xoá
+        getAllCinemas(); // Cập nhật lại danh sách cinema sau khi xoá
       } else {
         message.error('Xoá thất bại.');
       }
@@ -282,7 +222,7 @@ const AdminDirector = () => {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Tìm kiếm đạo diễn`}
+          placeholder={`Tìm kiếm rạp phim`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -352,9 +292,9 @@ const AdminDirector = () => {
         text
       )
   });
-  const listDirectorMap = listDirector.map((director, index) => ({
+  const listCinemasMap = listCinemas.map((cinema, index) => ({
     key: index + 1,
-    ...director
+    ...cinema
   }));
   const columns = [
     {
@@ -363,69 +303,35 @@ const AdminDirector = () => {
       width: 50
     },
     {
-      title: 'Ảnh đại diện',
-      dataIndex: 'imageUrl',
-      key: 'imageUrl',
-      width: 60,
-      render: (text, record) => {
-        console.log(record);
-        const fullURL = record?.imageUrl
-          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${
-              record?.imageUrl
-            }`
-          : null;
-        // console.log(fullURL);
-        return fullURL ? (
-          <Image
-            width={70}
-            height={70}
-            src={fullURL}
-            alt="Ảnh đạo diễn"
-            style={{ borderRadius: '50%', objectFit: 'cover' }}
-          />
-        ) : null;
-      }
-    },
-    {
-      title: 'Tên đạo diễn',
-      dataIndex: 'directorName',
-      key: 'directorName',
-      ...getColumnSearchProps('directorName'),
+      title: 'Tên rạp phim',
+      dataIndex: 'cinemaName',
+      key: 'cinemaName',
+      ...getColumnSearchProps('cinemaName'),
       width: 50,
-      sorter: (a, b) => a.directorName.length - b.directorName.length,
+      sorter: (a, b) => a.cinemaName.length - b.cinemaName.length,
       sortDirections: ['descend', 'ascend'],
-      render: (director, record) => {
+      render: (cinema, record) => {
         return (
           <div>
-            {director} {/* Hiển thị tên quốc gia */}
+            {cinema} {/* Hiển thị tên quốc gia */}
           </div>
         );
       }
     },
     {
-      title: 'Ngày sinh',
-      dataIndex: 'birthday',
-      key: 'birthday',
+      title: 'Địa chỉ',
+      dataIndex: 'address',
+      key: 'address',
       width: 50
     },
-    {
-      title: 'Mô tả',
-      dataIndex: 'description',
-      key: 'description',
-      width: 100,
-      render: (description) => (
-        <div className="truncate-description">{description}</div>
-      )
-    },
-
     {
       title: 'Hành động',
       width: 50,
       render: (record) => (
         <div className="flex gap-4">
           <Popconfirm
-            title="Xoá đạo diễn"
-            description="Bạn muốn xoá đạo diễn này?"
+            title="Xoá rạp phim"
+            description="Bạn muốn xoá rạp phim này?"
             onConfirm={() => confirm(record.uuid)}
             okText={<>Có</>}
             cancelText="Không"
@@ -446,18 +352,19 @@ const AdminDirector = () => {
     }
   ];
   useEffect(() => {
-    getAllDirector();
+    getAllCinemas();
   }, []);
   return (
     <>
       <Button className="float-end mb-4" type="primary" onClick={showModal}>
-        Thêm mới đạo diễn
+        Thêm mới rạp phim
       </Button>
       <Modal
-        title="Thêm mới đạo diễn"
+        title="Thêm mới rạp phim"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
+        width={800}
         footer={<></>}
       >
         <Form
@@ -472,58 +379,33 @@ const AdminDirector = () => {
           autoComplete="off"
         >
           <Form.Item
-            label="Tên đạo diễn"
-            name="directorName"
-            rules={[{ required: true, message: 'Hãy nhập tên đạo diễn!' }]}
+            label="Tên rạp phim"
+            name="cinemaName"
+            rules={[{ required: true, message: 'Hãy nhập tên rạp phim!' }]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item
-            label="Ngày sinh"
-            name="birthday"
+            label="Địa chỉ"
+            name="addres"
             rules={[
               {
                 required: true,
-                message: 'Hãy nhập ngày sinh của bạn!'
+                message: 'Hãy nhập địa chỉ rạp phim!'
               }
             ]}
           >
-            <DatePicker
-              placeholder="Ngày sinh"
-              variant="filled"
-              className="w-full"
-            />
+            <Input />
           </Form.Item>
 
-          <Form.Item label="Mô tả" name="description" rules={[]}>
-            <Input.TextArea
-              placeholder="Nhập mô tả...."
-              autoSize={{ minRows: 2, maxRows: 6 }}
-            />
-          </Form.Item>
-          <Form.Item label="Image" name="imageUrl" rules={[]}>
-            <Upload
-              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
-              listType="picture-circle"
-              fileList={fileList}
-              onPreview={handlePreviewCreateImage}
-              onChange={handleChangeCreateImage}
-              customRequest={dummyRequestCreateImageCast}
-            >
-              {fileList.length >= 1 ? null : uploadButton}
-            </Upload>
-            {previewImage && (
-              <Image
-                wrapperStyle={{ display: 'none' }}
-                preview={{
-                  visible: previewOpen,
-                  onVisibleChange: (visible) => setPreviewOpen(visible),
-                  afterOpenChange: (visible) => !visible && setPreviewImage('')
-                }}
-                src={previewImage}
-              />
-            )}
+          <Form.Item label="Địa chỉ map" name="location" rules={[
+            {
+                required: true,
+                message: 'Hãy nhập địa chỉ map!'
+            }
+          ]}>
+            <MapPicker onLocationSelect={handleLocationSelect} initialLocation={location} />
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
@@ -533,7 +415,7 @@ const AdminDirector = () => {
         </Form>
       </Modal>
       <Modal
-        title="Cập nhật đạo diễn"
+        title="Cập nhật rạp phim"
         open={isModalUpdateOpen}
         onCancel={() => setIsModalUpdateOpen(false)}
         footer={
@@ -547,14 +429,14 @@ const AdminDirector = () => {
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 600 }}
           initialValues={{ remember: true }}
-          onFinish={onFinishUpdateDirectorInfor}
+          onFinish={onFinishUpdateCinemasInfor}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
           <Form.Item
-            label="Tên đạo diễn"
-            name="directorName"
-            rules={[{ required: true, message: 'Hãy nhập tên đạo diễn!' }]}
+            label="Tên rạp phim"
+            name="cinemaName"
+            rules={[{ required: true, message: 'Hãy nhập tên rạp phim!' }]}
           >
             <Input />
           </Form.Item>
@@ -569,11 +451,6 @@ const AdminDirector = () => {
               }
             ]}
           >
-            <DatePicker
-              placeholder="Ngày sinh"
-              variant="filled"
-              className="w-full"
-            />
           </Form.Item>
 
           <Form.Item label="Mô tả" name="description" rules={[]}>
@@ -585,29 +462,6 @@ const AdminDirector = () => {
               }}
             />
           </Form.Item>
-          <Form.Item label="Image" name="imageUrl" rules={[]}>
-            <Upload
-              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
-              listType="picture-circle"
-              fileList={fileList}
-              onPreview={handlePreviewCreateImage}
-              onChange={handleChangeCreateImage}
-              customRequest={dummyRequestCreateImageCast}
-            >
-              {fileList.length >= 1 ? null : uploadButton}
-            </Upload>
-            {previewImage && (
-              <Image
-                wrapperStyle={{ display: 'none' }}
-                preview={{
-                  visible: previewOpen,
-                  onVisibleChange: (visible) => setPreviewOpen(visible),
-                  afterOpenChange: (visible) => !visible && setPreviewImage('')
-                }}
-                src={previewImage}
-              />
-            )}
-          </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
               Cập nhật
@@ -617,7 +471,7 @@ const AdminDirector = () => {
       </Modal>
       <Table
         columns={columns}
-        dataSource={listDirectorMap}
+        dataSource={listCinemasMap}
         scroll={{ x: 1000, y: 500 }}
         pagination={{
           showTotal: (total, range) => {
@@ -632,4 +486,4 @@ const AdminDirector = () => {
   );
 };
 
-export default AdminDirector;
+export default AdminCinemas;
