@@ -2,52 +2,119 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   DeleteOutlined,
   EditOutlined,
-  EditTwoTone,
-  SearchOutlined
+  SearchOutlined,
+  TableOutlined
 } from '@ant-design/icons';
 
 import {
   Button,
-  Drawer,
+  DatePicker,
   Form,
   Input,
+  InputNumber,
   message,
   Modal,
   Popconfirm,
+  Select,
   Space,
   Table
 } from 'antd';
 import Highlighter from 'react-highlight-words';
 import '../../../css/AdminGenre.css';
 import {
-  APICreateRegion,
-  APIGetAllRegion,
-  APIGetRegionDetail,
-  APIDeleteRegion
+  APICreateDirector,
+  APIGetAllDirector,
+  APIGetDirectorDetail,
+  APIDeleteDirector,
+  APIUploadImage,
+  APIGetAllMovies
 } from '../../../services/service.api';
+import { PlusOutlined } from '@ant-design/icons';
+import { Image, Upload } from 'antd';
+import moment from 'moment';
+const getBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
 
-const AdminRegion = () => {
+const AdminSchedule = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
-  const searchInput = useRef (null);
-  const [listRegion, setListRegion] = useState([]);
+  const searchInput = useRef(null);
+  const [listDirector, setListDirector] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
   const [formUpdate] = Form.useForm();
-  const [regionDetail, setRegionDetail] = useState (null);
+  const [directorDetail, setDirectorDetail] = useState(null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
+  const [fileList, setFileList] = useState([]);
+  const [imagesUuid, setImagesUuid] = useState('');
+  const [listMovies, setListMovies] = useState([]);
+
+  const handleChangeStatus = (value) =>{
+    console.log(`selected ${value}`);
+  }
+
+  const handleChangeMovies = (value) => {
+    console.log(`selected ${value}`);
+  };
+  
+  const handlePreviewCreateImage = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+
+    setPreviewImage(file.url || file.preview);
+    setPreviewOpen(true);
+  };
+  // console.log('fileList,', fileList);
+  const dummyRequestCreateImageCast = async ({ file, onSuccess }) => {
+    console.log('Đây là file gì ' + file);
+    const res = await APIUploadImage(file, '3');
+    console.log('Check var' + res);
+    if (res && res.status === 200) {
+      console.log('UUID của ảnh:', res.data.data);
+      setImagesUuid(res.data.data);
+    }
+    onSuccess('ok');
+  };
+  const handleChangeCreateImage = ({ fileList: newFileList }) =>
+    setFileList(newFileList);
+
+  const uploadButton = (
+    <button style={{ border: 0, background: 'none' }} type="button">
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Upload</div>
+    </button>
+  );
 
   const showModalUpdate = async (uuid) => {
     try {
-      const res = await APIGetRegionDetail({ uuid });
+      const res = await APIGetDirectorDetail({ uuid });
+      console.log('update', res);
       if (res && res.status === 200) {
-        const regionDetail = res.data.data;
-        setRegionDetail(regionDetail);
+        const directorDetail = res.data.data;
+        setDirectorDetail(directorDetail);
+        //  console.log("Lam gi thi lam ",directorDetail.imageUrl);
+        const imageUrl = `${
+          import.meta.env.VITE_BACKEND_URL
+        }/resources/images/${directorDetail.imageUrl}`;
         formUpdate.setFieldsValue({
-          regionName: regionDetail.regionName
+          directorName: directorDetail.directorName,
+          birthday: moment(directorDetail.birthday, 'YYYY-MM-DD'),
+          description: directorDetail.description,
+          imageUrl: directorDetail.imageUrl
         });
+        setFileList([{ url: imageUrl }]);
         setIsModalUpdateOpen(true);
+        // setFileList([]);
+        setPreviewImage('');
       } else {
         message.error('Không tìm thấy thông tin chi tiết.');
       }
@@ -62,19 +129,33 @@ const AdminRegion = () => {
       }
     }
   };
-  const onFinishUpdateRegionName = async (values) => {
+
+  const formatToDateString = (dateObj) => {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  const onFinishUpdateDirectorInfor = async (values) => {
+    const { birthday, ...restValues } = values;
+    const birthdayObj = new Date(birthday);
+    const birthdayFormat = formatToDateString(birthdayObj);
     try {
-      const res = await APICreateRegion({
-        uuid: regionDetail.uuid,
-        regionName: values.regionName
+      const res = await APICreateDirector({
+        uuid: directorDetail.uuid,
+        directorName: restValues.directorName,
+        birthday: birthdayFormat,
+        description: restValues.description,
+        imagesUuid // Gửi URL của ảnh nếu có
       });
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
-        getAllRegion();
-        formUpdate.resetFields();
+        form.resetFields();
+        setFileList([]);
+        setImagesUuid('');
+        getAllDirector();
         handleCancelUpdate();
       }
-      // console.log("Success:", values);
     } catch (error) {
       if (error.response) {
         const errorMessage =
@@ -91,29 +172,39 @@ const AdminRegion = () => {
     }
   };
 
-  const getAllRegion = async () => {
+  const getAllDirector = async () => {
     try {
-      const res = await APIGetAllRegion({ pageSize: 10, page: 1 });
+      const res = await APIGetAllDirector({ pageSize: 10, page: 1 });
+      console.log(res.data.data);
       if (res && res.data && res.data.data) {
         // Lọc các region có status khác "0"
-        const filteredRegions = res.data?.data?.items.filter(
-          (region) => region.status !== 0
+        const filteredDirectors = res.data?.data?.items.filter(
+          (director) => director.status !== 0
         );
-        setListRegion(filteredRegions); // Cập nhật danh sách region đã lọc
+        setListDirector(filteredDirectors); // Cập nhật danh sách director đã lọc
         form.resetFields();
         handleCancel();
       }
     } catch (error) {
-      message.error('Đã xảy ra lỗi khi lấy danh sách quốc gia.');
+      message.error('Đã xảy ra lỗi khi lấy danh sách đạo diễn.');
     }
   };
   const onFinish = async (values) => {
+    const { birthday, ...restValues } = values;
+    const birthdayFormat = formatToDateString(new Date(birthday));
+    const dataDirector = {
+      ...restValues,
+      birthday: birthdayFormat,
+      imagesUuid
+    };
     try {
-      const res = await APICreateRegion(values);
-      // console.log(res);
+      const res = await APICreateDirector(dataDirector);
+      console.log(res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
-        getAllRegion();
+        form.resetFields();
+        setFileList([]);
+        getAllDirector();
       }
       // console.log("Success:", values);
     } catch (error) {
@@ -131,48 +222,28 @@ const AdminRegion = () => {
       }
     }
   };
-
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
   const showModal = () => {
     setIsModalOpen(true);
+    setFileList([]);
   };
 
   const handleOk = () => {
     setIsModalOpen(false);
+    form.resetFields();
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    form.resetFields();
   };
 
   const handleCancelUpdate = () => {
     setIsModalUpdateOpen(false);
+    setFileList([]);
   };
-
-  // const showDrawer = async (uuid: string) => {
-  //   try {
-  //     const res = await APIGetRegionDetail({ uuid });
-  //     // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
-  //     if (res && res.status === 200) {
-  //       setRegionDetail(res.data.data);
-  //       setOpen(true);
-  //     } else {
-  //       message.error("Không tìm thấy thông tin chi tiết.");
-  //     }
-  //   } catch (error: any) {
-  //     if (error.response) {
-  //       console.error(error.response.data);
-  //       const errorMessage =
-  //         error.response.data?.error?.errorMessage ||
-  //         "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
-  //       message.error(errorMessage);
-  //     } else {
-  //       message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
-  //     }
-  //   }
-  // };
 
   const onClose = () => {
     setOpen(false);
@@ -190,10 +261,10 @@ const AdminRegion = () => {
   };
   const confirm = async (uuid) => {
     try {
-      const res = await APIDeleteRegion({ uuid, status: 0 });
+      const res = await APIDeleteDirector({ uuid, status: 0 });
       if (res && res.status === 200) {
         message.success('Đã xoá thành công.');
-        getAllRegion(); // Cập nhật lại danh sách region sau khi xoá
+        getAllDirector(); // Cập nhật lại danh sách director sau khi xoá
       } else {
         message.error('Xoá thất bại.');
       }
@@ -212,6 +283,25 @@ const AdminRegion = () => {
       }
     }
   };
+  const getAllMovies = async () => {
+    try {
+      const res = await APIGetAllMovies({ pageSize: 10, page: 1 });
+      console.log('API Response:', res);
+      if (res && res.data && Array.isArray(res.data.data.items)) {
+        const movies = res.data.data.items;
+        const moviesOptions = movies.map((movie) => ({
+          value: movie.uuid,
+          label: movie.title,
+        }));
+
+        setListMovies(moviesOptions); // Cập nhật state
+      } else {
+        message.error('Không có dữ liệu đạo diễn hợp lệ.');
+      }
+    } catch (error) {
+      message.error('Đã xảy ra lỗi khi lấy danh sách đạo diễn.');
+    }
+  };
 
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
@@ -224,7 +314,7 @@ const AdminRegion = () => {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Tìm kiếm quốc gia`}
+          placeholder={`Tìm kiếm đạo diễn`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -247,7 +337,7 @@ const AdminRegion = () => {
             size="small"
             style={{ width: 90 }}
           >
-            Đăt lại
+            Đặt lại
           </Button>
           <Button
             type="link"
@@ -294,9 +384,9 @@ const AdminRegion = () => {
         text
       )
   });
-  const listRegionMap = listRegion.map((region, index) => ({
+  const listDirectorMap = listDirector.map((director, index) => ({
     key: index + 1,
-    ...region
+    ...director
   }));
   const columns = [
     {
@@ -304,54 +394,38 @@ const AdminRegion = () => {
       dataIndex: 'key',
       width: 50
     },
-    // {
-    //   title: "UUID",
-    //   width: 200,
-    //    ...getColumnSearchProps("uuid"),
-    //   render: (record) => {
-    //     return (
-    //       <div
-    //         className="hover:text-[#4096ff] cursor-pointer"
-    //         onClick={() => showDrawer(record.uuid)} // Gọi showDrawer với uuid
-    //       >
-    //         {record.uuid}
-    //       </div>
-    //     );
-    //   },
-    // },
     {
-      title: 'Tên quốc gia',
-      dataIndex: 'regionName',
-      key: 'regionName',
-      ...getColumnSearchProps('regionName'),
-      width: 100,
-      sorter: (a, b) => a.regionName.length - b.regionName.length,
+      title: 'Tên phim',
+      dataIndex: 'directorName',
+      key: 'directorName',
+      ...getColumnSearchProps('directorName'),
+      width: 50,
+      sorter: (a, b) => a.directorName.length - b.directorName.length,
       sortDirections: ['descend', 'ascend'],
-      render: (region, record) => {
+      render: (director, record) => {
         return (
-          <div
-          // className="hover:text-[#4096ff] cursor-pointer"
-          // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
-          >
-            {region} {/* Hiển thị tên quốc gia */}
+          <div>
+            {director} {/* Hiển thị tên quốc gia */}
           </div>
         );
       }
     },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   width:50,
-    // },
+    {
+      title: 'Thời gian chiếu',
+      dataIndex: 'screenType',
+      key: 'screenType',
+      width: 50
+    },
+    
+
     {
       title: '',
       width: 50,
       render: (record) => (
         <div className="flex gap-4">
           <Popconfirm
-            title="Xoá quốc gia"
-            description="Bạn chắc chắn muốn xoá quốc gia này?"
+            title="Xoá đạo diễn"
+            description="Bạn muốn xoá đạo diễn này?"
             onConfirm={() => confirm(record.uuid)}
             okText={<>Có</>}
             cancelText="Không"
@@ -372,33 +446,16 @@ const AdminRegion = () => {
     }
   ];
   useEffect(() => {
-    getAllRegion();
+    getAllDirector();
+    getAllMovies();
   }, []);
   return (
     <>
       <Button className="float-end mb-4" type="primary" onClick={showModal}>
-        Thêm mới quốc gia
+        Thêm mới lịch chiếu
       </Button>
-      {/* <Drawer
-        title="Chi tiết quốc gia"
-        placement="right"
-        onClose={onClose}
-        open={open}
-        width={400}
-      > 
-       {regionDetail ? (
-          <div>
-             <p><strong>UUID:</strong> {regionDetail.uuid}</p> 
-            <p><strong>Tên Thể Loại:</strong> {regionDetail.regionName}</p>
-            <p><strong>Trạng Thái:</strong> {regionDetail.status}</p>
-             Thêm các thông tin khác nếu cần 
-          </div>
-        ) : (
-          <p>Không có thông tin chi tiết để hiển thị.</p>
-        )}
-       </Drawer> */}
       <Modal
-        title="Thêm mới quốc gia"
+        title="Thêm mới lịch chiếu"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -416,13 +473,43 @@ const AdminRegion = () => {
           autoComplete="off"
         >
           <Form.Item
-            label="Tên quốc gia"
-            name="regionName"
-            rules={[{ required: true, message: 'Nhập tên quốc gia!' }]}
+            label="Tên phim"
+            name="movieUuid"
+            rules={[{ required: true, message: 'Hãy chọn phim!' }]}
           >
-            <Input />
+            <Select
+                  showSearch
+                  placeholder="Chọn phim..."
+                  onChange={handleChangeMovies}
+                  options={listMovies}
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  allowClear
+                />
           </Form.Item>
-
+          <Form.Item
+            label="Ngày bắt đầu"
+            name="startDate"
+            rules={[{ required: true, message: 'Hãy nhập ngày bắt đầu!' }]}
+          >
+            <DatePicker
+              placeholder="Ngày bắt đầu"
+              variant="filled"
+              className="w-full"
+            />
+          </Form.Item>
+          <Form.Item
+            label="Ngày kết thúc"
+            name="startDate"
+            rules={[{ required: true, message: 'Hãy nhập ngày kết thúc!' }]}
+          >
+            <DatePicker
+              placeholder="Ngày kết thúc"
+              variant="filled"
+              className="w-full"
+            />
+          </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
               Thêm mới
@@ -431,7 +518,7 @@ const AdminRegion = () => {
         </Form>
       </Modal>
       <Modal
-        title="Cập nhật quốc gia"
+        title="Cập nhật đạo diễn"
         open={isModalUpdateOpen}
         onCancel={() => setIsModalUpdateOpen(false)}
         footer={
@@ -445,18 +532,67 @@ const AdminRegion = () => {
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 600 }}
           initialValues={{ remember: true }}
-          onFinish={onFinishUpdateRegionName}
+          onFinish={onFinishUpdateDirectorInfor}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
           <Form.Item
-            label="Tên quốc gia"
-            name="regionName"
-            rules={[{ required: true, message: 'Nhập tên quốc gia!' }]}
+            label="Tên đạo diễn"
+            name="directorName"
+            rules={[{ required: true, message: 'Hãy nhập tên đạo diễn!' }]}
           >
             <Input />
           </Form.Item>
 
+          <Form.Item
+            label="Ngày sinh"
+            name="birthday"
+            rules={[
+              {
+                required: true,
+                message: 'Hãy nhập ngày sinh của bạn!'
+              }
+            ]}
+          >
+            <DatePicker
+              placeholder="Ngày sinh"
+              variant="filled"
+              className="w-full"
+            />
+          </Form.Item>
+
+          <Form.Item label="Mô tả" name="description" rules={[]}>
+            <Input.TextArea
+              placeholder="Nhập mô tả...."
+              autoSize={{ minRows: 2, maxRows: 6 }}
+              onChange={(e) => {
+                // Optional: Handle text area change if needed
+              }}
+            />
+          </Form.Item>
+          <Form.Item label="Image" name="imageUrl" rules={[]}>
+            <Upload
+              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+              listType="picture-circle"
+              fileList={fileList}
+              onPreview={handlePreviewCreateImage}
+              onChange={handleChangeCreateImage}
+              customRequest={dummyRequestCreateImageCast}
+            >
+              {fileList.length >= 1 ? null : uploadButton}
+            </Upload>
+            {previewImage && (
+              <Image
+                wrapperStyle={{ display: 'none' }}
+                preview={{
+                  visible: previewOpen,
+                  onVisibleChange: (visible) => setPreviewOpen(visible),
+                  afterOpenChange: (visible) => !visible && setPreviewImage('')
+                }}
+                src={previewImage}
+              />
+            )}
+          </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit">
               Cập nhật
@@ -466,7 +602,7 @@ const AdminRegion = () => {
       </Modal>
       <Table
         columns={columns}
-        dataSource={listRegionMap}
+        dataSource={listDirectorMap}
         scroll={{ x: 1000, y: 500 }}
         pagination={{
           showTotal: (total, range) => {
@@ -481,4 +617,4 @@ const AdminRegion = () => {
   );
 };
 
-export default AdminRegion;
+export default AdminSchedule;

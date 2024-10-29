@@ -419,7 +419,7 @@ const AdminDirector = () => {
     },
 
     {
-      title: 'Hành động',
+      title: '',
       width: 50,
       render: (record) => (
         <div className="flex gap-4">

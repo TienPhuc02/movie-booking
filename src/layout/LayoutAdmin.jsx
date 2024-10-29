@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
 import {
+  CalendarOutlined,
+  DollarOutlined,
   EnvironmentOutlined,
+  FileSearchOutlined,
   GlobalOutlined,
   IdcardOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  PercentageOutlined,
+  PlaySquareOutlined,
+  ShoppingCartOutlined,
+  TableOutlined,
+  UnorderedListOutlined,
   UserOutlined,
   UserSwitchOutlined,
   VideoCameraAddOutlined,
@@ -23,7 +31,7 @@ const items = [
         <UserOutlined />
       </Link>
     ),
-    label: 'User'
+    label: 'Quản lý người dùng'
   },
   {
     key: '2',
@@ -46,6 +54,69 @@ const items = [
   {
     key: '4',
     icon: (
+      <Link to={'/admin/screen'}>
+        <PlaySquareOutlined />
+      </Link>
+    ),
+    label: 'Quản lý phòng chiếu phim'
+  },
+  {
+    key: '5',
+    icon: (
+      <Link to={'/admin/schedule'}>
+        <CalendarOutlined />
+      </Link>
+    ),
+    label: 'Quản lý lịch chiếu phim'
+  },
+  {
+    key: '6',
+    icon: (
+      <Link to={'/admin/showtime'}>
+       <UnorderedListOutlined />
+      </Link>
+    ),
+    label: 'Quản lý suất chiếu phim'
+  },
+  {
+    key: '7',
+    icon: (
+      <Link to={'/admin/order'}>
+        <ShoppingCartOutlined />
+      </Link>
+    ),
+    label: 'Quản lý đơn hàng'
+  },
+  {
+    key: '8',
+    icon: (
+      <Link to={'/admin/ticketprice'}>
+        <DollarOutlined />
+      </Link>
+    ),
+    label: 'Quản lý giá vé'
+  },
+  {
+    key: '9',
+    icon: (
+      <Link to={'/admin/coupon'}>
+        <PercentageOutlined />
+      </Link>
+    ),
+    label: 'Quản lý khuyến mãi'
+  },
+  {
+    key: '10',
+    icon: (
+      <Link to={'/admin/news'}>
+        <FileSearchOutlined />
+      </Link>
+    ),
+    label: 'Quản lý tin tức'
+  },
+  {
+    key: '11',
+    icon: (
       <Link to={'/admin/genre'}>
         <VideoCameraAddOutlined />
       </Link>
@@ -53,7 +124,7 @@ const items = [
     label: 'Quản lý thể loại'
   },
   {
-    key: '5',
+    key: '12',
     icon: (
       <Link to={'/admin/region'}>
         <GlobalOutlined />
@@ -62,7 +133,7 @@ const items = [
     label: 'Quản lý quốc gia'
   },
   {
-    key: '6',
+    key: '13',
     icon: (
       <Link to={'/admin/director'}>
         <IdcardOutlined />
@@ -71,13 +142,22 @@ const items = [
     label: 'Quản lý đạo diễn'
   },
   {
-    key: '7',
+    key: '14',
     icon: (
       <Link to={'/admin/cast'}>
         <UserSwitchOutlined />
       </Link>
     ),
     label: 'Quản lý diễn viên'
+  },
+  {
+    key: '15',
+    icon: (
+      <Link to={'/admin/combo'}>
+        <TableOutlined />
+      </Link>
+    ),
+    label: 'Quản lý combo-nước'
   }
 ];
 
@@ -94,6 +174,7 @@ const LayoutAdmin = () => {
         theme="light"
         collapsed={collapsed}
         onCollapse={(value) => setCollapsed(value)}
+        width={250}
       >
         <div className="demo-logo-vertical flex justify-center items-center py-8">
           {/* Admin DashBoard */}
@@ -125,7 +206,8 @@ const LayoutAdmin = () => {
               padding: 24,
               minHeight: '75vh',
               background: colorBgContainer,
-              borderRadius: borderRadiusLG
+              borderRadius: borderRadiusLG,
+              
             }}
           >
             <Outlet />

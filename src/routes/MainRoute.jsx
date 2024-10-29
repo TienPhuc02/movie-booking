@@ -11,6 +11,15 @@ import AdminCast from "../pages/Admin/Cast/AdminCast";
 import ProtectRoute from "./ProtectRoute";
 import LoginAdminPage from "../pages/Admin/LoginAdminPage";
 import AdminCinemas from "../pages/Admin/Cinema/AdminCinema";
+import AdminScreen from "../pages/Admin/Screen/AdminScreen";
+import SeatLayout from "../pages/Admin/Screen/SeatLayOut";
+import AdminSchedule from "../pages/Admin/Schedule/AdminSchedule";
+import AdminShowTime from "../pages/Admin/ShowTime/AdminShowTime";
+import AdminOrder from "../pages/Admin/Order/AdminOrder";
+import AdminTicketPrice from "../pages/Admin/TicketPrice/AdminTicketPrice";
+import AdminCoupon from "../pages/Admin/Coupon/AdminCoupon";
+import AdminNew from "../pages/Admin/News/AdminNew";
+import AdminCombo from "../pages/Admin/Combo/AdminCombo";
 
 const router = createBrowserRouter([
   {
@@ -21,7 +30,10 @@ const router = createBrowserRouter([
     path: "/login/admin",
     element: <LoginAdminPage />, // Trang đăng nhập admin
   },
-
+  {
+    path: "/testing",
+    element: <SeatLayout />,
+  },
   {
     path: "/admin",
     element: (
@@ -44,6 +56,35 @@ const router = createBrowserRouter([
         element: <AdminCinemas />,
       },
       {
+        path: "screen",
+        element: <AdminScreen />,
+      },
+      {
+        path: "schedule",
+        element: <AdminSchedule />,
+      },
+      {
+        path: "showtime",
+        element: <AdminShowTime />,
+      },
+      {
+        path: "order",
+        element: <AdminOrder />,
+      },
+      {
+        path: "ticketprice",
+        element: <AdminTicketPrice />,
+      },
+      {
+        path: "coupon",
+        element: <AdminCoupon />,
+      },
+      {
+        path: "news",
+        element: <AdminNew />,
+      },
+
+      {
         path: "genre",
         element: <AdminGenre />,
       },
@@ -58,6 +99,10 @@ const router = createBrowserRouter([
       {
         path: "cast",
         element: <AdminCast />,
+      },
+      {
+        path: "combo",
+        element: <AdminCombo />,
       },
     ],
   },

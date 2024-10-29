@@ -287,44 +287,39 @@ const AdminMovies = () => {
   //     }
   //   }
   // };
-  const getAllDirector = async () => {
+  const fetchData = async (apiCall, mapDataToOptions, setState) => {
     try {
-      const res = await APIGetAllDirector({ pageSize: 10, page: 1 });
+      const res = await apiCall({ pageSize: 10, page: 1 });
       console.log('API Response:', res);
       if (res && res.data && Array.isArray(res.data.data.items)) {
-        const directors = res.data.data.items;
-        const directorOptions = directors.map((director) => ({
-          value: director.uuid,
-          label: director.directorName
-        }));
+        const dataItems = res.data.data.items;
+        const options = dataItems.map(mapDataToOptions);
 
-        setListDirector(directorOptions); // Cập nhật state
+        setState(options); // Cập nhật state
       } else {
-        message.error('Không có dữ liệu đạo diễn hợp lệ.');
+        message.error('Không có dữ liệu hợp lệ.');
       }
     } catch (error) {
-      message.error('Đã xảy ra lỗi khi lấy danh sách đạo diễn.');
+      message.error('Đã xảy ra lỗi khi lấy dữ liệu.');
     }
   };
-  const getAllGenre = async () => {
-    try {
-      const res = await APIGetAllGenre({ pageSize: 10, page: 1 });
-      console.log('API Response:', res);
-      if (res && res.data && Array.isArray(res.data.data.items)) {
-        const genres = res.data.data.items;
-        const genresOptions = genres.map((genre) => ({
-          value: genre.uuid,
-          label: genre.genreName
-        }));
 
-        setListGenre(genresOptions); // Cập nhật state
-      } else {
-        message.error('Không có dữ liệu đạo diễn hợp lệ.');
-      }
-    } catch (error) {
-      message.error('Đã xảy ra lỗi khi lấy danh sách đạo diễn.');
-    }
+  const getAllDirector = () => {
+    fetchData(
+      APIGetAllDirector,
+      (director) => ({ value: director.uuid, label: director.directorName }),
+      setListDirector
+    );
   };
+
+  const getAllGenre = () => {
+    fetchData(
+      APIGetAllGenre,
+      (genre) => ({ value: genre.uuid, label: genre.genreName }),
+      setListGenre
+    );
+  };
+
 
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
@@ -425,9 +420,8 @@ const AdminMovies = () => {
       render: (text, record) => {
         console.log(record);
         const fullURL = record?.imageUrl
-          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${
-              record?.imageUrl
-            }`
+          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${record?.imageUrl
+          }`
           : null;
         console.log(fullURL);
         return fullURL ? (
@@ -507,11 +501,6 @@ const AdminMovies = () => {
       // )
     },
     {
-      title: 'Đạo diễn Phim',
-      dataIndex: 'directorUuid',
-      key: 'directorUuid'
-    },
-    {
       title: 'Trạng Thái Phim ',
       dataIndex: 'status',
       key: 'status',
@@ -521,7 +510,7 @@ const AdminMovies = () => {
     },
 
     {
-      title: 'Hành động',
+      title: '',
       width: 50,
       render: (record) => (
         <div className="flex gap-4">
@@ -539,7 +528,7 @@ const AdminMovies = () => {
           <Button
             type="text"
             className="bg-blue-700 text-white"
-            // onClick={() => showModalUpdate(record.uuid)}
+          // onClick={() => showModalUpdate(record.uuid)}
           >
             <EditOutlined />
           </Button>
@@ -755,12 +744,12 @@ const AdminMovies = () => {
                 message: 'Hãy nhập mô tả phim của bạn!'
               }
             ]}
-            
+
           >
             <Input.TextArea
-            placeholder="Nhập mô tả...."
-            autoSize={{ minRows: 3, maxRows: 8 }}
-            width={300}
+              placeholder="Nhập mô tả...."
+              autoSize={{ minRows: 3, maxRows: 8 }}
+              width={300}
             />
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>

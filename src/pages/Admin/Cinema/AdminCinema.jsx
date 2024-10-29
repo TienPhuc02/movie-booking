@@ -25,8 +25,6 @@ import {
   APIDeleteCinemas,
 } from '../../../services/service.api';
 import { PlusOutlined } from '@ant-design/icons';
-import moment from 'moment';
-import MapPicker from './MapPicker';
 
 const AdminCinemas = () => {
   const [searchText, setSearchText] = useState('');
@@ -39,28 +37,27 @@ const AdminCinemas = () => {
   const [formUpdate] = Form.useForm();
   const [cinemaDetail, setCinemasDetail] = useState(null);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
-  const [location, setLocation] = useState(null);
+  const [mapUrl, setMapUrl] = useState(null);
 
   const handleLocationSelect = (loc) => {
-    setLocation(loc); // Lưu tọa độ vào state
+    setMapUrl(loc.target.value); // Lưu tọa độ vào state
   };
+  console.log("Địa chỉ map: ", mapUrl)
 
   const showModalUpdate = async (uuid) => {
     try {
       const res = await APIGetCinemasDetail({ uuid });
-      console.log('update', res);
+      console.log('update 1234', res);
       if (res && res.status === 200) {
         const cinemaDetail = res.data.data;
         setCinemasDetail(cinemaDetail);
-        //  console.log("Lam gi thi lam ",cinemaDetail.imageUrl);
+        setMapUrl(cinemaDetail.location);
         formUpdate.setFieldsValue({
           cinemaName: cinemaDetail.cinemaName,
           address: cinemaDetail.address,
           location: cinemaDetail.location,
         });
         setIsModalUpdateOpen(true);
-        // setFileList([]);
-        setPreviewImage('');
       } else {
         message.error('Không tìm thấy thông tin chi tiết.');
       }
@@ -126,16 +123,16 @@ const AdminCinemas = () => {
     }
   };
   const onFinish = async (values) => {
-    const dataCinemas = { ...values, location };
+    const dataCinemas = { ...values };
     try {
       const res = await APICreateCinemas(dataCinemas);
-      console.log(res);
+      console.log("1234455", res);
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
         form.resetFields();
         getAllCinemas();
       }
-      // console.log("Success:", values);
+      console.log("Success:", dataCinemas);
     } catch (error) {
       if (error.response) {
         const errorMessage =
@@ -156,16 +153,19 @@ const AdminCinemas = () => {
   };
   const showModal = () => {
     setIsModalOpen(true);
+    setMapUrl(null);
   };
 
   const handleOk = () => {
     setIsModalOpen(false);
     form.resetFields();
+    setMapUrl(null);
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
     form.resetFields();
+    setMapUrl(null);
   };
 
   const handleCancelUpdate = () => {
@@ -300,7 +300,7 @@ const AdminCinemas = () => {
     {
       title: 'Id',
       dataIndex: 'key',
-      width: 50
+      width: 10
     },
     {
       title: 'Tên rạp phim',
@@ -325,7 +325,7 @@ const AdminCinemas = () => {
       width: 50
     },
     {
-      title: 'Hành động',
+      title: '',
       width: 50,
       render: (record) => (
         <div className="flex gap-4">
@@ -364,56 +364,76 @@ const AdminCinemas = () => {
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
-        width={800}
-        footer={<></>}
+        width={1000}
+        footer={null}
       >
-        <Form
-          form={form}
-          name="basic"
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 600 }}
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-          autoComplete="off"
-        >
-          <Form.Item
-            label="Tên rạp phim"
-            name="cinemaName"
-            rules={[{ required: true, message: 'Hãy nhập tên rạp phim!' }]}
-          >
-            <Input />
-          </Form.Item>
+        <div className="flex gap-4">
+          {/* Cột bên trái: Form */}
+          <div className="w-1/2">
+            <Form
+              form={form}
+              name="basic"
+              initialValues={{ remember: true }}
+              onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
+              autoComplete="off"
+              labelCol={{ span: 6 }} // Căn chỉnh nhãn
+              wrapperCol={{ span: 18 }} // Căn chỉnh input
+            >
+              <Form.Item
+                label="Tên rạp phim"
+                name="cinemaName"
+                rules={[{ required: true, message: 'Hãy nhập tên rạp phim!' }]}
+              >
+                <Input placeholder='Nhập tên rạp phim...' />
+              </Form.Item>
 
-          <Form.Item
-            label="Địa chỉ"
-            name="addres"
-            rules={[
-              {
-                required: true,
-                message: 'Hãy nhập địa chỉ rạp phim!'
-              }
-            ]}
-          >
-            <Input />
-          </Form.Item>
+              <Form.Item
+                label="Địa chỉ"
+                name="address"
+                rules={[{ required: true, message: 'Hãy nhập địa chỉ rạp phim!' }]}
+              >
+                <Input.TextArea
+                  placeholder="Nhập địa chỉ...."
+                  autoSize={{ minRows: 3, maxRows: 8 }}
+                />
+              </Form.Item>
 
-          <Form.Item label="Địa chỉ map" name="location" rules={[
-            {
-                required: true,
-                message: 'Hãy nhập địa chỉ map!'
-            }
-          ]}>
-            <MapPicker onLocationSelect={handleLocationSelect} initialLocation={location} />
-          </Form.Item>
-          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type="primary" htmlType="submit">
-              Thêm mới
-            </Button>
-          </Form.Item>
-        </Form>
+              <Form.Item
+                label="Địa chỉ map"
+                name="location"
+                rules={[{ required: true, message: 'Hãy nhập địa chỉ map!' }]}
+              >
+                <Input.TextArea
+                  onChange={handleLocationSelect}
+                  placeholder="Nhập địa chỉ map...."
+                  autoSize={{ minRows: 5, maxRows: 10 }}
+                />
+              </Form.Item>
+            </Form>
+          </div>
+          {/* Cột bên phải: iFrame bản đồ */}
+          <div className="w-1/2">
+            {mapUrl && (
+              <iframe
+                src={mapUrl}
+                width="100%"
+                height="350"
+                className="border-0"
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            )}
+          </div>
+        </div>
+        <div className="flex justify-center mt-10">
+          <Button type="primary" htmlType="submit" form="basic">
+            Thêm mới
+          </Button>
+        </div>
       </Modal>
+
       <Modal
         title="Cập nhật rạp phim"
         open={isModalUpdateOpen}
@@ -421,53 +441,76 @@ const AdminCinemas = () => {
         footer={
           <Button onClick={() => setIsModalUpdateOpen(false)}>Đóng</Button>
         }
+        width={1000}
       >
-        <Form
-          form={formUpdate}
-          name="basic"
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 600 }}
-          initialValues={{ remember: true }}
-          onFinish={onFinishUpdateCinemasInfor}
-          onFinishFailed={onFinishFailed}
-          autoComplete="off"
-        >
-          <Form.Item
-            label="Tên rạp phim"
-            name="cinemaName"
-            rules={[{ required: true, message: 'Hãy nhập tên rạp phim!' }]}
-          >
-            <Input />
-          </Form.Item>
+        <div className="flex gap-4">
+          {/* Cột bên trái: Form */}
+          <div className="w-1/2">
+            <Form
+              form={formUpdate}
+              name="basic"
+              labelCol={{ span: 8 }}
+              wrapperCol={{ span: 16 }}
+              style={{ maxWidth: 600 }}
+              initialValues={{ remember: true }}
+              onFinish={onFinishUpdateCinemasInfor}
+              onFinishFailed={onFinishFailed}
+              autoComplete="off"
+            >
+              <Form.Item
+                label="Tên rạp phim"
+                name="cinemaName"
+                rules={[{ required: true, message: 'Hãy nhập tên rạp phim!' }]}
+              >
+                <Input />
+              </Form.Item>
 
-          <Form.Item
-            label="Ngày sinh"
-            name="birthday"
-            rules={[
-              {
-                required: true,
-                message: 'Hãy nhập ngày sinh của bạn!'
-              }
-            ]}
-          >
-          </Form.Item>
+              <Form.Item
+                label="Địa chỉ"
+                name="address"
+                rules={[{ required: true, message: 'Hãy nhập địa chỉ rạp phim!' }]}
+              >
+                <Input.TextArea
+                  placeholder="Nhập địa chỉ...."
+                  autoSize={{ minRows: 3, maxRows: 8 }}
+                />
+              </Form.Item>
 
-          <Form.Item label="Mô tả" name="description" rules={[]}>
-            <Input.TextArea
-              placeholder="Nhập mô tả...."
-              autoSize={{ minRows: 2, maxRows: 6 }}
-              onChange={(e) => {
-                // Optional: Handle text area change if needed
-              }}
-            />
-          </Form.Item>
+              <Form.Item
+                label="Địa chỉ map"
+                name="location"
+                rules={[{ required: true, message: 'Hãy nhập địa chỉ map!' }]}
+              >
+                <Input.TextArea
+                  onChange={handleLocationSelect}
+                  placeholder="Nhập địa chỉ map...."
+                  autoSize={{ minRows: 5, maxRows: 10 }}
+                />
+              </Form.Item>
+
+            </Form>
+          </div>
+          <div className="w-1/2">
+            {mapUrl && (
+              <iframe
+                src={mapUrl}
+                width="100%"
+                height="350"
+                className="border-0"
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            )}
+          </div>
+        </div>
+        <div className="flex justify-center mt-10">
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" form="basic" >
               Cập nhật
             </Button>
           </Form.Item>
-        </Form>
+        </div>
       </Modal>
       <Table
         columns={columns}
