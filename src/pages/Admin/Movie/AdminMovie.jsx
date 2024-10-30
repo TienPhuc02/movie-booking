@@ -27,9 +27,9 @@ import {
   APICreateMovies,
   APIGetAllDirector,
   APIGetAllGenre,
+  APIGetAllCast,
+  APIGetAllRegion,
   APIGetAllMovies,
-  APIGetDirectorDetail,
-  APIGetMoviesDetail,
   APIUploadImage
 } from '../../../services/service.api';
 
@@ -63,6 +63,8 @@ const AdminMovies = () => {
   const [imagesUuid, setImagesUuid] = useState('');
   const [listDirector, setListDirector] = useState([]);
   const [listGenre, setListGenre] = useState([]);
+  const [listRegion, setListRegion] = useState([]);
+  const [listCast, setListCast] = useState([]);
   const handleChangeStatus = (value) => {
     console.log(`selected ${value}`);
   };
@@ -70,6 +72,12 @@ const AdminMovies = () => {
     console.log(`selected ${value}`);
   };
   const handleChangeGenre = (value) => {
+    console.log(`selected ${value}`);
+  };
+  const handleChangeRegion = (value) => {
+    console.log(`selected ${value}`);
+  };
+  const handleChangeCast = (value) => {
     console.log(`selected ${value}`);
   };
   // const baseURL = import.meta.env.VITE_BASE_URL; // Lấy base URL từ biến môi trường
@@ -183,8 +191,8 @@ const AdminMovies = () => {
 
   const getAllMovies = async () => {
     try {
-      const res = await APIGetAllMovies({ pageSize: 10, page: 1 });
-      console.log(res.data.data);
+      const res = await APIGetAllMovies({ pageSize: 1000, page: 1 });
+      console.log("Dadadyaydyad" , res.data.data);
       if (res && res.data && res.data.data) {
         // Lọc các region có status khác "0"
         const filteredMovies = res.data?.data?.items.filter(
@@ -304,6 +312,7 @@ const AdminMovies = () => {
     }
   };
 
+  // Sử dụng cho danh sách đạo diễn
   const getAllDirector = () => {
     fetchData(
       APIGetAllDirector,
@@ -312,11 +321,27 @@ const AdminMovies = () => {
     );
   };
 
+  // Sử dụng cho danh sách thể loại
   const getAllGenre = () => {
     fetchData(
       APIGetAllGenre,
       (genre) => ({ value: genre.uuid, label: genre.genreName }),
       setListGenre
+    );
+  };
+
+  const getAllRegion = () => {
+    fetchData(
+      APIGetAllRegion,
+      (region) => ({ value: region.uuid, label: region.regionName }),
+      setListRegion
+    );
+  };
+  const getAllCast = () => {
+    fetchData(
+      APIGetAllCast,
+      (cast) => ({ value: cast.uuid, label: cast.castName }),
+      setListCast
     );
   };
 
@@ -408,33 +433,11 @@ const AdminMovies = () => {
   }));
   const columns = [
     {
-      title: 'Id',
+      title: 'STT',
       dataIndex: 'key'
       // width: 30
     },
-    {
-      title: 'Ảnh Phim',
-      dataIndex: 'imageUrl',
-      key: 'imageUrl',
-      // width: 60,
-      render: (text, record) => {
-        console.log(record);
-        const fullURL = record?.imageUrl
-          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${record?.imageUrl
-          }`
-          : null;
-        console.log(fullURL);
-        return fullURL ? (
-          <Image
-            width={70}
-            height={70}
-            src={fullURL}
-            alt="Ảnh phim"
-            style={{ borderRadius: '50%', objectFit: 'cover' }}
-          />
-        ) : null;
-      }
-    },
+    
     {
       title: 'Tên phim',
       dataIndex: 'title',
@@ -448,34 +451,9 @@ const AdminMovies = () => {
       }
     },
     {
-      title: 'Tên Tiếng Anh',
-      dataIndex: 'engTitle',
-      key: 'engTitle'
-      // ...getColumnSearchProps("birthday"),
-      // width: 50
-    },
-    {
-      title: 'Trailer',
-      dataIndex: 'trailer',
-      key: 'trailer',
-      // ...getColumnSearchProps("description"),
-      // width: 50,
-      render: (trailer) => <div className="truncate-description">{trailer}</div>
-    },
-    {
-      title: 'Description',
-      dataIndex: 'description',
-      key: 'description',
-      // ...getColumnSearchProps("description"),
-      // width: 80,
-      render: (description) => (
-        <div className="truncate-description">{description}</div>
-      )
-    },
-    {
-      title: 'Duration',
-      dataIndex: 'duration',
-      key: 'duration',
+      title: 'Lịch chiếu',
+      dataIndex: 'calendar',
+      key: 'calendar',
       // ...getColumnSearchProps("description"),
       // width: 70,
       render: (duration) => (
@@ -483,32 +461,37 @@ const AdminMovies = () => {
       )
     },
     {
-      title: 'Rated',
-      dataIndex: 'rated',
-      key: 'rated',
-      // ...getColumnSearchProps("description"),
-      // width: 60,
-      render: (rated) => <div className="truncate-description">{rated}</div>
+      title: 'Ngày tạo',
+      dataIndex: 'realeaseDate',
+      key: 'realeaseDate',
+      render: (realeaseDate) => {
+        const date = new Date(realeaseDate);
+        return <div className="truncate-description">{date.toLocaleDateString('vi-VN')}</div>;
+      }
     },
     {
-      title: 'Đánh giá phim',
-      dataIndex: 'averageReview',
-      key: 'averageReview'
-      // ...getColumnSearchProps("description"),
-      // width: 100,
-      // render: (average_review: number) => (
-      //   <div className="truncate-description">{average_review}</div>
-      // )
-    },
-    {
-      title: 'Trạng Thái Phim ',
+      title: 'Trạng Thái Phim',
       dataIndex: 'status',
       key: 'status',
-      // ...getColumnSearchProps("description"),
-      // width: 100,
-      render: (status) => <div className="truncate-description">{status}</div>
+      width: 150,
+      render: (status) => {
+        let statusText;
+        switch (status) {
+          case 1:
+            statusText = 'Đang chiếu';
+            break;
+          case 2:
+            statusText = 'Sắp chiếu';
+            break;
+          case 3:
+            statusText = 'Chiếu sớm';
+            break;
+          default:
+            statusText = 'Không còn'; // Giá trị mặc định nếu không khớp với bất kỳ trạng thái nào
+        }
+        return <div className="truncate-description">{statusText}</div>;
+      }
     },
-
     {
       title: '',
       width: 50,
@@ -542,6 +525,8 @@ const AdminMovies = () => {
   useEffect(() => {
     getAllDirector();
     getAllGenre();
+    getAllCast();
+    getAllRegion();
   }, []);
   return (
     <>
@@ -619,11 +604,20 @@ const AdminMovies = () => {
           <Row gutter={16}>
             <Col className="gutter-row" span={12}>
               <Form.Item
-                label="Đánh giá"
+                label="Độ tuổi"
                 name="rated"
-                rules={[{ required: true, message: 'Hãy nhập đánh giá!' }]}
+                rules={[{ required: true, message: 'Hãy chọn độ tuổi!' }]}
               >
-                <InputNumber className="w-full" />
+                <Select
+                  defaultValue=""
+                  onChange={handleChangeStatus}
+                  options={[
+                    { value: 0, label: 'P' },
+                    { value: 1, label: 'T13' },
+                    { value: 2, label: 'T16' },
+                    { value: 3, label: 'T18' }
+                  ]}
+                />
               </Form.Item>
             </Col>
             <Col className="gutter-row" span={12}>
@@ -680,6 +674,44 @@ const AdminMovies = () => {
                     { value: 2, label: 'Sắp chiếu' },
                     { value: 3, label: 'Chiếu sớm' }
                   ]}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col className="gutter-row" span={12}>
+              <Form.Item
+                label="Quốc gia"
+                name="regionUuid"
+                rules={[{ required: true, message: 'Hãy chọn quốc gia!' }]}
+              >
+                <Select
+                  showSearch
+                  onChange={handleChangeRegion}
+                  options={listRegion}
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  allowClear
+                  mode="tags"
+                />
+              </Form.Item>
+            </Col>
+            <Col className="gutter-row" span={12}>
+              <Form.Item
+                label="Diễn viên"
+                name="castUuid"
+                rules={[{ required: true, message: 'Hãy chọn các diễn viên tham gia bộ phim!' }]}
+              >
+                <Select
+                  showSearch
+                  onChange={handleChangeCast}
+                  options={listCast}
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  allowClear
+                  mode="tags"
                 />
               </Form.Item>
             </Col>

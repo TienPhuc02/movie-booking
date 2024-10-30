@@ -20,7 +20,7 @@ const LoginAdminPage = () => {
         localStorage.setItem("access_token", res.data.data.token);
         localStorage.setItem("role", res.data.data.role);
 
-        navigate('/admin');
+        navigate('/admin/user');
       } else {
         message.error(res?.data.error.errorMessage);
       }

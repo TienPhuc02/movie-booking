@@ -91,7 +91,7 @@ const AdminGenre = () => {
   };
   const getAllGenre = async () => {
     try {
-      const res = await APIGetAllGenre({ pageSize: 10, page: 1 });
+      const res = await APIGetAllGenre({ pageSize: 1000, page: 1 });
       console.log(res);
       if (res && res.data && res.data.data) {
         const filteredGenres = res.data?.data?.items.filter(
@@ -278,7 +278,7 @@ const AdminGenre = () => {
   }));
   const columns = [
     {
-      title: 'Id',
+      title: 'STT',
       dataIndex: 'key',
       width: 50
     },

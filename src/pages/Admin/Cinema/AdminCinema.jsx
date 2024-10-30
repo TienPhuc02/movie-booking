@@ -107,7 +107,7 @@ const AdminCinemas = () => {
 
   const getAllCinemas = async () => {
     try {
-      const res = await APIGetAllCinemas({ pageSize: 10, page: 1 });
+      const res = await APIGetAllCinemas({ pageSize: 1000, page: 1 });
       console.log(res.data.data);
       if (res && res.data && res.data.data) {
         // Lọc các region có status khác "0"
@@ -298,7 +298,7 @@ const AdminCinemas = () => {
   }));
   const columns = [
     {
-      title: 'Id',
+      title: 'STT',
       dataIndex: 'key',
       width: 10
     },

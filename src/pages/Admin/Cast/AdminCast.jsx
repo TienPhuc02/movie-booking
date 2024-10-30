@@ -1,21 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  DeleteOutlined,
-  EditOutlined,
-  SearchOutlined
-} from '@ant-design/icons';
-
-import {
-  Button,
-  DatePicker,
-  Form,
-  Input,
-  message,
-  Modal,
-  Popconfirm,
-  Space,
-  Table
-} from 'antd';
+import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, DatePicker, Form, Input, message, Modal, Popconfirm, Space, Table } from 'antd';
 import Highlighter from 'react-highlight-words';
 import '../../../css/AdminGenre.css';
 import {
@@ -85,9 +70,8 @@ const AdminCast = () => {
         const castDetail = res.data.data;
         setCastDetail(castDetail);
         const birthdayFormat = 'YYYY-MM-DD';
-        const imageUrl = `${
-          import.meta.env.VITE_BACKEND_URL
-        }/resources/images/${castDetail.imageUrl}`;
+        const imageUrl = `${import.meta.env.VITE_BACKEND_URL
+          }/resources/images/${castDetail.imageUrl}`;
         formUpdate.setFieldsValue({
           castName: castDetail.castName,
           birthday: castDetail.birthday
@@ -161,7 +145,7 @@ const AdminCast = () => {
 
   const getAllCast = async () => {
     try {
-      const res = await APIGetAllCast({ pageSize: 10, page: 1 });
+      const res = await APIGetAllCast({ pageSize: 1000, page: 1 });
       console.log(res.data.data);
       if (res && res.data && res.data.data) {
         // Lọc các cast có status khác "0"
@@ -179,10 +163,18 @@ const AdminCast = () => {
   const onFinish = async (values) => {
     const { birthday, ...restValues } = values;
     const birthdayFormat = formatToDateString(new Date(birthday));
+    let tempImagesUuid = imagesUuid;
+    if (fileList.length > 0) {
+      const uploadResponse = await APIUploadImage(fileList[0].originFileObj, '3');
+      console.log("đaiadisiaidaosd adjadad", uploadResponse)
+      if (uploadResponse && uploadResponse.status === 200) {
+        tempImagesUuid = uploadResponse.data.data; // Use the returned UUID from the image upload
+      }
+    }
     const dataCast = {
       ...restValues,
       birthday: birthdayFormat,
-      imagesUuid
+      imagesUuid: tempImagesUuid
     };
     try {
       const res = await APICreateCast(dataCast);
@@ -190,6 +182,7 @@ const AdminCast = () => {
         message.success(res.data.error.errorMessage);
         form.resetFields();
         setFileList([]);
+        setImagesUuid('');
         getAllCast();
       }
       // console.log("Success:", values);
@@ -358,7 +351,7 @@ const AdminCast = () => {
   }));
   const columns = [
     {
-      title: 'Id',
+      title: 'STT',
       dataIndex: 'key',
       width: 50
     },
@@ -370,9 +363,8 @@ const AdminCast = () => {
       render: (text, record) => {
         console.log(record);
         const fullURL = record?.imageUrl
-          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${
-              record?.imageUrl
-            }`
+          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${record?.imageUrl
+          }`
           : null;
         // console.log(fullURL);
         return fullURL ? (
@@ -510,15 +502,18 @@ const AdminCast = () => {
           </Form.Item>
           <Form.Item label="Image" name="imagesUuid" rules={[]}>
             <Upload
-              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               listType="picture-circle"
               fileList={fileList}
               onPreview={handlePreviewCreateImage}
               onChange={handleChangeCreateImage}
-              customRequest={dummyRequestCreateImageCast}
+              beforeUpload={(file) => {
+                setFileList([file]);
+                return false; // Prevents automatic upload
+              }}
             >
               {fileList.length >= 1 ? null : uploadButton}
             </Upload>
+
             {previewImage && (
               <Image
                 wrapperStyle={{ display: 'none' }}
@@ -586,9 +581,9 @@ const AdminCast = () => {
             <Input.TextArea
               placeholder="Nhập mô tả...."
               autoSize={{ minRows: 2, maxRows: 6 }}
-              // onChange={(e) => {
-              //   // Optional: Handle text area change if needed
-              // }}
+            // onChange={(e) => {
+            //   // Optional: Handle text area change if needed
+            // }}
             />
           </Form.Item>
           <Form.Item label="Image" name="imagesUuid" rules={[]}>

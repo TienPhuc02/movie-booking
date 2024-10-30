@@ -93,9 +93,8 @@ const AdminRegion = () => {
 
   const getAllRegion = async () => {
     try {
-      const res = await APIGetAllRegion({ pageSize: 10, page: 1 });
+      const res = await APIGetAllRegion({ pageSize:1000, page: 1 });
       if (res && res.data && res.data.data) {
-        // Lọc các region có status khác "0"
         const filteredRegions = res.data?.data?.items.filter(
           (region) => region.status !== 0
         );
@@ -150,29 +149,6 @@ const AdminRegion = () => {
   const handleCancelUpdate = () => {
     setIsModalUpdateOpen(false);
   };
-
-  // const showDrawer = async (uuid: string) => {
-  //   try {
-  //     const res = await APIGetRegionDetail({ uuid });
-  //     // console.log('API Response:', res); // Kiểm tra dữ liệu trả về
-  //     if (res && res.status === 200) {
-  //       setRegionDetail(res.data.data);
-  //       setOpen(true);
-  //     } else {
-  //       message.error("Không tìm thấy thông tin chi tiết.");
-  //     }
-  //   } catch (error: any) {
-  //     if (error.response) {
-  //       console.error(error.response.data);
-  //       const errorMessage =
-  //         error.response.data?.error?.errorMessage ||
-  //         "Đã xảy ra lỗi khi lấy thông tin chi tiết.";
-  //       message.error(errorMessage);
-  //     } else {
-  //       message.error("Đã xảy ra lỗi khi lấy thông tin chi tiết.");
-  //     }
-  //   }
-  // };
 
   const onClose = () => {
     setOpen(false);
@@ -300,25 +276,10 @@ const AdminRegion = () => {
   }));
   const columns = [
     {
-      title: 'Id',
+      title: 'STT',
       dataIndex: 'key',
       width: 50
     },
-    // {
-    //   title: "UUID",
-    //   width: 200,
-    //    ...getColumnSearchProps("uuid"),
-    //   render: (record) => {
-    //     return (
-    //       <div
-    //         className="hover:text-[#4096ff] cursor-pointer"
-    //         onClick={() => showDrawer(record.uuid)} // Gọi showDrawer với uuid
-    //       >
-    //         {record.uuid}
-    //       </div>
-    //     );
-    //   },
-    // },
     {
       title: 'Tên quốc gia',
       dataIndex: 'regionName',
@@ -330,20 +291,12 @@ const AdminRegion = () => {
       render: (region, record) => {
         return (
           <div
-          // className="hover:text-[#4096ff] cursor-pointer"
-          // onClick={() => showDrawer(record.uuid)} // Gọi hàm showDrawer với uuid
           >
             {region} {/* Hiển thị tên quốc gia */}
           </div>
         );
       }
     },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   width:50,
-    // },
     {
       title: '',
       width: 50,
