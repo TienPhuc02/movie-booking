@@ -110,13 +110,20 @@ const AdminCast = () => {
     const birthdayObj = new Date(birthday);
     const birthdayFormat = formatToDateString(birthdayObj);
     // console.log(birthdayFormat);
+    let tempImagesUuid = imagesUuid;
+    if (fileList.length > 0) {
+      const uploadResponse = await APIUploadImage(fileList[0].originFileObj, '3');
+      if (uploadResponse && uploadResponse.status === 200) {
+        tempImagesUuid = uploadResponse.data.data; // Use the returned UUID from the image upload
+      }
+    }
     try {
       const res = await APICreateCast({
         uuid: castDetail?.uuid,
         castName: restValues.castName,
         birthday: birthdayFormat,
         description: restValues.description,
-        imagesUuid
+        imagesUuid: tempImagesUuid
       });
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
@@ -166,7 +173,6 @@ const AdminCast = () => {
     let tempImagesUuid = imagesUuid;
     if (fileList.length > 0) {
       const uploadResponse = await APIUploadImage(fileList[0].originFileObj, '3');
-      console.log("đaiadisiaidaosd adjadad", uploadResponse)
       if (uploadResponse && uploadResponse.status === 200) {
         tempImagesUuid = uploadResponse.data.data; // Use the returned UUID from the image upload
       }
@@ -588,12 +594,14 @@ const AdminCast = () => {
           </Form.Item>
           <Form.Item label="Image" name="imagesUuid" rules={[]}>
             <Upload
-              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               listType="picture-circle"
               fileList={fileList}
               onPreview={handlePreviewCreateImage}
               onChange={handleChangeCreateImage}
-              customRequest={dummyRequestCreateImageCast}
+              beforeUpload={(file) => {
+                setFileList([file]);
+                return false; 
+              }}
             >
               {fileList.length >= 1 ? null : uploadButton}
             </Upload>

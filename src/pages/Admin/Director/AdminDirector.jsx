@@ -89,9 +89,8 @@ const AdminDirector = () => {
         const directorDetail = res.data.data;
         setDirectorDetail(directorDetail);
         //  console.log("Lam gi thi lam ",directorDetail.imageUrl);
-        const imageUrl = `${
-          import.meta.env.VITE_BACKEND_URL
-        }/resources/images/${directorDetail.imageUrl}`;
+        const imageUrl = `${import.meta.env.VITE_BACKEND_URL
+          }/resources/images/${directorDetail.imageUrl}`;
         formUpdate.setFieldsValue({
           directorName: directorDetail.directorName,
           birthday: moment(directorDetail.birthday, 'YYYY-MM-DD'),
@@ -127,13 +126,20 @@ const AdminDirector = () => {
     const { birthday, ...restValues } = values;
     const birthdayObj = new Date(birthday);
     const birthdayFormat = formatToDateString(birthdayObj);
+    let tempImagesUuid = imagesUuid
+    if(fileList.length > 0) {
+      const resupload = await APIUploadImage(fileList[0].originFileObj, '3')
+      if(resupload && resupload.status === 200){
+        tempImagesUuid = resupload.data.data
+      }
+    }
     try {
       const res = await APICreateDirector({
         uuid: directorDetail.uuid,
         directorName: restValues.directorName,
         birthday: birthdayFormat,
         description: restValues.description,
-        imagesUuid // Gửi URL của ảnh nếu có
+        imagesUuid:tempImagesUuid // Gửi URL của ảnh nếu có
       });
       if (res && res.status === 200) {
         message.success(res.data.error.errorMessage);
@@ -179,10 +185,17 @@ const AdminDirector = () => {
   const onFinish = async (values) => {
     const { birthday, ...restValues } = values;
     const birthdayFormat = formatToDateString(new Date(birthday));
+    let tempImagesUuid = imagesUuid
+    if(fileList.length > 0) {
+      const resupload = await APIUploadImage(fileList[0].originFileObj, '3');
+      if (resupload && resupload.status === 200) {
+        tempImagesUuid = resupload.data.data;
+      }
+    }
     const dataDirector = {
       ...restValues,
       birthday: birthdayFormat,
-      imagesUuid
+      imagesUuid: tempImagesUuid
     };
     try {
       const res = await APICreateDirector(dataDirector);
@@ -191,6 +204,7 @@ const AdminDirector = () => {
         message.success(res.data.error.errorMessage);
         form.resetFields();
         setFileList([]);
+        setImagesUuid('');
         getAllDirector();
       }
       // console.log("Success:", values);
@@ -370,9 +384,8 @@ const AdminDirector = () => {
       render: (text, record) => {
         console.log(record);
         const fullURL = record?.imageUrl
-          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${
-              record?.imageUrl
-            }`
+          ? `${import.meta.env.VITE_BACKEND_URL}/resources/images/${record?.imageUrl
+          }`
           : null;
         // console.log(fullURL);
         return fullURL ? (
@@ -504,12 +517,14 @@ const AdminDirector = () => {
           </Form.Item>
           <Form.Item label="Image" name="imageUrl" rules={[]}>
             <Upload
-              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               listType="picture-circle"
               fileList={fileList}
               onPreview={handlePreviewCreateImage}
               onChange={handleChangeCreateImage}
-              customRequest={dummyRequestCreateImageCast}
+              beforeUpload={(file) => {
+                setFileList([file]);
+                return false;
+              }}
             >
               {fileList.length >= 1 ? null : uploadButton}
             </Upload>
@@ -587,12 +602,14 @@ const AdminDirector = () => {
           </Form.Item>
           <Form.Item label="Image" name="imageUrl" rules={[]}>
             <Upload
-              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               listType="picture-circle"
               fileList={fileList}
               onPreview={handlePreviewCreateImage}
               onChange={handleChangeCreateImage}
-              customRequest={dummyRequestCreateImageCast}
+              beforeUpload={(file) => {
+                setFileList([file]);
+                return false;
+              }}
             >
               {fileList.length >= 1 ? null : uploadButton}
             </Upload>
